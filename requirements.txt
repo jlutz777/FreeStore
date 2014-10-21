@@ -12,6 +12,7 @@ bson==0.3.3
 configobj==5.0.2
 distribute==0.6.34
 gunicorn==18.0
+psycopg2==2.5.4
 pycrypto==2.6.1
 pymongo==2.6.3
 pytz==2013.9
