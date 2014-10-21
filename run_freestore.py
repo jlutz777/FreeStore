@@ -1,7 +1,7 @@
 import bottle
 from bottle import HTTPError
 from bottle.ext import sqlalchemy
-from sqlalchemy import create_engine, Column, Integer, Sequence, Unicode, DateTime
+from sqlalchemy import create_engine, Column, Integer, Sequence, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -22,7 +22,7 @@ class CustomerFamily(Base):
 
     id = Column(Integer, primary_key=True)
     email = Column('email', Unicode)
-    phone = Column('phone', Unicode, default='')
+    phone = Column('phone', Unicode, default=unicode(''))
     address = Column('address', Unicode)
     city = Column('city', Unicode)
     state = Column('state', Unicode)
