@@ -3,6 +3,7 @@ from bottle import HTTPError, HTTPResponse
 from bottle.ext import sqlalchemy
 from sqlalchemy import create_engine, Column, Integer, Sequence, Unicode, DateTime
 from sqlalchemy.ext.declarative import declarative_base
+import json
 
 Base = declarative_base()
 #engine = create_engine('postgresql://postgres:passw0rd@localhost:5432/freestore', echo=True)
@@ -34,7 +35,8 @@ class CustomerFamily(Base):
 def show(db):
     entity = db.query(CustomerFamily).first()
     if entity:
-        return HTTPResponse({'id': entity.id, 'name': entity.email, 'city': entity.city, 'zip': entity.zip}, status=200,
+        jsonInfo = json.dumps({'id': entity.id, 'name': entity.email, 'city': entity.city, 'zip': entity.zip}, default=json_util.default)
+        return HTTPResponse(jsonInfo, status=200,
                         header={'Content-Type': 'application/json'})
     return HTTPError(404, 'Entity not found.')
 
