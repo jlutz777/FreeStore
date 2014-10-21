@@ -8,7 +8,7 @@ Base = declarative_base()
 #engine = create_engine('postgresql://postgres:passw0rd@localhost:5432/freestore', echo=True)
 engine = create_engine('postgres://root:j9t95X5qpwsbaaQm@172.17.42.1:49160/db', echo=True)
 
-app = bottle.Bottle()
+app = bottle.default_app()
 plugin = sqlalchemy.Plugin(
     engine,
     keyword='db', # Keyword used to inject session database in a route (default 'db').
@@ -39,5 +39,3 @@ def show(db):
 
 if __name__ == "main":
     bottle.run(server='gunicorn')
-
-app = bottle.default_app()
