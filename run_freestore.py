@@ -9,4 +9,3 @@ if __name__ == "__main__":
     bottle.run(server='gunicorn')
 
 app = bottle.default_app()
-
