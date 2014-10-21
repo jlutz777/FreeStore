@@ -34,7 +34,7 @@ class CustomerFamily(Base):
 def show(db):
     entity = db.query(CustomerFamily).first()
     if entity:
-        return {'id': entity.id, 'name': entity.email}
+        return {'id': entity.id, 'name': entity.email, 'city': entity.city, 'zip': entity.zip}
     return HTTPError(404, 'Entity not found.')
 
 if __name__ == "main":
