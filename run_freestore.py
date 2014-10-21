@@ -1,7 +1,7 @@
 import bottle
 from bottle import HTTPError
 from bottle.ext import sqlalchemy
-from sqlalchemy import create_engine, Column, Integer, Sequence, String
+from sqlalchemy import create_engine, Column, Integer, Sequence, String, Unicode
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
