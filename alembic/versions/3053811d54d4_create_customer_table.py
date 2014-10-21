@@ -19,7 +19,7 @@ def upgrade():
         'customerfamily',
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('email', sa.Unicode(100), nullable=False),
-        sa.Column('phone', sa.Unicode(40),
+        sa.Column('phone', sa.Unicode(40)),
         sa.Column('address', sa.Unicode(100), nullable=False),
         sa.Column('city', sa.Unicode(40), nullable=False),
         sa.Column('state', sa.Unicode(40), nullable=False),
