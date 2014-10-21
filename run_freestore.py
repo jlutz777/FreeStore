@@ -4,6 +4,7 @@ from bottle.ext import sqlalchemy
 from sqlalchemy import create_engine, Column, Integer, Sequence, Unicode, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 import json
+from bson import json_util
 
 Base = declarative_base()
 #engine = create_engine('postgresql://postgres:passw0rd@localhost:5432/freestore', echo=True)
