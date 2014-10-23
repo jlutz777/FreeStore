@@ -4,19 +4,56 @@ from models.customerfamily import CustomerFamily
 import bottle
 from bottle import HTTPError, HTTPResponse
 from bottle.ext import sqlalchemy
+from cork import Cork, AAAException, AuthException
+from cork.backends import SqlAlchemyBackend
+from beaker.middleware import SessionMiddleware
 
+import os
 import json
 from bson import json_util
 
+postgresConn = os.environ.get("POSTGRES_CONN", "")
+corkBackend = SqlAlchemyBackend(postgresConn, initialize=False)
+aaa = Cork(backend=corkBackend, email_sender='', smtp_url='')
+authorize = aaa.make_auth_decorator(fail_redirect="/login", role="user")
+
 app = bottle.default_app()
-plugin = sqlalchemy.Plugin(
-    models.base.engine,
-    keyword='db', # Keyword used to inject session database in a route (default 'db').
-)
+dbPlugin = sqlalchemy.Plugin(models.base.engine, keyword='db')
+app.install(dbPlugin)
 
-app.install(plugin)
+session_opts = {
+    'session.cookie_expires': True,
+    'session.encrypt_key': 'please use a random key and keep it secret!',
+    'session.httponly': True,
+    'session.timeout': 3600 * 24,  # 1 day
+    'session.type': 'cookie',
+    'session.validate_key': True,
+}
+sessionApp = SessionMiddleware(app, session_opts)
 
-@app.get('/')
+def setupDB():
+    corkBackend.roles.insert({'role': 'admin', 'level': 100})
+    corkBackend.roles.insert({'role': 'user', 'level': 50})
+    
+    corkBackend.users.insert({
+            "username": "admin",
+            "email_addr": "admin@localhost.local",
+            "desc": "admin test user",
+            "role": "admin",
+            "hash": "cLzRnzbEwehP6ZzTREh3A4MXJyNo+TV8Hs4//EEbPbiDoo+dmNg22f2RJC282aSwgyWv/O6s3h42qrA6iHx8yfw=",
+            "creation_date": "2012-10-28 20:50:26.286723",
+            "last_login": "2012-10-28 20:50:26.286723"
+        })
+    assert len(corkBackend.roles) == 2
+    assert len(corkBackend.users) == 1
+    
+def postd():
+    return bottle.request.forms
+
+def post_get(name, default=''):
+    return bottle.request.POST.get(name, default).strip()
+
+@app.route('/', apply=[authorize()])
 def show(db):
     entity = db.query(CustomerFamily).first()
     if entity:
@@ -25,5 +62,81 @@ def show(db):
                         header={'Content-Type': 'application/json'})
     return HTTPError(404, 'Entity not found.')
 
-if __name__ == "main":
-    bottle.run(server='gunicorn')
+@app.get('/login')
+@bottle.view('login_form')
+def login_form():
+    """Serve login form"""
+    return {}
+
+@app.post('/login')
+def login():
+    """Authenticate users"""
+    username = post_get('username')
+    password = post_get('password')
+    aaa.login(username, password, success_redirect='/', fail_redirect='/login')
+
+@bottle.route('/logout')
+def logout():
+    aaa.logout(success_redirect='/login')
+    
+# Admin-only pages
+
+@app.get('/admin')
+@bottle.view('admin_page')
+@authorize(role="admin", fail_redirect='/sorry_page')
+def admin():
+    """Only admin users can see this"""
+    #aaa.require(role='admin', fail_redirect='/sorry_page')
+    return dict(
+        current_user = aaa.current_user,
+        users = aaa.list_users(),
+        roles = aaa.list_roles()
+    )
+
+
+@app.post('/create_user')
+@authorize(role="admin", fail_redirect='/sorry_page')
+def create_user():
+    try:
+        aaa.create_user(postd().username, postd().role, postd().password)
+        return dict(ok=True, msg='')
+    except Exception, e:
+        return dict(ok=False, msg=e.message)
+
+
+@app.post('/delete_user')
+@authorize(role="admin", fail_redirect='/sorry_page')
+def delete_user():
+    try:
+        aaa.delete_user(post_get('username'))
+        return dict(ok=True, msg='')
+    except Exception, e:
+        print repr(e)
+        return dict(ok=False, msg=e.message)
+
+
+@app.post('/create_role')
+@authorize(role="admin", fail_redirect='/sorry_page')
+def create_role():
+    try:
+        aaa.create_role(post_get('role'), post_get('level'))
+        return dict(ok=True, msg='')
+    except Exception, e:
+        return dict(ok=False, msg=e.message)
+
+
+@app.post('/delete_role')
+@authorize(role="admin", fail_redirect='/sorry_page')
+def delete_role():
+    try:
+        aaa.delete_role(post_get('role'))
+        return dict(ok=True, msg='')
+    except Exception, e:
+        return dict(ok=False, msg=e.message)
+
+@app.route('/sorry_page')
+def sorry_page():
+    """Serve sorry page"""
+    return '<p>Sorry, you are not authorized to perform this action</p>'
+
+#setupDB()

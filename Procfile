@@ -1,1 +1,1 @@
-web: gunicorn run_freestore:app
+web: gunicorn run_freestore:sessionApp
