@@ -12,6 +12,8 @@ bottle-sqlalchemy==0.4.1
 bson==0.3.3
 configobj==5.0.2
 distribute==0.6.34
+gevent==1.0.1
+greenlet==0.4.5
 gunicorn==18.0
 psycopg2==2.5.4
 pycrypto==2.6.1

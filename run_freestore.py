@@ -1,3 +1,6 @@
+from gevent import monkey
+monkey.patch_all()
+
 import models.base
 from models.customerfamily import CustomerFamily
 
@@ -23,7 +26,7 @@ app.install(dbPlugin)
 
 session_opts = {
     'session.cookie_expires': True,
-    'session.encrypt_key': 'please use a random key and keep it secret!',
+    'session.encrypt_key': 'ASD342sad856vsd',
     'session.httponly': True,
     'session.timeout': 3600 * 24,  # 1 day
     'session.type': 'cookie',
@@ -75,7 +78,7 @@ def login():
     password = post_get('password')
     aaa.login(username, password, success_redirect='/', fail_redirect='/login')
 
-@bottle.route('/logout')
+@app.route('/logout')
 def logout():
     aaa.logout(success_redirect='/login')
     
