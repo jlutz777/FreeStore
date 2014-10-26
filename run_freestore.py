@@ -142,4 +142,4 @@ def sorry_page():
     """Serve sorry page"""
     return '<p>Sorry, you are not authorized to perform this action</p>'
 
-setupDB()
+#setupDB()
