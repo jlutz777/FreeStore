@@ -16,6 +16,11 @@ import sqlalchemy as sa
 
 def upgrade():
     op.create_table(
+        'roles',
+        sa.Column('role', sa.String(128), primary_key=True),
+        sa.Column('level', sa.Integer, nullable=False)
+        )
+    op.create_table(
         'users',
         sa.Column('username', sa.String(128), primary_key=True),
         sa.Column('role', sa.ForeignKey('roles.role')),
@@ -24,11 +29,6 @@ def upgrade():
         sa.Column('desc', sa.String(128)),
         sa.Column('creation_date', sa.String(128), nullable=False),
         sa.Column('last_login', sa.String(128), nullable=False)
-        )
-    op.create_table(
-        'roles',
-        sa.Column('role', sa.String(128), primary_key=True),
-        sa.Column('level', sa.Integer, nullable=False)
         )
     op.create_table(
         'register',
