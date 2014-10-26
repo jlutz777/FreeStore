@@ -23,7 +23,7 @@ def upgrade():
     op.create_table(
         'users',
         sa.Column('username', sa.String(128), primary_key=True),
-        sa.Column('role', sa.ForeignKey('roles.role')),
+        sa.Column('role', sa.String(128), sa.ForeignKey('roles.role')),
         sa.Column('hash', sa.String(256), nullable=False),
         sa.Column('email_addr', sa.String(128)),
         sa.Column('desc', sa.String(128)),
@@ -34,7 +34,7 @@ def upgrade():
         'register',
         sa.Column('code', sa.String(128), primary_key=True),
         sa.Column('username', sa.String(128), nullable=False),
-        sa.Column('role', sa.ForeignKey('roles.role')),
+        sa.Column('role', sa.String(128), sa.ForeignKey('roles.role')),
         sa.Column('hash', sa.String(256), nullable=False),
         sa.Column('email_addr', sa.String(128)),
         sa.Column('desc', sa.String(128)),
