@@ -2,7 +2,7 @@ from gevent import monkey
 monkey.patch_all()
 
 import models.base
-from models.customerfamily import CustomerFamily
+from models import CustomerFamily, Dependent, ShoppingCategory, ShoppingItem, Visit
 
 import bottle
 from bottle import HTTPError, HTTPResponse
@@ -13,6 +13,7 @@ from beaker.middleware import SessionMiddleware
 
 import os
 import json
+from datetime import datetime
 from bson import json_util
 
 postgresConn = os.environ.get("POSTGRES_CONN", "")
@@ -58,9 +59,11 @@ def post_get(name, default=''):
 
 @app.route('/', apply=[authorize()])
 def show(db):
-    entity = db.query(CustomerFamily).first()
-    if entity:
-        jsonInfo = json.dumps({'id': entity.id, 'name': entity.email, 'city': entity.city, 'zip': entity.zip}, default=json_util.default)
+    fam = db.query(CustomerFamily).first()
+    visit = db.query(Visit).first()
+    visit_checkin = visit.checkin.strftime("%m/%d/%Y %H:%M:%S")
+    if fam:
+        jsonInfo = json.dumps({'id': fam.id, 'name': fam.email, 'city': fam.city, 'zip': fam.zip, 'visit checkin': visit_checkin}, default=json_util.default)
         return HTTPResponse(jsonInfo, status=200,
                         header={'Content-Type': 'application/json'})
     return HTTPError(404, 'Entity not found.')
