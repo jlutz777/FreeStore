@@ -13,4 +13,4 @@ class Visit(base.Base):
     id = Column(Integer, primary_key=True)
     checkin = Column('checkin', DateTime)
     checkout = Column('checkout', DateTime)
-    family = Column('family', Integer, ForeignKey('customerfamily.id'))
+    family_id = Column('family', Integer, ForeignKey('customerfamily.id'))

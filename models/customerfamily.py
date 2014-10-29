@@ -4,6 +4,7 @@ This is the sqlalchemy class for communicating with the database.
 """
 
 from sqlalchemy import Column, Integer, Sequence, Unicode, DateTime
+from sqlalchemy.orm import relationship, backref
 import base
 
 class CustomerFamily(base.Base):
@@ -18,3 +19,5 @@ class CustomerFamily(base.Base):
     state = Column('state', Unicode)
     zip = Column('zip', Unicode)
     datecreated = Column('datecreated', DateTime)
+    dependents = relationship("Dependent", backref="family")
+    visits = relationship("Visit", backref="family")

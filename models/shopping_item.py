@@ -12,4 +12,4 @@ class ShoppingItem(base.Base):
 
     id = Column(Integer, primary_key=True)
     name = Column('name', Unicode)
-    category = Column('category', Integer, ForeignKey('shopping_category.id'))
+    category_id = Column('category', Integer, ForeignKey('shopping_category.id'))

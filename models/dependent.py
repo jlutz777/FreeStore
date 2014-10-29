@@ -15,4 +15,4 @@ class Dependent(base.Base):
     firstName = Column('first_name', Unicode)
     lastName = Column('last_name', Unicode)
     birthdate = Column('birthdate', DateTime)
-    family = Column('family', Integer, ForeignKey('customerfamily.id'))
+    family_id = Column('family', Integer, ForeignKey('customerfamily.id'))

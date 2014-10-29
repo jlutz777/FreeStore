@@ -3,9 +3,10 @@ monkey.patch_all()
 
 import models.base
 from models import CustomerFamily, Dependent, ShoppingCategory, ShoppingItem, Visit
+from forms.checkin_form import CheckinForm
 
 import bottle
-from bottle import HTTPError, HTTPResponse
+from bottle import HTTPError, HTTPResponse, template
 from bottle.ext import sqlalchemy
 from cork import Cork, AAAException, AuthException
 from cork.backends import SqlAlchemyBackend
@@ -60,13 +61,17 @@ def post_get(name, default=''):
 @app.route('/', apply=[authorize()])
 def show(db):
     fam = db.query(CustomerFamily).first()
-    visit = db.query(Visit).first()
-    visit_checkin = visit.checkin.strftime("%m/%d/%Y %H:%M:%S")
+    visit_checkin = fam.visits[0].checkin.strftime("%m/%d/%Y %H:%M:%S")
     if fam:
         jsonInfo = json.dumps({'id': fam.id, 'name': fam.email, 'city': fam.city, 'zip': fam.zip, 'visit checkin': visit_checkin}, default=json_util.default)
         return HTTPResponse(jsonInfo, status=200,
                         header={'Content-Type': 'application/json'})
     return HTTPError(404, 'Entity not found.')
+
+@app.route('/checkin', method=['GET','POST'], apply=[authorize()])
+def checkin(db):
+    form = CheckinForm(bottle.request.POST)
+    return template('checkin', form=form)
 
 @app.get('/login')
 @bottle.view('login_form')
