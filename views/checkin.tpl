@@ -2,8 +2,23 @@
 <html>
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="content-type">
-<form method="POST" action="/checkin">
-    <div>{{! form.stuff.label }}: {{! form.stuff() }}</div>
-</form>
 </head>
+<body>
+<form method="POST" action="/checkin">
+    <div>{{! form.shopperName.label }} {{! form.shopperName }}</div>
+</form>
+
+% if form.errors:
+<ul class="errors">
+% for field_name, field_errors in form.errors.iteritems():
+% if field_errors:
+% for error in field_errors:
+<li>{{! form[field_name].label }}: {{ error }}</li>
+% end
+% end
+% end
+</ul>
+% end
+
+</body>
 </html>

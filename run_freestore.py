@@ -71,6 +71,11 @@ def show(db):
 @app.route('/checkin', method=['GET','POST'], apply=[authorize()])
 def checkin(db):
     form = CheckinForm(bottle.request.POST)
+    if bottle.request.method == 'POST' and form.validate():
+        return "Saved"
+        #user.username = form.username.data
+        #user.save()
+        #return redirect('change_username')
     return template('checkin', form=form)
 
 @app.get('/login')
