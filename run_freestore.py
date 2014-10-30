@@ -60,10 +60,12 @@ def post_get(name, default=''):
 
 @app.route('/', apply=[authorize()])
 def show(db):
-    fam = db.query(CustomerFamily).first()
-    visit_checkin = fam.visits[0].checkin.strftime("%m/%d/%Y %H:%M:%S")
+    fam = db.query(CustomerFamily)[1]
+    visit_checkin = ''
+    if len(fam.visits) > 0:
+        visit_checkin = fam.visits[0].checkin.strftime("%m/%d/%Y %H:%M:%S")
     if fam:
-        jsonInfo = json.dumps({'id': fam.id, 'name': fam.email, 'city': fam.city, 'zip': fam.zip, 'visit checkin': visit_checkin}, default=json_util.default)
+        jsonInfo = json.dumps({'id': fam.id, 'email': fam.email, 'city': fam.city, 'zip': fam.zip, 'visit checkin': visit_checkin}, default=json_util.default)
         return HTTPResponse(jsonInfo, status=200,
                         header={'Content-Type': 'application/json'})
     return HTTPError(404, 'Entity not found.')
@@ -72,6 +74,21 @@ def show(db):
 def checkin(db):
     form = CheckinForm(bottle.request.POST)
     if bottle.request.method == 'POST' and form.validate():
+        family = CustomerFamily()
+        family.email = form.email.data
+        family.phone = form.phone.data
+        family.address = form.address.data
+        family.city = form.city.data
+        family.state = form.state.data
+        family.zip = form.zip.data
+        family.datecreated = datetime.now()
+        primary = Dependent()
+        primary.isPrimary = True
+        primary.firstName = form.shopperName.data
+        primary.lastName = ''
+        primary.birthdate = form.shopperBirthday.data
+        family.dependents.append(primary)
+        db.add(family)
         return "Saved"
         #user.username = form.username.data
         #user.save()

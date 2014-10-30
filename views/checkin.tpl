@@ -2,10 +2,25 @@
 <html>
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="content-type">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 </head>
 <body>
 <form method="POST" action="/checkin">
     <div>{{! form.shopperName.label }} {{! form.shopperName }}</div>
+    <div>{{! form.shopperBirthday.label }} {{! form.shopperBirthday }}</div>
+    <div>{{! form.email.label }} {{! form.email }}</div>
+    <div>{{! form.phone.label }} {{! form.phone }}</div>
+    <div>{{! form.address.label }} {{! form.address }}</div>
+    <div>{{! form.zip.label }} {{! form.zip }}</div>
+    <div>{{! form.dependentName.label }} {{! form.dependentName }}</div>
+    <div>{{! form.dependentBirthday.label }} {{! form.dependentBirthday }}</div>
+    <input type="submit" value="Submit">
 </form>
 
 % if form.errors:

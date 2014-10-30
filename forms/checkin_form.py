@@ -2,15 +2,12 @@ from wtforms import Form, validators, DateField, BooleanField, StringField
 
 class CheckinForm(Form):
     shopperName = StringField('Shopper Name', [validators.Required()])
-    shopperBirthday = DateField('Shopper Birthday', [validators.Required()])
-    
-#Name of shopper
-#Birthdate of shopper
-#Email of shopper
-#Phone of shopper
-#Address of shopper
-#Zip code of shopper
-#Dependent* name
-#Dependent birthday
-#Automatic date and time stamp
-#Assign a unique and permanent shopper number
+    shopperBirthday = DateField('Shopper Birthday', [validators.Required()], format='%m/%d/%Y')
+    email = StringField('Email', [validators.Optional(),validators.Email()])
+    phone = StringField('Phone')
+    address = StringField('Address')
+    city = StringField('City')
+    state = StringField('State')
+    zip = StringField('Zip')
+    dependentName = StringField('Dependent Name')
+    dependentBirthday = DateField('Dependent Birthday', [validators.Optional()], format='%m/%d/%Y')
