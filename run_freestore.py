@@ -6,7 +6,7 @@ from models import CustomerFamily, Dependent, ShoppingCategory, ShoppingItem, Vi
 from forms.checkin_form import CheckinForm
 
 import bottle
-from bottle import HTTPError, HTTPResponse, template
+from bottle import HTTPError, HTTPResponse, template, static_file, TEMPLATE_PATH
 from bottle.ext import sqlalchemy
 from cork import Cork, AAAException, AuthException
 from cork.backends import SqlAlchemyBackend
@@ -16,6 +16,9 @@ import os
 import json
 from datetime import datetime
 from bson import json_util
+
+MODULEPATH = os.path.dirname(__file__)
+TEMPLATE_PATH.insert(0, os.path.join(MODULEPATH, "views"))
 
 postgresConn = os.environ.get("POSTGRES_CONN", "")
 corkBackend = SqlAlchemyBackend(postgresConn, initialize=False)
@@ -111,6 +114,32 @@ def login():
 @app.route('/logout')
 def logout():
     aaa.logout(success_redirect='/login')
+
+@app.route('/js/<filename>', 'GET')
+def js_static(filename):
+    """Get static javascript files.
+
+    :param filename: the name of the javascript file
+    :type filename: str
+    :returns: The given js file
+    :rtype: file
+
+    """
+
+    return static_file(filename, root=os.path.join(MODULEPATH, 'static/js'))
+
+@app.route('/css/<filename>', 'GET')
+def css_static(filename):
+    """Get static css files.
+
+    :param filename: the name of the css file
+    :type filename: str
+    :returns: The given css file
+    :rtype: file
+
+    """
+
+    return static_file(filename, root=os.path.join(MODULEPATH, 'static/css'))
     
 # Admin-only pages
 
