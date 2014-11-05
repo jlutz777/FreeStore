@@ -5,9 +5,11 @@ has-error\\
     % end
 {{ kwargs.pop('class_', '') }}">
         % if (field.type != 'HiddenField' or field.type !='CSRFTokenField') and label_visible:
-        <label for="{{ field.id }}" class="control-label">{{ field.label.text }}</label>
+        <label for="{{ field.id }}" class="col-sm-2 control-label">{{ field.label.text }}</label>
         % end
-        {{! field(class_='form-control', **kwargs) }}
+        <div class="col-sm-10">
+            {{! field(class_='form-control', **kwargs) }}
+        </div>
         % if field.errors:
             % for e in field.errors:
         <p class="help-block">{{ e }}</p>
@@ -34,7 +36,7 @@ has-error\\
     % end
 % end
  
-% def render_form(form, action_url='', action_text='Submit', class_='', btn_class='btn btn-default'):
+% def render_form(form, action_url='', action_text='Submit', class_='form_horizontal', btn_class='btn btn-default'):
     <form method="POST" action="{{ action_url }}" role="form" class="{{ class_ }}">
         % for f in form:
             % if f.type == 'BooleanField':

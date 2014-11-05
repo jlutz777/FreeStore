@@ -13,7 +13,7 @@
 </head>
 <body>
 <div class="your-form">
-    % render_form(form, class_='form-horizontal', action_url='/checkin', action_text='Submit Form')
+    % render_form(form, action_url='/checkin', action_text='Submit Form')
 </div>
 </body>
 </html>
