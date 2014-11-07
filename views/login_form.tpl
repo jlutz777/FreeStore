@@ -6,6 +6,7 @@
   <div class="box">
       <h2>Login</h2>
       <p>Please insert your credentials:</p>
+<!-- Implement: http://bootsnipp.com/snippets/featured/easy-log-in-form -->
       <form action="login" method="post" name="login">
           <input type="text" name="username" />
           <input type="password" name="password" />

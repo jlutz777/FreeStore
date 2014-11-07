@@ -4,6 +4,7 @@ monkey.patch_all()
 import models.base
 from models import CustomerFamily, Dependent, ShoppingCategory, ShoppingItem, Visit
 from forms.checkin_form import CheckinForm
+from forms.customer_edit import CustomerEditForm
 
 import bottle
 from bottle import HTTPError, HTTPResponse, template, static_file, TEMPLATE_PATH
@@ -73,6 +74,25 @@ def show(db):
                         header={'Content-Type': 'application/json'})
     return HTTPError(404, 'Entity not found.')
 
+@app.route('/customer/<customer_family_id>', method=['GET', 'POST'], apply=[authorize()])
+def shopper(customer_family_id, db):
+    form = CustomerEditForm(bottle.request.POST)
+    if bottle.request.method == 'POST' and form.validate():
+        return "Need to implement"
+    fams = db.query(CustomerFamily).filter(CustomerFamily.id == customer_family_id)
+    if len(fams.all()) != 1:
+        return "Customer request bad"
+    fam = fams[0]
+    form.shopperID.data = fam.id
+    form.creationDate.data = fam.datecreated
+    form.email.data = fam.email
+    form.phone.data = fam.phone
+    form.address.data = fam.address
+    form.city.data = fam.city
+    form.state.data = fam.state
+    form.zip.data = fam.zip
+    return template('customer', form=form)
+
 @app.route('/checkin', method=['GET','POST'], apply=[authorize()])
 def checkin(db):
     form = CheckinForm(bottle.request.POST)
@@ -92,10 +112,7 @@ def checkin(db):
         primary.birthdate = form.shopperBirthday.data
         family.dependents.append(primary)
         db.add(family)
-        return "Saved"
-        #user.username = form.username.data
-        #user.save()
-        #return redirect('change_username')
+        return redirect('/shopper/' + family.id)
     return template('checkin', form=form)
 
 @app.get('/login')
