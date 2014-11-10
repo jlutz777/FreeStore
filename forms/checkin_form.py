@@ -1,5 +1,10 @@
-from wtforms import Form, validators, DateField, BooleanField, StringField
+from wtforms import Form, validators, DateField, BooleanField, StringField, FieldList, FormField
 
+class DependentForm(Form):
+    name = StringField('Name')
+    birthday = DateField('Birthday', format='%m/%d/%Y')
+    #birthday = StringField('Birthday')
+    
 class CheckinForm(Form):
     shopperName = StringField('Shopper Name', [validators.Required()])
     shopperBirthday = DateField('Shopper Birthday', [validators.Required()], format='%m/%d/%Y')
@@ -9,5 +14,6 @@ class CheckinForm(Form):
     city = StringField('City')
     state = StringField('State')
     zip = StringField('Zip')
-    dependentName = StringField('Dependent Name')
-    dependentBirthday = DateField('Dependent Birthday', [validators.Optional()], format='%m/%d/%Y')
+    dependents = FieldList(FormField(DependentForm))
+    #dependentName = StringField('Dependent Name')
+    #dependentBirthday = DateField('Dependent Birthday', [validators.Optional()], format='%m/%d/%Y')

@@ -18,6 +18,18 @@ has-error\\
     </div>
 % end
 
+% def render_multi_field(field, **kwargs):
+    <div class="form-group">
+        Some extra logic needed
+        % for subfield in field[0]:
+            % render_field(subfield)
+        % end
+        <button data-field="{{ subfield.name }}-group">Remove Entry</button>
+        <br/>
+        <button type="button">Add entry</button>
+    </div>
+% end
+
 % def render_checkbox_field(field):
     <div class="checkbox">
         <label>
@@ -43,6 +55,8 @@ has-error\\
                 % render_checkbox_field(f)
             % elif f.type == 'RadioField':
                 % render_radio_field(f)
+            % elif f.type == 'FieldList':
+                % render_multi_field(f)
             % else:
                 % render_field(f)
             % end

@@ -3,7 +3,7 @@ monkey.patch_all()
 
 import models.base
 from models import CustomerFamily, Dependent, ShoppingCategory, ShoppingItem, Visit
-from forms.checkin_form import CheckinForm
+from forms.checkin_form import CheckinForm, DependentForm
 from forms.customer_edit import CustomerEditForm
 
 import bottle
@@ -113,6 +113,8 @@ def checkin(db):
         family.dependents.append(primary)
         db.add(family)
         return redirect('/shopper/' + family.id)
+    #emptyDependentForm = DependentForm()
+    form.dependents.append_entry()
     return template('checkin', form=form)
 
 @app.get('/login')
