@@ -13,7 +13,7 @@
 </head>
 <body>
 <div class="your-form">
-    % render_form(form, action_url='/customer/'+str(form.shopperID.data), action_text='Submit Form')
+    % render_form(form, action_url=url, action_text='Submit Form')
 </div>
 </body>
 </html>

@@ -4,7 +4,7 @@
 has-error\\
     % end
 {{ kwargs.pop('class_', '') }}">
-        % if (field.type != 'HiddenField' or field.type !='CSRFTokenField') and label_visible:
+        % if (field.type != 'HiddenField' or field.type !='CSRFTokenField') and label_visible and field.widget.input_type != 'hidden':
         <label for="{{ field.id }}" class="col-sm-2 control-label">{{ field.label.text }}</label>
         % end
         <div class="col-sm-10">
@@ -19,15 +19,16 @@ has-error\\
 % end
 
 % def render_multi_field(field, **kwargs):
-    <div class="form-group">
-        Some extra logic needed
-        % for subfield in field[0]:
+    <div class="form-group fieldset" data-toggle="fieldset" id="dependent-fieldset">
+        {{ kwargs["multi_field_label"] }}
+        <div data-toggle="fieldset-entry">
+        % for index, subfield in enumerate(field[0]):
             % render_field(subfield)
         % end
-        <button data-field="{{ subfield.name }}-group">Remove Entry</button>
-        <br/>
-        <button type="button">Add entry</button>
+        </div>
+        <button type="button" class="remove_button" data-toggle="fieldset-remove-row">-</button>
     </div>
+    <button type="button" id="add_another_button">+</button>
 % end
 
 % def render_checkbox_field(field):
@@ -55,8 +56,8 @@ has-error\\
                 % render_checkbox_field(f)
             % elif f.type == 'RadioField':
                 % render_radio_field(f)
-            % elif f.type == 'FieldList':
-                % render_multi_field(f)
+            % elif f.type in ['FieldList', 'ModelFieldList']:
+                % render_multi_field(f, multi_field_label=f.label.text)
             % else:
                 % render_field(f)
             % end
