@@ -87,6 +87,15 @@ function clone_field_list(selector) {
         </div>
         % get_field_errors(form.zip)
     </div>
+    % if form.datecreated.data is not None:
+    <div class="form-group ">
+        <label for="datecreated" class="col-sm-2 control-label">Date Created</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="datecreated" name="datecreated" required type="text" value="{{form.datecreated.data.strftime("%m/%d/%Y")}}">
+        </div>
+        % get_field_errors(form.datecreated)
+    </div>
+    % end
     Dependents
     % dependent_index = -1
     % for dependent in form.dependents:
@@ -122,7 +131,7 @@ function clone_field_list(selector) {
     <div class="form-group ">
         <label for="dependents-{{dependent_index}}-birthdate" class="col-sm-2 control-label">Birthday</label>
         <div class="col-sm-10">
-            % if not dependent.birthdate.errors:
+            % if dependent.birthdate.data is not None:
             <input class="form-control" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="{{dependent.birthdate.data.strftime("%m/%d/%Y")}}">
             % else:
             <input class="form-control" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="">

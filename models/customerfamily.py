@@ -8,6 +8,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, Sequence, Unicode, DateTime
 from sqlalchemy.orm import relationship, backref
 import base
+from wtforms.validators import Length
 
 from models.dependent import Dependent
 
@@ -16,13 +17,13 @@ class CustomerFamily(base.Base):
     __tablename__ = "customerfamily"
 
     id = Column(Integer, primary_key=True)
-    email = Column('email', Unicode, info={'label': 'Email'})
-    phone = Column('phone', Unicode, default=unicode(''), info={'label': 'Phone'})
-    address = Column('address', Unicode, info={'label': 'Street Address'})
-    city = Column('city', Unicode, nullable=False, info={'label': 'City'})
-    state = Column('state', Unicode, nullable=False, info={'label': 'State'})
-    zip = Column('zip', Unicode, nullable=False, info={'label': 'Zip'})
-    datecreated = Column('datecreated', DateTime, info={'label': 'Date Created'}, nullable=False)
+    email = Column('email', Unicode, default=unicode(''))
+    phone = Column('phone', Unicode, default=unicode(''))
+    address = Column('address', Unicode, default=unicode(''))
+    city = Column('city', Unicode, default=unicode(''), nullable=False)
+    state = Column('state', Unicode, default=unicode(''), nullable=False)
+    zip = Column('zip', Unicode, default=unicode(''), nullable=False)
+    datecreated = Column('datecreated', DateTime, nullable=False)
     dependents = relationship("Dependent", backref="family")
     visits = relationship("Visit", backref="family")
     

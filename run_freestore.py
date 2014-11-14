@@ -99,25 +99,6 @@ def customer(db, customer_id=None):
         
     return template('customer', form=form, post_url=bottle.request.path)
 
-@app.route('/checkin', method=['GET','POST'], apply=[authorize()])
-@app.route('/checkin/<customer_id>', method=['GET','POST'], apply=[authorize()])
-def checkin(db, customer_id=None):
-    form = CustomerForm(bottle.request.POST)
-    if bottle.request.method == 'POST' and form.validate():
-        family = CustomerFamily()
-        family.fromForm(customer_id, form)
-        family = db.merge(family)
-        db.commit()
-        return bottle.redirect('/checkin/' + str(family.id))
-
-    if customer_id is not None:
-        fams = db.query(CustomerFamily).filter(CustomerFamily.id == customer_id)
-        if len(fams.all()) != 1:
-            return "Customer request bad"
-        form = CustomerForm(obj=fams[0])
-        
-    return template('checkin', form=form, post_url=bottle.request.path)
-
 @app.get('/login')
 @bottle.view('login_form')
 def login_form():

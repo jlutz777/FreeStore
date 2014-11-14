@@ -27,16 +27,41 @@ class DependentForm(ModelForm):
         include = ['id']
         field_args = {
             'id' : {
-                'validators' : [validators.Optional()] } }
+                'validators' : [validators.Optional()]
+            },
+            'firstName': {
+                'validators' : [validators.InputRequired()]
+            },
+            'lastName': {
+                'validators' : [validators.InputRequired()]
+            }
+        }
 
 class CustomerForm(ModelForm):
     class Meta:
         model = CustomerFamily
-        exclude = ['datecreated']
-
+        field_args = {
+            'id' : {
+                'validators' : [validators.Optional()]
+            },
+            'city': {
+                'validators' : [validators.InputRequired()]
+            },
+            'state': {
+                'validators' : [validators.InputRequired()]
+            },
+            'zip': {
+                'validators' : [validators.InputRequired()]
+            },
+            'state': {
+                'validators' : [validators.InputRequired()]
+            }
+        }
+        
+    datecreated = DisabledStringField('Created Date')
     dependents = ModelFieldList(FormField(DependentForm), min_entries=1)
 
-    def __iter__(self):
+    '''def __iter__(self):
         # Total hack to get dependents at the end of the list
         last_field = self._fields.popitem(False)
         temp_fields = OrderedDict()
@@ -46,3 +71,4 @@ class CustomerForm(ModelForm):
         self._fields = temp_fields
         
         return super(CustomerForm, self).__iter__()
+    '''
