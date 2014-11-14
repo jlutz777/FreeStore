@@ -3,9 +3,13 @@ This is the sqlalchemy class for communicating with the database.
 
 """
 
+from datetime import datetime
+
 from sqlalchemy import Column, Integer, Sequence, Unicode, DateTime
 from sqlalchemy.orm import relationship, backref
 import base
+
+from models.dependent import Dependent
 
 class CustomerFamily(base.Base):
     """Sqlalchemy deals model"""
@@ -21,3 +25,25 @@ class CustomerFamily(base.Base):
     datecreated = Column('datecreated', DateTime, info={'label': 'Date Created'}, nullable=False)
     dependents = relationship("Dependent", backref="family")
     visits = relationship("Visit", backref="family")
+    
+    def fromForm(self, id, form):
+        if id is not None:
+            self.id = id
+        else:
+            self.datecreated = datetime.now()
+
+        self.email = form.email.data
+        self.phone = form.phone.data
+        self.address = form.address.data
+        self.city = form.city.data
+        self.state = form.state.data
+        self.zip = form.zip.data
+
+        for formDependent in form.dependents:
+            dependent = Dependent()
+            dependent.id = formDependent['id'].data
+            dependent.isPrimary = formDependent['isPrimary'].data
+            dependent.firstName = formDependent['firstName'].data
+            dependent.lastName = formDependent['lastName'].data
+            dependent.birthdate = formDependent['birthdate'].data
+            self.dependents.append(dependent)

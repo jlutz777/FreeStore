@@ -1,3 +1,11 @@
+% def get_field_errors(field):
+    % if field.errors:
+        % for e in field.errors:
+            <p class="help-block">{{ e }}</p>
+        % end
+    % end
+% end
+        
 % def render_field(field, label_visible=True, **kwargs):
     <div class="form-group \\
     % if field.errors:

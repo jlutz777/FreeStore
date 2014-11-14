@@ -3,8 +3,7 @@ monkey.patch_all()
 
 import models.base
 from models import CustomerFamily, Dependent, ShoppingCategory, ShoppingItem, Visit
-from forms.checkin_form import CheckinForm#, DependentForm
-from forms.customer_edit import CustomerEditForm
+from forms.customer_form import CustomerForm, DependentForm
 
 from wtforms_alchemy import ModelForm, ModelFieldList
 from wtforms.fields import FormField
@@ -18,7 +17,6 @@ from beaker.middleware import SessionMiddleware
 
 import os
 import json
-from datetime import datetime
 from bson import json_util
 import logging
 
@@ -82,47 +80,24 @@ def show(db):
                         header={'Content-Type': 'application/json'})
     return HTTPError(404, 'Entity not found.')
 
-#class DisabledStringField(StringField):
-#    def __call__(self, **kwargs):
-#        kwargs['disabled'] = 'disabled'
-#        return super(DisabledStringField, self).__call__(**kwargs)
-
-from wtforms.validators import Optional
-class DependentForm(ModelForm):
-    class Meta:
-        datetime_format = '%m/%d/%Y'
-        model = Dependent
-        include = ['id']
-        field_args = {
-            'id' : {
-                'validators' : [Optional()] } }
-
-class CustomerForm(ModelForm):
-    class Meta:
-        model = CustomerFamily
-        exclude = ['datecreated']
-    dependents = ModelFieldList(FormField(DependentForm), min_entries=1)
-
-@app.route('/customer/<customer_family_id>', method=['GET', 'POST'], apply=[authorize()])
-def shopper(customer_family_id, db):
+@app.route('/customer', method=['GET','POST'], apply=[authorize()])
+@app.route('/customer/<customer_id>', method=['GET','POST'], apply=[authorize()])
+def customer(db, customer_id=None):
     form = CustomerForm(bottle.request.POST)
-    if bottle.request.method == 'POST' and form.validate():
-        return "Need to implement"
-    fams = db.query(CustomerFamily).filter(CustomerFamily.id == customer_family_id)
-    if len(fams.all()) != 1:
-        return "Customer request bad"
-    
-    fam = fams[0]
-    form = CustomerForm(obj=fams[0])
-    #form.shopperID.data = fam.id
-    #form.creationDate.data = fam.datecreated
-    #form.email.data = fam.email
-    #form.phone.data = fam.phone
-    #form.address.data = fam.address
-    #form.city.data = fam.city
-    #form.state.data = fam.state
-    #form.zip.data = fam.zip
-    return template('customer', form=form, url=bottle.request.path)
+    if bottle.request.method == 'POST':
+        if form.validate():
+            family = CustomerFamily()
+            family.fromForm(customer_id, form)
+            family = db.merge(family)
+            db.commit()
+            return bottle.redirect('/customer/' + str(family.id))
+    elif customer_id is not None:
+        fams = db.query(CustomerFamily).filter(CustomerFamily.id == customer_id)
+        if len(fams.all()) != 1:
+            return "Customer request bad"
+        form = CustomerForm(obj=fams[0])
+        
+    return template('customer', form=form, post_url=bottle.request.path)
 
 @app.route('/checkin', method=['GET','POST'], apply=[authorize()])
 @app.route('/checkin/<customer_id>', method=['GET','POST'], apply=[authorize()])
@@ -130,24 +105,7 @@ def checkin(db, customer_id=None):
     form = CustomerForm(bottle.request.POST)
     if bottle.request.method == 'POST' and form.validate():
         family = CustomerFamily()
-        if customer_id is not None:
-            family.id = customer_id
-        family.email = form.email.data
-        family.phone = form.phone.data
-        family.address = form.address.data
-        family.city = form.city.data
-        family.state = form.state.data
-        family.zip = form.zip.data
-        family.datecreated = datetime.now()
-
-        dependent = Dependent()
-        dependent.id = form.dependents[0]['id'].data
-        dependent.isPrimary = form.dependents[0]['isPrimary'].data
-        dependent.firstName = form.dependents[0]['firstName'].data
-        dependent.lastName = form.dependents[0]['lastName'].data
-        dependent.birthdate = form.dependents[0]['birthdate'].data
-        family.dependents.append(dependent)
-
+        family.fromForm(customer_id, form)
         family = db.merge(family)
         db.commit()
         return bottle.redirect('/checkin/' + str(family.id))

@@ -1,19 +1,151 @@
 % include renders
 % renders_namespace = _ 
-% render_form = renders_namespace['render_form'] 
+% get_field_errors = renders_namespace['get_field_errors']
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="content-type">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<link rel="stylesheet" href="css/bootstrap.min.css">
-<link rel="stylesheet" href="css/bootstrap-theme.min.css">
-<script src="js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+<script src="/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function () {
+    $('#add_another_button').click(function () {
+        clone_field_list('.fieldset:last');
+    });
+    
+    $('.remove_button').click(function (e) {
+        if ($('.remove_button').length > 1)
+        {
+            e.target.parentElement.parentElement.removeChild(e.target.parentElement);
+        }
+    });
+});
+
+function clone_field_list(selector) {
+    var new_element = $(selector).clone(true);
+    var elem_id = new_element.find(':input')[0].id;
+    var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1')) + 1;
+    new_element.find(':input').each(function() {
+        if (this.className === 'remove_button')
+            return;
+        var id = $(this).attr('id').replace('-' + (elem_num - 1) + '-', '-' + elem_num + '-');
+        $(this).attr({'name': id, 'id': id}).val('').removeAttr('checked');
+    });
+    new_element.find('label').each(function() {
+        var new_for = $(this).attr('for').replace('-' + (elem_num - 1) + '-', '-' + elem_num + '-');
+        $(this).attr('for', new_for);
+    });
+    $(selector).after(new_element);
+}
+</script>
 </head>
 <body>
 <div class="your-form">
-    % render_form(form, action_url=url, action_text='Submit Form')
+    <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
+    <div class="form-group ">
+        <label for="email" class="col-sm-2 control-label">Email</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="email" name="email" type="text" value="{{form.email.data}}">
+        </div>
+        % get_field_errors(form.email)
+    </div>
+    <div class="form-group ">
+        <label for="phone" class="col-sm-2 control-label">Phone</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="phone" name="phone" type="text" value="{{form.phone.data}}">
+        </div>
+        % get_field_errors(form.phone)
+    </div>
+    <div class="form-group ">
+        <label for="address" class="col-sm-2 control-label">Street Address</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="address" name="address" type="text" value="{{form.address.data}}">
+        </div>
+        % get_field_errors(form.address)
+    </div>
+    <div class="form-group ">
+        <label for="city" class="col-sm-2 control-label">City</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="city" name="city" required type="text" value="{{form.city.data}}">
+        </div>
+        % get_field_errors(form.city)
+    </div>
+    <div class="form-group ">
+        <label for="state" class="col-sm-2 control-label">State</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="state" name="state" required type="text" value="{{form.state.data}}">
+        </div>
+        % get_field_errors(form.state)
+    </div>
+    <div class="form-group ">
+        <label for="zip" class="col-sm-2 control-label">Zip</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="zip" name="zip" required type="text" value="{{form.zip.data}}">
+        </div>
+        % get_field_errors(form.zip)
+    </div>
+    Dependents
+    % dependent_index = -1
+    % for dependent in form.dependents:
+    % dependent_index += 1
+    <div class="form-group fieldset" data-toggle="fieldset" id="dependent-fieldset">
+        Dependent
+        <div data-toggle="fieldset-entry">
+    <div class="form-group ">
+        <label for="dependents-{{dependent_index}}-isPrimary" class="col-sm-2 control-label">Primary</label>
+        <div class="col-sm-10">
+            <input
+            % if dependent.isPrimary.data:
+            checked
+            % end
+            class="form-control" id="dependents-{{dependent_index}}-isPrimary" name="dependents-{{dependent_index}}-isPrimary" type="checkbox" value="{{dependent.isPrimary.data}}">
+        </div>
+        % get_field_errors(dependent.isPrimary)
+    </div>
+    <div class="form-group ">
+        <label for="dependents-{{dependent_index}}-firstName" class="col-sm-2 control-label">First Name</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="dependents-{{dependent_index}}-firstName" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
+        </div>
+        % get_field_errors(dependent.firstName)
+    </div>
+    <div class="form-group ">
+        <label for="dependents-{{dependent_index}}-lastName" class="col-sm-2 control-label">Last Name</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="dependents-{{dependent_index}}-lastName" name="dependents-{{dependent_index}}-lastName" type="text" value="{{dependent.lastName.data}}">
+        </div>
+        % get_field_errors(dependent.lastName)
+    </div>
+    <div class="form-group ">
+        <label for="dependents-{{dependent_index}}-birthdate" class="col-sm-2 control-label">Birthday</label>
+        <div class="col-sm-10">
+            % if not dependent.birthdate.errors:
+            <input class="form-control" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="{{dependent.birthdate.data.strftime("%m/%d/%Y")}}">
+            % else:
+            <input class="form-control" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="">
+            % end
+        </div>
+        % get_field_errors(dependent.birthdate)
+    </div>
+    <div class="form-group ">
+        <div class="col-sm-10">
+        % if dependent["id"].data is not None:
+            <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="{{dependent["id"].data}}">
+        % else:
+            <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="">
+        % end
+        </div>
+    </div>
+        </div>
+        <button type="button" class="remove_button" data-toggle="fieldset-remove-row">-</button>
+    </div>
+    % end
+    <button type="button" id="add_another_button">+</button>
+        <button type="submit" class="btn btn-default">Submit Customer</button>
+    </form>
 </div>
 </body>
 </html>
