@@ -30,6 +30,7 @@ class CustomerFamily(base.Base):
     def fromForm(self, id, form):
         if id is not None:
             self.id = id
+            self.datecreated = form.datecreated.data
         else:
             self.datecreated = datetime.now()
 

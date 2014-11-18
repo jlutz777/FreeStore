@@ -19,7 +19,9 @@ $(document).ready(function () {
     $('.remove_button').click(function (e) {
         if ($('.remove_button').length > 1)
         {
-            e.target.parentElement.parentElement.removeChild(e.target.parentElement);
+            var dependentGrandParent = $(e.target).parents("#dependent-fieldset");
+            dependentGrandParent.remove();
+            //.parentElement.parentElement.parentElement.parentElement.removeChild(e.target.parentElement);
         }
     });
 });
@@ -29,7 +31,7 @@ function clone_field_list(selector) {
     var elem_id = new_element.find(':input')[0].id;
     var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1')) + 1;
     new_element.find(':input').each(function() {
-        if (this.className === 'remove_button')
+        if (this.className.indexOf('remove_button') > -1)
             return;
         var id = $(this).attr('id').replace('-' + (elem_num - 1) + '-', '-' + elem_num + '-');
         $(this).attr({'name': id, 'id': id}).val('').removeAttr('checked');
@@ -91,7 +93,7 @@ function clone_field_list(selector) {
     <div class="form-group ">
         <label for="datecreated" class="col-sm-2 control-label">Date Created</label>
         <div class="col-sm-10">
-            <input class="form-control" id="datecreated" name="datecreated" required type="text" value="{{form.datecreated.data.strftime("%m/%d/%Y")}}">
+            <input class="form-control" readonly id="datecreated" name="datecreated" type="text" value="{{form.datecreated.data.strftime("%m/%d/%Y")}}">
         </div>
         % get_field_errors(form.datecreated)
     </div>
@@ -102,58 +104,70 @@ function clone_field_list(selector) {
     % dependent_index += 1
     <div class="form-group fieldset" data-toggle="fieldset" id="dependent-fieldset">
         Dependent
-        <div data-toggle="fieldset-entry">
-    <div class="form-group ">
-        <label for="dependents-{{dependent_index}}-isPrimary" class="col-sm-2 control-label">Primary</label>
-        <div class="col-sm-10">
-            <input
-            % if dependent.isPrimary.data:
-            checked
-            % end
-            class="form-control" id="dependents-{{dependent_index}}-isPrimary" name="dependents-{{dependent_index}}-isPrimary" type="checkbox" value="{{dependent.isPrimary.data}}">
+    <div data-toggle="fieldset-entry">
+        <div class="form-group ">
+            <label for="dependents-{{dependent_index}}-isPrimary" class="col-sm-2 control-label">Primary</label>
+            <div class="col-sm-10">
+                <input
+                % if dependent.isPrimary.data:
+                checked
+                % end
+                class="form-control" id="dependents-{{dependent_index}}-isPrimary" name="dependents-{{dependent_index}}-isPrimary" type="checkbox" value="{{dependent.isPrimary.data}}">
+            </div>
+            % get_field_errors(dependent.isPrimary)
         </div>
-        % get_field_errors(dependent.isPrimary)
-    </div>
-    <div class="form-group ">
-        <label for="dependents-{{dependent_index}}-firstName" class="col-sm-2 control-label">First Name</label>
-        <div class="col-sm-10">
-            <input class="form-control" id="dependents-{{dependent_index}}-firstName" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
+        <div class="form-group ">
+            <label for="dependents-{{dependent_index}}-firstName" class="col-sm-2 control-label">First Name</label>
+            <div class="col-sm-10">
+                <input class="form-control" id="dependents-{{dependent_index}}-firstName" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
+            </div>
+            % get_field_errors(dependent.firstName)
         </div>
-        % get_field_errors(dependent.firstName)
-    </div>
-    <div class="form-group ">
-        <label for="dependents-{{dependent_index}}-lastName" class="col-sm-2 control-label">Last Name</label>
-        <div class="col-sm-10">
-            <input class="form-control" id="dependents-{{dependent_index}}-lastName" name="dependents-{{dependent_index}}-lastName" type="text" value="{{dependent.lastName.data}}">
+        <div class="form-group ">
+            <label for="dependents-{{dependent_index}}-lastName" class="col-sm-2 control-label">Last Name</label>
+            <div class="col-sm-10">
+                <input class="form-control" id="dependents-{{dependent_index}}-lastName" name="dependents-{{dependent_index}}-lastName" type="text" value="{{dependent.lastName.data}}">
+            </div>
+            % get_field_errors(dependent.lastName)
         </div>
-        % get_field_errors(dependent.lastName)
-    </div>
-    <div class="form-group ">
-        <label for="dependents-{{dependent_index}}-birthdate" class="col-sm-2 control-label">Birthday</label>
-        <div class="col-sm-10">
-            % if dependent.birthdate.data is not None:
-            <input class="form-control" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="{{dependent.birthdate.data.strftime("%m/%d/%Y")}}">
+        <div class="form-group ">
+            <label for="dependents-{{dependent_index}}-birthdate" class="col-sm-2 control-label">Birthday</label>
+            <div class="col-sm-10">
+                % if dependent.birthdate.data is not None and not dependent.birthdate.errors:
+                <input class="form-control" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="{{dependent.birthdate.data.strftime("%m/%d/%Y")}}">
+                % else:
+                <input class="form-control" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="">
+                % end
+            </div>
+            % get_field_errors(dependent.birthdate)
+        </div>
+        <div class="form-group ">
+            <div class="col-sm-10">
+            % if dependent["id"].data is not None:
+                <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="{{dependent["id"].data}}">
             % else:
-            <input class="form-control" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="">
+                <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="">
             % end
-        </div>
-        % get_field_errors(dependent.birthdate)
-    </div>
-    <div class="form-group ">
-        <div class="col-sm-10">
-        % if dependent["id"].data is not None:
-            <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="{{dependent["id"].data}}">
-        % else:
-            <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="">
-        % end
+            </div>
         </div>
     </div>
+    <div class="form-group"> 
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="button" class="remove_button btn btn-danger" data-toggle="fieldset-remove-row">Remove</button>
         </div>
-        <button type="button" class="remove_button" data-toggle="fieldset-remove-row">-</button>
+    </div>
     </div>
     % end
-    <button type="button" id="add_another_button">+</button>
-        <button type="submit" class="btn btn-default">Submit Customer</button>
+    <div class="form-group"> 
+        <div class="col-sm-10">
+            <button type="button" class="btn btn-success" id="add_another_button">Add Dependent</button>
+        </div>
+    </div>
+    <div class="form-group"> 
+        <div class="col-sm-10">
+            <button type="submit" class="btn btn-default">Submit Customer</button>
+        </div>
+    </div>
     </form>
 </div>
 </body>
