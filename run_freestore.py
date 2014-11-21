@@ -45,28 +45,16 @@ session_opts = {
     'session.validate_key': True,
 }
 sessionApp = SessionMiddleware(app, session_opts)
+    
+# Utilities
 
-def setupDB():
-    corkBackend.roles.insert({'role': 'admin', 'level': 100})
-    corkBackend.roles.insert({'role': 'user', 'level': 50})
-    
-    corkBackend.users.insert({
-            "username": "admin",
-            "email_addr": "admin@localhost.local",
-            "desc": "admin test user",
-            "role": "admin",
-            "hash": "cLzRnzbEwehP6ZzTREh3A4MXJyNo+TV8Hs4//EEbPbiDoo+dmNg22f2RJC282aSwgyWv/O6s3h42qrA6iHx8yfw=",
-            "creation_date": "2012-10-28 20:50:26.286723",
-            "last_login": "2012-10-28 20:50:26.286723"
-        })
-    assert len(corkBackend.roles) == 2
-    assert len(corkBackend.users) == 1
-    
 def postd():
     return bottle.request.forms
 
 def post_get(name, default=''):
     return bottle.request.POST.get(name, default).strip()
+
+# App Pages
 
 @app.route('/', apply=[authorize()])
 def show(db):
@@ -99,6 +87,8 @@ def customer(db, customer_id=None):
         
     return template('customer', form=form, post_url=bottle.request.path)
 
+# Login/logout pages
+
 @app.get('/login')
 @bottle.view('login_form')
 def login_form():
@@ -116,6 +106,7 @@ def login():
 def logout():
     aaa.logout(success_redirect='/login')
 
+# General and Static pages
 @app.route('/js/<filename>', 'GET')
 def js_static(filename):
     """Get static javascript files.
@@ -141,8 +132,13 @@ def css_static(filename):
     """
 
     return static_file(filename, root=os.path.join(MODULEPATH, 'static/css'))
-    
-# Admin-only pages
+
+@app.route('/sorry_page')
+def sorry_page():
+    """Serve sorry page"""
+    return '<p>Sorry, you are not authorized to perform this action</p>'
+
+# Admin pages
 
 @app.get('/admin')
 @bottle.view('admin_page')
@@ -155,7 +151,6 @@ def admin():
         users = aaa.list_users(),
         roles = aaa.list_roles()
     )
-
 
 @app.post('/create_user')
 @authorize(role="admin", fail_redirect='/sorry_page')
@@ -197,9 +192,21 @@ def delete_role():
     except Exception, e:
         return dict(ok=False, msg=e.message)
 
-@app.route('/sorry_page')
-def sorry_page():
-    """Serve sorry page"""
-    return '<p>Sorry, you are not authorized to perform this action</p>'
+# Setup stuff
+# def setupDB():
+#     corkBackend.roles.insert({'role': 'admin', 'level': 100})
+#     corkBackend.roles.insert({'role': 'user', 'level': 50})
+    
+#     corkBackend.users.insert({
+#             "username": "admin",
+#             "email_addr": "admin@localhost.local",
+#             "desc": "admin test user",
+#             "role": "admin",
+#             "hash": "cLzRnzbEwehP6ZzTREh3A4MXJyNo+TV8Hs4//EEbPbiDoo+dmNg22f2RJC282aSwgyWv/O6s3h42qrA6iHx8yfw=",
+#             "creation_date": "2012-10-28 20:50:26.286723",
+#             "last_login": "2012-10-28 20:50:26.286723"
+#         })
+#     assert len(corkBackend.roles) == 2
+#     assert len(corkBackend.users) == 1
 
 #setupDB()

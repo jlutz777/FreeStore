@@ -42,6 +42,9 @@ class CustomerForm(ModelForm):
             },
             'zip': {
                 'validators' : [validators.InputRequired()]
+            },
+            'datecreated': {
+                'validators' : [validators.Optional()]
             }
         }
 
