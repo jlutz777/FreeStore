@@ -170,5 +170,16 @@ function clone_field_list(selector) {
     </div>
     </form>
 </div>
+% if customer_id:
+<div class="your-form">
+    % for visit in visits:
+        {{visit.checkin}}
+    % end
+    <form method="POST" action="/checkin" role="form" class="form_horizontal">
+        <input type="hidden" id="customer_id" name="customer_id" value="{{customer_id}}" />
+        <button type="submit" class="btn btn-default">Check In</button>
+    </form>
+</div>
+% end
 </body>
 </html>

@@ -3,7 +3,7 @@ monkey.patch_all()
 
 import models.base
 from models import CustomerFamily, Dependent, ShoppingCategory, ShoppingItem, Visit
-from forms.customer_form import CustomerForm, DependentForm
+from forms.customer import CustomerForm, DependentForm
 
 from wtforms_alchemy import ModelForm, ModelFieldList
 from wtforms.fields import FormField
@@ -58,20 +58,22 @@ def post_get(name, default=''):
 
 @app.route('/', apply=[authorize()])
 def show(db):
-    fam = db.query(CustomerFamily)[1]
-    visit_checkin = ''
-    if len(fam.visits) > 0:
-        visit_checkin = fam.visits[0].checkin.strftime("%m/%d/%Y %H:%M:%S")
-    if fam:
-        jsonInfo = json.dumps({'id': fam.id, 'email': fam.email, 'city': fam.city, 'zip': fam.zip, 'visit checkin': visit_checkin}, default=json_util.default)
-        return HTTPResponse(jsonInfo, status=200,
-                        header={'Content-Type': 'application/json'})
-    return HTTPError(404, 'Entity not found.')
+    #fam = db.query(CustomerFamily)[1]
+    #visit_checkin = ''
+    # if len(fam.visits) > 0:
+    #     visit_checkin = fam.visits[0].checkin.strftime("%m/%d/%Y %H:%M:%S")
+    # if fam:
+    #     jsonInfo = json.dumps({'id': fam.id, 'email': fam.email, 'city': fam.city, 'zip': fam.zip, 'visit checkin': visit_checkin}, default=json_util.default)
+    #     return HTTPResponse(jsonInfo, status=200,
+    #                     header={'Content-Type': 'application/json'})
+    # return HTTPError(404, 'Entity not found.')
+    return bottle.redirect('/customer')
 
 @app.route('/customer', method=['GET','POST'], apply=[authorize()])
 @app.route('/customer/<customer_id>', method=['GET','POST'], apply=[authorize()])
 def customer(db, customer_id=None):
     form = CustomerForm(bottle.request.POST)
+    visits = None
     if bottle.request.method == 'POST':
         if form.validate():
             family = CustomerFamily()
@@ -84,8 +86,18 @@ def customer(db, customer_id=None):
         if len(fams.all()) != 1:
             return "Customer request bad"
         form = CustomerForm(obj=fams[0])
+        visits = fams[0].visits
         
-    return template('customer', form=form, post_url=bottle.request.path)
+    return template('customer', form=form, customer_id=customer_id, visits=visits, post_url=bottle.request.path)
+
+@app.route('/checkin', method=['POST'], apply=[authorize()])
+def visit(db):
+    customer_id = post_get('customer_id')
+    visit = Visit()
+    visit.setStatus(status='checkin', family_id=customer_id)
+    db.add(visit)
+    db.commit()
+    return bottle.redirect('/customer/' + str(customer_id))
 
 # Login/logout pages
 
