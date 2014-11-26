@@ -56,8 +56,12 @@ def post_get(name, default=''):
 
 # App Pages
 
+@app.route('/practice')
+def practice():
+    return template('practice')
+
 @app.route('/', apply=[authorize()])
-def show(db):
+def main(db):
     #fam = db.query(CustomerFamily)[1]
     #visit_checkin = ''
     # if len(fam.visits) > 0:
@@ -67,7 +71,7 @@ def show(db):
     #     return HTTPResponse(jsonInfo, status=200,
     #                     header={'Content-Type': 'application/json'})
     # return HTTPError(404, 'Entity not found.')
-    return bottle.redirect('/customer')
+    return template('main')
 
 @app.route('/customer', method=['GET','POST'], apply=[authorize()])
 @app.route('/customer/<customer_id>', method=['GET','POST'], apply=[authorize()])
@@ -89,6 +93,21 @@ def customer(db, customer_id=None):
         visits = fams[0].visits
         
     return template('customer', form=form, customer_id=customer_id, visits=visits, post_url=bottle.request.path)
+
+@app.route('/customersearch', method=['POST'], apply=[authorize()])
+def customersearch(db):
+    searchTerm = post_get('searchTerm')
+    dependents = db.query(Dependent).filter(Dependent.lastName.like("%" + searchTerm + "%"))
+    depDict = []
+    for dep in dependents:
+        depDict.append(dep.getDict())
+    jsonInfo = json.dumps(depDict, default=json_util.default)
+    #jsonInfo = json.dumps({'id': fam.id, 'email': fam.email, 'city': fam.city, 'zip': fam.zip, 'visit checkin': visit_checkin}, default=json_util.default)
+    return HTTPResponse(jsonInfo, status=200,
+        header={'Content-Type': 'application/json'})
+    #subq = sess.query(Dependent.firstName, Dependent.lastName).filter(Dependent.lastName.like("%" + searchTerm + "%").\
+    #              group_by(Score.user_id).subquery()
+    #sess.query(User).join((subq, subq.c.user_id==User.user_id)).order_by(subq.c.score_increase)
 
 @app.route('/checkin', method=['POST'], apply=[authorize()])
 def visit(db):
