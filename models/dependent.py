@@ -19,3 +19,11 @@ class Dependent(base.Base):
     lastName = Column('last_name', Unicode, nullable=False, default=unicode(''))
     birthdate = Column('birthdate', DateTime, info={'format': '%m/%d/%Y'})
     family_id = Column('family', Integer, ForeignKey('customerfamily.id'))
+
+    def getDict(self):
+    	return {
+    		'id': self.id,
+    		'firstName': self.firstName,
+    		'lastName': self.lastName,
+    		'family_id': self.family_id
+    	}
