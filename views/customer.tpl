@@ -1,15 +1,15 @@
 % include renders
 % renders_namespace = _ 
 % get_field_errors = renders_namespace['get_field_errors']
+% get_menu = renders_namespace['get_menu']
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="content-type">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<link rel="stylesheet" href="/css/bootstrap.min.css">
-<link rel="stylesheet" href="/css/bootstrap-theme.min.css">
-<script src="/js/bootstrap.min.js"></script>
+</head>
+<body>
+% get_menu()
 <script type="text/javascript">
 $(document).ready(function () {
     $('#add_another_button').click(function () {
@@ -43,8 +43,6 @@ function clone_field_list(selector) {
     $(selector).after(new_element);
 }
 </script>
-</head>
-<body>
 <div class="your-form">
     <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
     <div class="form-group ">
@@ -172,12 +170,20 @@ function clone_field_list(selector) {
 </div>
 % if customer_id:
 <div class="your-form">
+    <div class="form-group ">
     % for visit in visits:
-        {{visit.checkin}}
+        <div class="col-sm-10">
+            {{visit.checkin}}
+        </div>
     % end
+    </div>
     <form method="POST" action="/checkin" role="form" class="form_horizontal">
-        <input type="hidden" id="customer_id" name="customer_id" value="{{customer_id}}" />
-        <button type="submit" class="btn btn-default">Check In</button>
+        <div class="form-group ">
+            <div class="col-sm-10">
+                <input type="hidden" id="customer_id" name="customer_id" value="{{customer_id}}" />
+                <button type="submit" class="btn btn-default">Check In</button>
+            </div>
+        </div>
     </form>
 </div>
 % end

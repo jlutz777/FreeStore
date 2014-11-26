@@ -23,7 +23,6 @@ class Dependent(base.Base):
     def getDict(self):
     	return {
     		'id': self.id,
-    		'firstName': self.firstName,
-    		'lastName': self.lastName,
+    		'fullName': self.firstName + ' ' + self.lastName,
     		'family_id': self.family_id
     	}
