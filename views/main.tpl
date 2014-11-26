@@ -1,3 +1,4 @@
+% from datetime import datetime, timedelta
 % include renders
 % renders_namespace = _ 
 % get_menu = renders_namespace['get_menu']
@@ -90,6 +91,44 @@ function onSelected(e,d)
       <br />
   </div>
   <br style="clear: left;" />
+  <div>
+    %def td_format(td_object):
+    %    seconds = int(td_object.total_seconds())
+    %    periods = [
+    %            ('year',        60*60*24*365),
+    %            ('month',       60*60*24*30),
+    %            ('day',         60*60*24),
+    %            ('hour',        60*60),
+    %            ('minute',      60),
+    %            ('second',      1)
+    %            ]
+
+    %    strings=[]
+    %    for period_name,period_seconds in periods:
+    %            if seconds > period_seconds:
+    %                    period_value , seconds = divmod(seconds,period_seconds)
+    %                    if period_value == 1:
+    %                            strings.append("%s %s" % (period_value, period_name))
+    %                    else:
+    %                            strings.append("%s %ss" % (period_value, period_name))
+    %                    end
+    %            end
+    %    end
+    %
+    %    return ", ".join(strings)
+    %end
+    % for visit in currentVisits:
+      % for dependent in visit.family.dependents:
+        % if dependent.isPrimary:
+          <p>{{dependent.lastName}}:
+          % timeInStore = td_format(datetime.now() - visit.checkin)
+          {{timeInStore}}
+          </p>
+          % break
+        % end
+      % end
+    % end
+  </div>
 </div>
 </body>
 </html>

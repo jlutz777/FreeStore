@@ -56,22 +56,14 @@ def post_get(name, default=''):
 
 # App Pages
 
-@app.route('/practice')
-def practice():
-    return template('practice')
+#@app.route('/practice')
+#def practice():
+#    return template('practice')
 
 @app.route('/', apply=[authorize()])
 def main(db):
-    #fam = db.query(CustomerFamily)[1]
-    #visit_checkin = ''
-    # if len(fam.visits) > 0:
-    #     visit_checkin = fam.visits[0].checkin.strftime("%m/%d/%Y %H:%M:%S")
-    # if fam:
-    #     jsonInfo = json.dumps({'id': fam.id, 'email': fam.email, 'city': fam.city, 'zip': fam.zip, 'visit checkin': visit_checkin}, default=json_util.default)
-    #     return HTTPResponse(jsonInfo, status=200,
-    #                     header={'Content-Type': 'application/json'})
-    # return HTTPError(404, 'Entity not found.')
-    return template('main')
+    currentVisits = db.query(Visit).filter(Visit.checkout == None)
+    return template('main', currentVisits=currentVisits)
 
 @app.route('/customer', method=['GET','POST'], apply=[authorize()])
 @app.route('/customer/<customer_id>', method=['GET','POST'], apply=[authorize()])

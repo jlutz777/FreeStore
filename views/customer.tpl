@@ -173,7 +173,7 @@ function clone_field_list(selector) {
     <div class="form-group ">
     % for visit in visits:
         <div class="col-sm-10">
-            {{visit.checkin}}
+            {{visit.checkin}}, {{visit.checkout}}
         </div>
     % end
     </div>
