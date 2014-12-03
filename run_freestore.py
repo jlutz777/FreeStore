@@ -50,7 +50,7 @@ def redirect_http_to_https(callback):
             return callback(*args, **kwargs)
     return wrapper
 
-app.install(redirect_http_to_https)
+#app.install(redirect_http_to_https)
 
 session_opts = {
     'session.cookie_expires': True,
@@ -175,11 +175,14 @@ def login():
     """Authenticate users"""
     username = post_get('username')
     password = post_get('password')
-    aaa.login(username, password, success_redirect='/', fail_redirect='/login')
+    success_url = bottle.request.url.replace('http', 'https').replace('login', '')
+    fail_url = bottle.request.url.replace('http', 'https')
+    aaa.login(username, password, success_redirect=success_url, fail_redirect=fail_url)
 
 @app.route('/logout')
 def logout():
-    aaa.logout(success_redirect='/login')
+    login_url = bottle.request.url.replace('http', 'https').replace('logout', 'login')
+    aaa.logout(success_redirect=login_url)
 
 # General and Static pages
 @app.route('/js/<filename>', 'GET')
