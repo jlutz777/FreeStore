@@ -19,6 +19,7 @@ import os
 import json
 from bson import json_util
 import logging
+from datetime import datetime, timedelta
 
 MODULEPATH = os.path.dirname(__file__)
 TEMPLATE_PATH.insert(0, os.path.join(MODULEPATH, "views"))
@@ -35,6 +36,21 @@ authorize = aaa.make_auth_decorator(fail_redirect="/login", role="user")
 app = bottle.default_app()
 dbPlugin = sqlalchemy.Plugin(models.base.engine, keyword='db')
 app.install(dbPlugin)
+
+def redirect_http_to_https(callback):
+    '''Bottle plugin that redirects all http requests to https'''
+
+    def wrapper(*args, **kwargs):
+        scheme = bottle.request.urlparts[0]
+        if scheme == 'http':
+            # request is http; redirect to https
+            bottle.redirect(bottle.request.url.replace('http', 'https', 1))
+        else:
+            # request is already https; okay to proceed
+            return callback(*args, **kwargs)
+    return wrapper
+
+app.install(redirect_http_to_https)
 
 session_opts = {
     'session.cookie_expires': True,
@@ -54,6 +70,28 @@ def postd():
 def post_get(name, default=''):
     return bottle.request.POST.get(name, default).strip()
 
+def td_format(td_object):
+    seconds = int(td_object.total_seconds())
+    periods = [
+        ('year',        60*60*24*365),
+        ('month',       60*60*24*30),
+        ('day',         60*60*24),
+        ('hour',        60*60),
+        ('minute',      60)#,
+        #('second',      1)
+    ]
+
+    strings=[]
+    for period_name,period_seconds in periods:
+        if seconds > period_seconds:
+            period_value , seconds = divmod(seconds,period_seconds)
+            if period_value == 1:
+                strings.append("%s %s" % (period_value, period_name))
+            else:
+                strings.append("%s %ss" % (period_value, period_name))
+
+    return ", ".join(strings)
+
 # App Pages
 
 #@app.route('/practice')
@@ -62,8 +100,23 @@ def post_get(name, default=''):
 
 @app.route('/', apply=[authorize()])
 def main(db):
-    currentVisits = db.query(Visit).filter(Visit.checkout == None)
     return template('main', currentVisits=currentVisits)
+
+@app.route('/currentVisits', apply=[authorize()])
+def currentVisits(db):
+    currentVisits = db.query(Visit).filter(Visit.checkout == None)
+    currentVisitsArray = []
+    for visit in currentVisits:
+        for dependent in visit.family.dependents:
+            if dependent.isPrimary:
+                thisVisit = {}
+                thisVisit["lastName"] = dependent.lastName
+                thisVisit["timeInStore"] = td_format(datetime.now()-visit.checkin)
+                currentVisitsArray.append(thisVisit)
+                break
+    jsonInfo = json.dumps(currentVisitsArray, default=json_util.default)
+    return HTTPResponse(jsonInfo, status=200,
+        header={'Content-Type': 'application/json'})
 
 @app.route('/customer', method=['GET','POST'], apply=[authorize()])
 @app.route('/customer/<customer_id>', method=['GET','POST'], apply=[authorize()])
@@ -94,7 +147,6 @@ def customersearch(db):
     for dep in dependents:
         depDict.append(dep.getDict())
     jsonInfo = json.dumps(depDict, default=json_util.default)
-    #jsonInfo = json.dumps({'id': fam.id, 'email': fam.email, 'city': fam.city, 'zip': fam.zip, 'visit checkin': visit_checkin}, default=json_util.default)
     return HTTPResponse(jsonInfo, status=200,
         header={'Content-Type': 'application/json'})
     #subq = sess.query(Dependent.firstName, Dependent.lastName).filter(Dependent.lastName.like("%" + searchTerm + "%").\

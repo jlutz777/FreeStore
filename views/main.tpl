@@ -1,4 +1,3 @@
-% from datetime import datetime, timedelta
 % include renders
 % renders_namespace = _ 
 % get_menu = renders_namespace['get_menu']
@@ -54,29 +53,53 @@
 <body>
 % get_menu()
 <script type="text/javascript">
+var currentVisitsElem;
+
 var customerSearch = function(q, cb) {
-   return $.post('customersearch', { 'searchTerm': q}, function(data)
+   return $.post('/customersearch', { 'searchTerm': q}, function(data)
    {
       return cb(data);
    });
 };
+
 $(window).load(function()
 {
-$('#customername').typeahead({
-  hint: true,
-  highlight: true,
-  minLength: 1
-},
-{
-  name: 'customers',
-  displayKey: 'fullName',
-  source: customerSearch
-}).on('typeahead:selected', onSelected);
-  
-function onSelected(e,d)
-{
-  window.location = '/customer/' + d.family_id;
-}
+  currentVisitsElem = document.getElementById('currentVisits');
+
+  function getCurrentVisits()
+  {
+     $.get('/currentVisits', function(data)
+      {
+          var currVisitsHTML = '';
+          var i;
+          for (i=0; i<data.length; i++)
+          {
+            currVisitsHTML += '<p>';
+            currVisitsHTML += data[i].lastName + ": " + data[i].timeInStore;
+            currVisitsHTML += '</p>';
+          }
+          currentVisitsElem.innerHTML = currVisitsHTML;
+      });
+  }
+
+  getCurrentVisits();
+  setInterval(getCurrentVisits, 10000);
+
+  function onSelected(e,d)
+  {
+    window.location = '/customer/' + d.family_id;
+  }
+
+  $('#customername').typeahead({
+    hint: true,
+    highlight: true,
+    minLength: 1
+  },
+  {
+    name: 'customers',
+    displayKey: 'fullName',
+    source: customerSearch
+  }).on('typeahead:selected', onSelected);
 });
 </script>
 <div id="hbox">
@@ -91,43 +114,7 @@ function onSelected(e,d)
       <br />
   </div>
   <br style="clear: left;" />
-  <div>
-    %def td_format(td_object):
-    %    seconds = int(td_object.total_seconds())
-    %    periods = [
-    %            ('year',        60*60*24*365),
-    %            ('month',       60*60*24*30),
-    %            ('day',         60*60*24),
-    %            ('hour',        60*60),
-    %            ('minute',      60),
-    %            ('second',      1)
-    %            ]
-
-    %    strings=[]
-    %    for period_name,period_seconds in periods:
-    %            if seconds > period_seconds:
-    %                    period_value , seconds = divmod(seconds,period_seconds)
-    %                    if period_value == 1:
-    %                            strings.append("%s %s" % (period_value, period_name))
-    %                    else:
-    %                            strings.append("%s %ss" % (period_value, period_name))
-    %                    end
-    %            end
-    %    end
-    %
-    %    return ", ".join(strings)
-    %end
-    % for visit in currentVisits:
-      % for dependent in visit.family.dependents:
-        % if dependent.isPrimary:
-          <p>{{dependent.lastName}}:
-          % timeInStore = td_format(datetime.now() - visit.checkin)
-          {{timeInStore}}
-          </p>
-          % break
-        % end
-      % end
-    % end
+  <div id="currentVisits">
   </div>
 </div>
 </body>
