@@ -37,21 +37,6 @@ app = bottle.default_app()
 dbPlugin = sqlalchemy.Plugin(models.base.engine, keyword='db')
 app.install(dbPlugin)
 
-def redirect_http_to_https(callback):
-    '''Bottle plugin that redirects all http requests to https'''
-
-    def wrapper(*args, **kwargs):
-        scheme = bottle.request.urlparts[0]
-        if scheme == 'http':
-            # request is http; redirect to https
-            bottle.redirect(bottle.request.url.replace('http', 'https', 1))
-        else:
-            # request is already https; okay to proceed
-            return callback(*args, **kwargs)
-    return wrapper
-
-#app.install(redirect_http_to_https)
-
 session_opts = {
     'session.cookie_expires': True,
     'session.encrypt_key': 'ASD342sad856vsd',
