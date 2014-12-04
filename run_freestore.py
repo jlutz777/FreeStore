@@ -28,19 +28,9 @@ logging.basicConfig(format='localhost - - [%(asctime)s] %(message)s',
                     level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
-def get_redirect_url(relative_path):
-    splitted = bottle.request.url.split('/')
-    https_url = 'https://' + splitted[2] + '/' + relative_path
-    return https_url
-#login_url = get_redirect_url('login')
-
 postgresConn = os.environ.get("POSTGRES_CONN", "")
 corkBackend = SqlAlchemyBackend(postgresConn, initialize=False)
 aaa = Cork(backend=corkBackend, email_sender='', smtp_url='')
-#authorize = aaa.make_auth_decorator(fail_redirect=login_url, role="user")
-def authorize(fail_redirect='login', role='user'):
-    full_fail_redirect = get_redirect_url(fail_redirect)
-    aaa.require(fail_redirect=full_fail_redirect, role=role)
 
 app = bottle.default_app()
 dbPlugin = sqlalchemy.Plugin(models.base.engine, keyword='db')
@@ -86,13 +76,22 @@ def td_format(td_object):
 
     return ", ".join(strings)
 
+def get_redirect_url(relative_path):
+    splitted = bottle.request.url.split('/')
+    https_url = 'https://' + splitted[2] + '/' + relative_path
+    return https_url
+
+def authorize(fail_redirect='login', role='user'):
+    full_fail_redirect = get_redirect_url(fail_redirect)
+    aaa.require(fail_redirect=full_fail_redirect, role=role)
+
 # App Pages
 
 #@app.route('/practice')
 #def practice():
 #    return template('practice')
 
-@app.route('/')#, apply=[authorize()])
+@app.route('/')
 def main(db):
     authorize()
 
@@ -129,7 +128,9 @@ def customer(db, customer_id=None):
             family.fromForm(customer_id, form)
             family = db.merge(family)
             db.commit()
-            return bottle.redirect('/customer/' + str(family.id))
+
+            customer_url = get_redirect_url('customer/' + str(family.id))
+            return bottle.redirect(customer_url)
     elif customer_id is not None:
         fams = db.query(CustomerFamily).filter(CustomerFamily.id == customer_id)
         if len(fams.all()) != 1:
@@ -164,7 +165,9 @@ def visit(db):
     visit.setStatus(status='checkin', family_id=customer_id)
     db.add(visit)
     db.commit()
-    return bottle.redirect('/customer/' + str(customer_id))
+
+    customer_url = get_redirect_url('customer/' + str(customer_id))
+    return bottle.redirect(customer_url)
 
 # Login/logout pages
 
