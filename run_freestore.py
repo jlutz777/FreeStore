@@ -28,10 +28,19 @@ logging.basicConfig(format='localhost - - [%(asctime)s] %(message)s',
                     level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
+def get_redirect_url(relative_path):
+    splitted = bottle.request.url.split('/')
+    https_url = 'https://' + splitted[2] + '/' + relative_path
+    return https_url
+#login_url = get_redirect_url('login')
+
 postgresConn = os.environ.get("POSTGRES_CONN", "")
 corkBackend = SqlAlchemyBackend(postgresConn, initialize=False)
 aaa = Cork(backend=corkBackend, email_sender='', smtp_url='')
-authorize = aaa.make_auth_decorator(fail_redirect="/login", role="user")
+#authorize = aaa.make_auth_decorator(fail_redirect=login_url, role="user")
+def authorize(fail_redirect='login', role='user'):
+    full_fail_redirect = get_redirect_url(fail_redirect)
+    aaa.require(fail_redirect=full_fail_redirect, role=role)
 
 app = bottle.default_app()
 dbPlugin = sqlalchemy.Plugin(models.base.engine, keyword='db')
@@ -83,12 +92,16 @@ def td_format(td_object):
 #def practice():
 #    return template('practice')
 
-@app.route('/', apply=[authorize()])
+@app.route('/')#, apply=[authorize()])
 def main(db):
+    authorize()
+
     return template('main', currentVisits=currentVisits)
 
-@app.route('/currentVisits', apply=[authorize()])
+@app.route('/currentVisits')
 def currentVisits(db):
+    authorize()
+
     currentVisits = db.query(Visit).filter(Visit.checkout == None)
     currentVisitsArray = []
     for visit in currentVisits:
@@ -103,9 +116,11 @@ def currentVisits(db):
     return HTTPResponse(jsonInfo, status=200,
         header={'Content-Type': 'application/json'})
 
-@app.route('/customer', method=['GET','POST'], apply=[authorize()])
-@app.route('/customer/<customer_id>', method=['GET','POST'], apply=[authorize()])
+@app.route('/customer', method=['GET','POST'])
+@app.route('/customer/<customer_id>', method=['GET','POST'])
 def customer(db, customer_id=None):
+    authorize()
+
     form = CustomerForm(bottle.request.POST)
     visits = None
     if bottle.request.method == 'POST':
@@ -124,8 +139,10 @@ def customer(db, customer_id=None):
         
     return template('customer', form=form, customer_id=customer_id, visits=visits, post_url=bottle.request.path)
 
-@app.route('/customersearch', method=['POST'], apply=[authorize()])
+@app.route('/customersearch', method=['POST'])
 def customersearch(db):
+    authorize()
+
     searchTerm = post_get('searchTerm')
     dependents = db.query(Dependent).filter(Dependent.lastName.like("%" + searchTerm + "%"))
     depDict = []
@@ -138,8 +155,10 @@ def customersearch(db):
     #              group_by(Score.user_id).subquery()
     #sess.query(User).join((subq, subq.c.user_id==User.user_id)).order_by(subq.c.score_increase)
 
-@app.route('/checkin', method=['POST'], apply=[authorize()])
+@app.route('/checkin', method=['POST'])
 def visit(db):
+    authorize()
+
     customer_id = post_get('customer_id')
     visit = Visit()
     visit.setStatus(status='checkin', family_id=customer_id)
@@ -160,13 +179,13 @@ def login():
     """Authenticate users"""
     username = post_get('username')
     password = post_get('password')
-    success_url = bottle.request.url.replace('http', 'https').replace('login', '')
-    fail_url = bottle.request.url.replace('http', 'https')
+    success_url = get_redirect_url('')
+    fail_url = get_redirect_url('login')
     aaa.login(username, password, success_redirect=success_url, fail_redirect=fail_url)
 
 @app.route('/logout')
 def logout():
-    login_url = bottle.request.url.replace('http', 'https').replace('logout', 'login')
+    login_url = get_redirect_url('login')
     aaa.logout(success_redirect=login_url)
 
 # General and Static pages
@@ -205,10 +224,10 @@ def sorry_page():
 
 @app.get('/admin')
 @bottle.view('admin_page')
-@authorize(role="admin", fail_redirect='/sorry_page')
 def admin():
     """Only admin users can see this"""
-    #aaa.require(role='admin', fail_redirect='/sorry_page')
+    authorize(fail_redirect='sorry_page', role='admin')
+
     return dict(
         current_user = aaa.current_user,
         users = aaa.list_users(),
@@ -216,8 +235,9 @@ def admin():
     )
 
 @app.post('/create_user')
-@authorize(role="admin", fail_redirect='/sorry_page')
 def create_user():
+    authorize(fail_redirect='sorry_page', role='admin')
+
     try:
         aaa.create_user(postd().username, postd().role, postd().password)
         return dict(ok=True, msg='')
@@ -226,8 +246,9 @@ def create_user():
 
 
 @app.post('/delete_user')
-@authorize(role="admin", fail_redirect='/sorry_page')
 def delete_user():
+    authorize(fail_redirect='sorry_page', role='admin')
+
     try:
         aaa.delete_user(post_get('username'))
         return dict(ok=True, msg='')
@@ -237,8 +258,9 @@ def delete_user():
 
 
 @app.post('/create_role')
-@authorize(role="admin", fail_redirect='/sorry_page')
 def create_role():
+    authorize(fail_redirect='sorry_page', role='admin')
+
     try:
         aaa.create_role(post_get('role'), post_get('level'))
         return dict(ok=True, msg='')
@@ -247,8 +269,9 @@ def create_role():
 
 
 @app.post('/delete_role')
-@authorize(role="admin", fail_redirect='/sorry_page')
 def delete_role():
+    authorize(fail_redirect='sorry_page', role='admin')
+
     try:
         aaa.delete_role(post_get('role'))
         return dict(ok=True, msg='')
