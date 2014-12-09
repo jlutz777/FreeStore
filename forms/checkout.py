@@ -3,7 +3,18 @@ from wtforms_alchemy import ModelForm, ModelFieldList
 
 from models import CustomerFamily, Dependent
 
-class DependentForm(ModelForm):
+'''
+visit
+- checkin (hidden)
+- checkout (datetime.now)
+- family_id (hidden)
+- shopping_item
+  - id, name
+  - category
+     - id, name, dailyLimit
+'''
+
+class ShoppingItemForm(ModelForm):
     class Meta:
         datetime_format = '%m/%d/%Y'
         model = Dependent
@@ -23,7 +34,7 @@ class DependentForm(ModelForm):
             }
         }
 
-class CustomerForm(ModelForm):
+class CheckoutForm(ModelForm):
     class Meta:
         datetime_format = '%m/%d/%Y'
         model = CustomerFamily

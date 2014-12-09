@@ -21,7 +21,6 @@ $(document).ready(function () {
         {
             var dependentGrandParent = $(e.target).parents("#dependent-fieldset");
             dependentGrandParent.remove();
-            //.parentElement.parentElement.parentElement.parentElement.removeChild(e.target.parentElement);
         }
     });
 });
