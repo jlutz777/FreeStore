@@ -7,6 +7,7 @@ class CategoryForm(ModelForm):
     class Meta:
         model = ShoppingCategory
         include = ['id']
+        
         field_args = {
             'id': {
                 'validators': [validators.InputRequired()]
