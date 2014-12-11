@@ -13,3 +13,4 @@ class ShoppingItem(base.Base):
     id = Column(Integer, primary_key=True)
     name = Column('name', Unicode)
     category_id = Column('category', Integer, ForeignKey('shopping_category.id'))
+    visit_id = Column('visit', Integer, ForeignKey('visits.id'))
