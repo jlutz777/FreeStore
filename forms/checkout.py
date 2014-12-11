@@ -29,7 +29,7 @@ class ShoppingItemForm(ModelForm):
             }
         }
 
-    category = FormField(CatgoryForm)
+    category = FormField(CategoryForm)
 
 class CheckoutForm(ModelForm):
     class Meta:

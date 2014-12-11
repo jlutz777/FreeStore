@@ -1,5 +1,6 @@
 % include renders
 % renders_namespace = _
+% get_field_errors = renders_namespace['get_field_errors']
 % get_menu = renders_namespace['get_menu']
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -43,8 +44,25 @@ function clone_field_list(selector) {
 </script>
 <div class="your-form">
     <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
+    Family email: {{visit.family.email}}
+    <div class="form-group ">
+        <label for="checkin" class="col-sm-2 control-label">Checkin</label>
+        <div class="col-sm-10">
+            <input class="form-control" readonly id="checkin" name="checkin" type="text" value="{{form.checkin.data.strftime("%m/%d/%Y")}}">
+        </div>
+        % get_field_errors(form.checkin)
+    </div>
+    <div class="form-group"> 
+        <div class="col-sm-10">
+            <button type="button" class="btn btn-success" id="add_another_button">Add Item</button>
+        </div>
+    </div>
+    <div class="form-group"> 
+        <div class="col-sm-10">
+            <button type="submit" class="btn btn-default">Checkout</button>
+        </div>
+    </div>
     </form>
 </div>
-% end
 </body>
 </html>

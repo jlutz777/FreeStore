@@ -4,6 +4,7 @@ monkey.patch_all()
 import models.base
 from models import CustomerFamily, Dependent, ShoppingCategory, ShoppingItem, Visit
 from forms.customer import CustomerForm, DependentForm
+from forms.checkout import CheckoutForm
 
 from wtforms_alchemy import ModelForm, ModelFieldList
 from wtforms.fields import FormField
@@ -76,9 +77,13 @@ def td_format(td_object):
 
     return ", ".join(strings)
 
-def get_redirect_url(relative_path):
+def get_redirect_url(relative_path=None):
     splitted = bottle.request.url.split('/')
+
+    if relative_path is None:
+        relative_path = splitted[3]
     https_url = 'https://' + splitted[2] + '/' + relative_path
+
     return https_url
 
 def authorize(fail_redirect='login', role='user'):
@@ -121,6 +126,7 @@ def customer(db, customer_id=None):
     authorize()
 
     form = CustomerForm(bottle.request.POST)
+    post_url = get_redirect_url()
     visits = None
     if bottle.request.method == 'POST':
         if form.validate():
@@ -138,7 +144,7 @@ def customer(db, customer_id=None):
         form = CustomerForm(obj=fams[0])
         visits = fams[0].visits
         
-    return template('customer', form=form, customer_id=customer_id, visits=visits, post_url=bottle.request.path)
+    return template('customer', form=form, customer_id=customer_id, visits=visits, post_url=post_url)
 
 @app.route('/customersearch', method=['POST'])
 def customersearch(db):
@@ -168,6 +174,20 @@ def visit(db):
 
     customer_url = get_redirect_url('customer/' + str(customer_id))
     return bottle.redirect(customer_url)
+
+@app.route('/checkout/<visit_id>', method=['GET', 'POST'])
+def checkout(db, visit_id):
+    post_url = get_redirect_url()
+    log.debug(post_url)
+
+    visits = db.query(Visit).filter(Visit.id == visit_id)
+    if len(visits.all()) != 1:
+        return "Visit request bad"
+    form = CheckoutForm(obj=visits[0])
+    visit = visits[0]
+        
+    return template('checkout', form=form, visit=visit, post_url=post_url)
+
 
 # Login/logout pages
 
