@@ -5,12 +5,12 @@ This is the sqlalchemy class for communicating with the database.
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, Sequence, Unicode, DateTime
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy import Column, Integer, Unicode, DateTime
+from sqlalchemy.orm import relationship
 import base
-from wtforms.validators import Length
 
 from models.dependent import Dependent
+
 
 class CustomerFamily(base.Base):
     """Sqlalchemy deals model"""
@@ -26,7 +26,7 @@ class CustomerFamily(base.Base):
     datecreated = Column('datecreated', DateTime, nullable=False)
     dependents = relationship("Dependent", backref="family")
     visits = relationship("Visit", backref="family")
-    
+
     def fromForm(self, id, form):
         if id is not None:
             self.id = id

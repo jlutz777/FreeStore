@@ -1,7 +1,8 @@
-from wtforms import Form, validators, DateField, BooleanField, StringField, HiddenField, FormField
+from wtforms import validators, FormField
 from wtforms_alchemy import ModelForm, ModelFieldList
 
 from models import ShoppingItem, Visit, ShoppingCategory
+
 
 class CategoryForm(ModelForm):
     class Meta:
@@ -19,17 +20,19 @@ class CategoryForm(ModelForm):
             }
         }
 
+
 class ShoppingItemForm(ModelForm):
     class Meta:
         datetime_format = '%m/%d/%Y'
         model = ShoppingItem
         field_args = {
             'name': {
-                'validators' : [validators.Optional()]
+                'validators': [validators.Optional()]
             }
         }
 
     category = FormField(CategoryForm)
+
 
 class CheckoutForm(ModelForm):
     class Meta:
@@ -37,17 +40,17 @@ class CheckoutForm(ModelForm):
         model = Visit
         include = ['id']
         field_args = {
-            'id' : {
-                'validators' : [validators.InputRequired()]
+            'id': {
+                'validators': [validators.InputRequired()]
             },
             'checkin': {
-                'validators' : [validators.InputRequired()]
+                'validators': [validators.InputRequired()]
             },
             'checkout': {
-                'validators' : [validators.Optional()]
+                'validators': [validators.Optional()]
             },
             'family_id': {
-                'validators' : [validators.InputRequired()]
+                'validators': [validators.InputRequired()]
             }
         }
 

@@ -1,7 +1,8 @@
-from wtforms import Form, validators, DateField, BooleanField, StringField, HiddenField, FormField
+from wtforms import validators, FormField
 from wtforms_alchemy import ModelForm, ModelFieldList
 
 from models import CustomerFamily, Dependent
+
 
 class DependentForm(ModelForm):
     class Meta:
@@ -9,39 +10,40 @@ class DependentForm(ModelForm):
         model = Dependent
         include = ['id']
         field_args = {
-            'id' : {
-                'validators' : [validators.Optional()]
+            'id': {
+                'validators': [validators.Optional()]
             },
             'firstName': {
-                'validators' : [validators.InputRequired()]
+                'validators': [validators.InputRequired()]
             },
             'lastName': {
-                'validators' : [validators.InputRequired()]
+                'validators': [validators.InputRequired()]
             },
             'birthdate': {
-                'validators' : [validators.InputRequired()]
+                'validators': [validators.InputRequired()]
             }
         }
+
 
 class CustomerForm(ModelForm):
     class Meta:
         datetime_format = '%m/%d/%Y'
         model = CustomerFamily
         field_args = {
-            'id' : {
-                'validators' : [validators.Optional()]
+            'id': {
+                'validators': [validators.Optional()]
             },
             'city': {
-                'validators' : [validators.InputRequired()]
+                'validators': [validators.InputRequired()]
             },
             'state': {
-                'validators' : [validators.InputRequired()]
+                'validators': [validators.InputRequired()]
             },
             'zip': {
-                'validators' : [validators.InputRequired()]
+                'validators': [validators.InputRequired()]
             },
             'datecreated': {
-                'validators' : [validators.Optional()]
+                'validators': [validators.Optional()]
             }
         }
 

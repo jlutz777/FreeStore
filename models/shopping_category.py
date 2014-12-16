@@ -4,8 +4,9 @@ This is the sqlalchemy class for communicating with the shopping category table
 """
 
 from sqlalchemy import Column, Integer, Unicode
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 import base
+
 
 class ShoppingCategory(base.Base):
     """Sqlalchemy deals model"""

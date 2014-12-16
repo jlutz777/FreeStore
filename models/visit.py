@@ -4,9 +4,11 @@ This is the sqlalchemy class for communicating with the visits table
 """
 
 from datetime import datetime
-from sqlalchemy import Column, Integer, Unicode, DateTime, ForeignKey
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy import Column, Integer, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+
 import base
+
 
 class Visit(base.Base):
     """Sqlalchemy deals model"""
@@ -19,6 +21,6 @@ class Visit(base.Base):
     items = relationship("ShoppingItem", backref="visit")
 
     def setStatus(self, status, family_id, id=None):
-    	self.family_id = family_id
-    	if (status == 'checkin'):
-    		self.checkin = datetime.now()
+        self.family_id = family_id
+        if (status == 'checkin'):
+            self.checkin = datetime.now()
