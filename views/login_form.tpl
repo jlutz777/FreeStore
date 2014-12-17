@@ -2,63 +2,22 @@
 <html>
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="content-type">
-<div id="hbox">
-  <div class="box">
-      <h2>Login</h2>
-      <p>Please insert your credentials:</p>
-<!-- Implement: http://bootsnipp.com/snippets/featured/easy-log-in-form -->
-      <form action="login" method="post" name="login">
-          <input type="text" name="username" />
-          <input type="password" name="password" />
-
-          <br/><br/>
-          <button type="submit" > OK </button>
-          <button type="button" class="close"> Cancel </button>
-      </form>
-      <br />
-  </div>
-  <div class="box">
-      <h2>Signup</h2>
-      <p>Please insert your credentials:</p>
-      <form action="register" method="post" name="signup">
-          <input type="text" name="username" value="username"/>
-          <input type="password" name="password" />
-          <input type="text" name="email_address" value="email address"/>
-
-          <br/><br/>
-          <button type="submit" > OK </button>
-          <button type="button" class="close"> Cancel </button>
-      </form>
-      <br />
-  </div>
-  <div class="box">
-      <h2>Password reset</h2>
-      <p>Please insert your credentials:</p>
-      <form action="reset_password" method="post" name="password_reset">
-          <input type="text" name="username" value="username"/>
-          <input type="text" name="email_address" value="email address"/>
-
-          <br/><br/>
-          <button type="submit" > OK </button>
-          <button type="button" class="close"> Cancel </button>
-      </form>
-      <br />
-  </div>
-  <br style="clear: left;" />
-</div>
-<style>
-div {
-    color: #777;
-    margin: auto;
-    width: 20em;
-    text-align: center;
-}
-div#hbox {width: 100%;}
-div#hbox div.box {float: left; width: 33%;}
-input {
-    background: #f8f8f8;
-    border: 1px solid #777;
-    margin: auto;
-}
-input:hover { background: #fefefe}
-</style>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+<script src="/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <form action="login" method="post" name="Login" class="form-signin">
+            <h2 class="form-signin-heading">Please sign in</h2>
+            <input name="username" type="text" class="input-block-level" placeholder="User name">
+            <input name="password" type="password" class="input-block-level" placeholder="Password">
+            <button class="btn btn-large btn-primary" type="submit">Sign in</button>
+            % if defined('errMessage'):
+                <span>* {{ errMessage }}</span>
+            % end
+        </form>
+    </div>
+</body>
+</html>
