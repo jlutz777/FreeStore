@@ -44,6 +44,10 @@ function clone_field_list(selector) {
 </script>
 <div class="your-form">
     <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
+    <div class="page-header">
+    <h3>Family Information</h3>
+    </div>
+    <div class="row">
     <div class="form-group ">
         <label for="email" class="col-sm-2 control-label">Email</label>
         <div class="col-sm-10">
@@ -95,10 +99,14 @@ function clone_field_list(selector) {
         % get_field_errors(form.datecreated)
     </div>
     % end
-    Dependents
+    </div>
+    <div class="page-header">
+    <h3>Dependents</h3>
+    </div>
     % dependent_index = -1
     % for dependent in form.dependents:
     % dependent_index += 1
+    <div class="row" style="margin-left:0px; margin-right:0px">
     <div class="form-group fieldset" data-toggle="fieldset" id="dependent-fieldset">
         Dependent
     <div data-toggle="fieldset-entry">
@@ -152,6 +160,7 @@ function clone_field_list(selector) {
         <div class="col-sm-offset-2 col-sm-10">
             <button type="button" class="remove_button btn btn-danger" data-toggle="fieldset-remove-row">Remove</button>
         </div>
+    </div>
     </div>
     </div>
     % end

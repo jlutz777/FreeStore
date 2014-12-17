@@ -81,7 +81,7 @@ def get_redirect_url(relative_path=None):
     splitted = bottle.request.url.split('/')
 
     if relative_path is None:
-        relative_path = splitted[3]
+        relative_path = '/'.join(splitted[3:])
     https_url = 'https://' + splitted[2] + '/' + relative_path
 
     return https_url
