@@ -112,6 +112,8 @@ def currentVisits(db):
             if dependent.isPrimary:
                 thisVisit = {}
                 timeInStore = td_format(datetime.now()-visit.checkin)
+                thisVisit["familyId"] = visit.family.id
+                thisVisit["visitId"] = visit.id
                 thisVisit["lastName"] = dependent.lastName
                 thisVisit["timeInStore"] = timeInStore
                 currentVisitsArray.append(thisVisit)

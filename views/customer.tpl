@@ -164,35 +164,46 @@ function clone_field_list(selector) {
     </div>
     </div>
     % end
-    <div class="form-group"> 
-        <div class="col-sm-10">
-            <button type="button" class="btn btn-success" id="add_another_button">Add Dependent</button>
+    <div class="row">
+        <div class="form-group"> 
+            <div class="col-sm-10">
+                <button type="button" class="btn btn-success" id="add_another_button">Add Dependent</button>
+            </div>
         </div>
     </div>
-    <div class="form-group"> 
-        <div class="col-sm-10">
-            <button type="submit" class="btn btn-default">Submit Customer</button>
+    <div class="row" style="margin-top:10px">
+        <div class="form-group"> 
+            <div class="col-sm-10">
+                <button type="submit" class="btn btn-default">Submit Customer</button>
+            </div>
         </div>
     </div>
     </form>
 </div>
 % if customer_id:
 <div class="your-form">
-    <div class="form-group ">
-    % for visit in visits:
-        <div class="col-sm-10">
-            {{visit.checkin}}, {{visit.checkout}}
-        </div>
-    % end
+    <div class="page_header">
+        <h3>Visits</h3>
     </div>
-    <form method="POST" action="/checkin" role="form" class="form_horizontal">
+    <div class="row">
         <div class="form-group ">
+        % for visit in visits:
             <div class="col-sm-10">
-                <input type="hidden" id="customer_id" name="customer_id" value="{{customer_id}}" />
-                <button type="submit" class="btn btn-default">Check In</button>
+                {{visit.checkin}}, {{visit.checkout}}
             </div>
+        % end
         </div>
-    </form>
+    </div>
+    <div class="row">
+        <form method="POST" action="/checkin" role="form" class="form_horizontal">
+            <div class="form-group ">
+                <div class="col-sm-10">
+                    <input type="hidden" id="customer_id" name="customer_id" value="{{customer_id}}" />
+                    <button type="submit" class="btn btn-default">Check In</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 % end
 </body>

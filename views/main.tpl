@@ -74,8 +74,11 @@ $(window).load(function()
           var i;
           for (i=0; i<data.length; i++)
           {
-            currVisitsHTML += '<p>';
-            currVisitsHTML += data[i].lastName + ": " + data[i].timeInStore;
+            currVisitsHTML += '<p><a href="/customer/' + data[i].familyId + '">';
+            currVisitsHTML += data[i].lastName + "</a>: " + data[i].timeInStore;
+            currVisitsHTML += '</p><p style="margin-bottom:15px"><a href="/checkout/' + data[i].visitId;
+            currVisitsHTML += '" role="button" class="btn btn-default">Checkout ';
+            currVisitsHTML += data[i].lastName + '</a>';
             currVisitsHTML += '</p>';
           }
           currentVisitsElem.innerHTML = currVisitsHTML;
