@@ -26,7 +26,7 @@ $(document).ready(function () {
 });
 
 function clone_field_list(selector) {
-    var new_element = $(selector).clone(true);
+    var new_element = $(selector).parent().clone(true);
     var elem_id = new_element.find(':input')[0].id;
     var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1')) + 1;
     new_element.find(':input').each(function() {
