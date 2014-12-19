@@ -38,7 +38,7 @@ class CheckoutForm(ModelForm):
     class Meta:
         datetime_format = '%m/%d/%Y'
         model = Visit
-        include = ['id']
+        include = ['id', 'family_id']
         field_args = {
             'id': {
                 'validators': [validators.InputRequired()]

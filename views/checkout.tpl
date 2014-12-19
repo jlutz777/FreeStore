@@ -48,7 +48,8 @@ function clone_field_list(selector) {
     <div class="form-group ">
         <label for="checkin" class="col-sm-2 control-label">Checkin</label>
         <div class="col-sm-10">
-            <input class="form-control" readonly id="checkin" name="checkin" type="text" value="{{form.checkin.data.strftime("%m/%d/%Y")}}">
+            <input class="form-control" readonly id="checkin" name="checkin" type="text" value="{{form.checkin.data.strftime("%m/%d/%Y")}}" />
+            <input type="hidden" id="family_id" name="family_id" value="{{visit.family.id}}" />
         </div>
         % get_field_errors(form.checkin)
     </div>

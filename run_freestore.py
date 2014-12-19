@@ -187,15 +187,35 @@ def visit(db):
 
 @app.route('/checkout/<visit_id>', method=['GET', 'POST'])
 def checkout(db, visit_id):
-    post_url = get_redirect_url() + "/" + visit_id
+    authorize()
 
-    visits = db.query(Visit).filter(Visit.id == visit_id)
-    if len(visits.all()) != 1:
-        return "Visit request bad"
-    form = CheckoutForm(obj=visits[0])
-    visit = visits[0]
+    form = CheckoutForm(bottle.request.POST)
+    post_url = get_redirect_url()
+    visit = None
 
-    return template('checkout', form=form, visit=visit, post_url=post_url)
+    if bottle.request.method == 'POST':
+        visit = Visit()
+        visit.fromForm(visit_id, form, db)
+
+        if form.validate():
+            # Need to save
+            #visit = db.merge(visit)
+            #db.commit()
+
+            return bottle.redirect(get_redirect_url("/"))
+    else:
+        visits = db.query(Visit).filter(Visit.id == visit_id)
+        if len(visits.all()) != 1:
+            return "Visit request bad"
+        form = CheckoutForm(obj=visits[0])
+        visit = visits[0]
+
+    checkoutDict = {}
+    checkoutDict["form"] = form
+    checkoutDict["visit"] = visit
+    checkoutDict["post_url"] = post_url
+
+    return template('checkout', **checkoutDict)
 
 
 # Login/logout pages
