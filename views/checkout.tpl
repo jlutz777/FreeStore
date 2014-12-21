@@ -26,7 +26,7 @@ $(document).ready(function () {
 });
 
 function clone_field_list(selector) {
-    var new_element = $(selector).clone(true);
+    var new_element = $(selector).parent().clone(true);
     var elem_id = new_element.find(':input')[0].id;
     var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1')) + 1;
     new_element.find(':input').each(function() {
@@ -44,15 +44,67 @@ function clone_field_list(selector) {
 </script>
 <div class="your-form">
     <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
+    <div class="page-header">
+    <h3>Checkout</h3>
+    </div>
+    <div class="row" style="margin-left:0px; margin-right:0px">
     Family email: {{visit.family.email}}
     <div class="form-group ">
-        <label for="checkin" class="col-sm-2 control-label">Checkin</label>
+        <label for="checkin" class="col-sm-2 control-label">Checkin Time</label>
         <div class="col-sm-10">
-            <input class="form-control" readonly id="checkin" name="checkin" type="text" value="{{form.checkin.data.strftime("%m/%d/%Y")}}" />
+            <input class="form-control" readonly id="checkin" name="checkin" type="text" value="{{form.checkin.data.strftime("%m/%d/%Y %H:%M:%S")}}" />
             <input type="hidden" id="family_id" name="family_id" value="{{visit.family.id}}" />
         </div>
         % get_field_errors(form.checkin)
     </div>
+    </div>
+    % shoppingitem_index = -1
+    % for shoppingitem in form.items:
+    % shoppingitem_index += 1
+    <div class="row" style="margin-left:0px; margin-right:0px">
+    <div class="form-group fieldset" data-toggle="fieldset" id="shoppingitem-fieldset">
+        Item
+    <div data-toggle="fieldset-entry">
+        <div class="form-group ">
+            <label for="items-{{shoppingitem_index}}-name" class="col-sm-2 control-label">Name</label>
+            <div class="col-sm-10">
+                % if shoppingitem["name"].data is not None:
+                <input class="form-control" id="items-{{shoppingitem_index}}-name" name="items-{{shoppingitem_index}}-name" type="text" value="{{shoppingitem["name"].data}}">
+                % else:
+                <input class="form-control" id="items-{{shoppingitem_index}}-name" name="items-{{shoppingitem_index}}-name" type="text" value="">
+                % end
+            </div>
+            % get_field_errors(shoppingitem["name"])
+        </div>
+        <div class="form-group ">
+            <label for="items-{{shoppingitem_index}}-category-id" class="col-sm-2 control-label">Category</label>
+            <div class="col-sm-10">
+                % if shoppingitem.category["id"].data is not None and not shoppingitem.category["id"].errors:
+                <input class="form-control" id="items-{{shoppingitem_index}}-category-id" name="items-{{shoppingitem_index}}-category-id" type="text" value="{{shoppingitem.category["id"].data}}">
+                % else:
+                <input class="form-control" id="items-{{shoppingitem_index}}-category-id" name="items-{{shoppingitem_index}}-category-id" type="text" value="">
+                % end
+            </div>
+            % get_field_errors(shoppingitem.category["id"])
+        </div>
+        <div class="form-group ">
+            <div class="col-sm-10">
+            % if shoppingitem["id"].data is not None:
+                <input class="form-control" id="items-{{shoppingitem_index}}-id" name="items-{{shoppingitem_index}}-id" type="hidden" value="{{shoppingitem["id"].data}}">
+            % else:
+                <input class="form-control" id="items-{{shoppingitem_index}}-id" name="items-{{shoppingitem_index}}-id" type="hidden" value="">
+            % end
+            </div>
+        </div>
+    </div>
+    <div class="form-group"> 
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="button" class="remove_button btn btn-danger" data-toggle="fieldset-remove-row">Remove</button>
+        </div>
+    </div>
+    </div>
+    </div>
+    % end
     <div class="form-group"> 
         <div class="col-sm-10">
             <button type="button" class="btn btn-success" id="add_another_button">Add Item</button>

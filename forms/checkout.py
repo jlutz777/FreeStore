@@ -23,8 +23,8 @@ class CategoryForm(ModelForm):
 
 class ShoppingItemForm(ModelForm):
     class Meta:
-        datetime_format = '%m/%d/%Y'
         model = ShoppingItem
+        include = ['id']
         field_args = {
             'name': {
                 'validators': [validators.Optional()]
@@ -36,7 +36,7 @@ class ShoppingItemForm(ModelForm):
 
 class CheckoutForm(ModelForm):
     class Meta:
-        datetime_format = '%m/%d/%Y'
+        datetime_format = '%m/%d/%Y %H:%M:%S'
         model = Visit
         include = ['id', 'family_id']
         field_args = {
