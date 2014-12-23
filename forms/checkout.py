@@ -1,4 +1,4 @@
-from wtforms import validators, FormField
+from wtforms import validators, FormField, SelectField
 from wtforms_alchemy import ModelForm, ModelFieldList
 
 from models import ShoppingItem, Visit, ShoppingCategory
@@ -8,7 +8,7 @@ class CategoryForm(ModelForm):
     class Meta:
         model = ShoppingCategory
         include = ['id']
-        field_args = {
+        '''field_args = {
             'id': {
                 'validators': [validators.InputRequired()]
             },
@@ -18,7 +18,7 @@ class CategoryForm(ModelForm):
             'dailyLimit': {
                 'validators': [validators.Optional()]
             }
-        }
+        }'''
 
 
 class ShoppingItemForm(ModelForm):
@@ -26,12 +26,16 @@ class ShoppingItemForm(ModelForm):
         model = ShoppingItem
         include = ['id']
         field_args = {
+            'id': {
+                'validators': [validators.Optional()]
+            },
             'name': {
                 'validators': [validators.Optional()]
             }
         }
 
-    category = FormField(CategoryForm)
+    #category = FormField(CategoryForm)
+    category = SelectField(u'Category', coerce=int)
 
 
 class CheckoutForm(ModelForm):
@@ -41,7 +45,7 @@ class CheckoutForm(ModelForm):
         include = ['id', 'family_id']
         field_args = {
             'id': {
-                'validators': [validators.InputRequired()]
+                'validators': [validators.Optional()]
             },
             'checkin': {
                 'validators': [validators.InputRequired()]

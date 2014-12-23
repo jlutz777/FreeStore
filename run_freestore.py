@@ -2,7 +2,7 @@ from gevent import monkey
 monkey.patch_all()
 
 import models.base
-from models import CustomerFamily, Dependent, Visit
+from models import CustomerFamily, Dependent, Visit, ShoppingCategory
 from forms.customer import CustomerForm
 from forms.checkout import CheckoutForm
 
@@ -181,8 +181,8 @@ def visit(db):
     db.add(visit)
     db.commit()
 
-    customer_url = get_redirect_url('customer/' + str(customer_id))
-    return bottle.redirect(customer_url)
+    main_url = get_redirect_url('')
+    return bottle.redirect(main_url)
 
 
 @app.route('/checkout/<visit_id>', method=['GET', 'POST'])
@@ -190,25 +190,37 @@ def checkout(db, visit_id):
     authorize()
 
     form = CheckoutForm(bottle.request.POST)
+    categoryChoices = [(s.id, s.name) for s in db.query(ShoppingCategory).order_by('name')]
+
+    for item in form.items:
+        item.category.choices = categoryChoices
+
     post_url = get_redirect_url()
-    visit = None
+
+    visits = db.query(Visit).filter(Visit.id == visit_id)
+    if len(visits.all()) != 1:
+        return "Visit request bad"
+    visit = visits[0]
 
     if bottle.request.method == 'POST':
-        visit = Visit()
         visit.fromForm(visit_id, form, db)
 
+        #TODO: editing a checkout ... right now it'll have a problem on the shopping items
         if form.validate():
-            # Need to save
-            #visit = db.merge(visit)
-            #db.commit()
+            # Why do I have to filter above instead of doing a merge here?
+            db.commit()
 
-            return bottle.redirect(get_redirect_url("/"))
+            return bottle.redirect(get_redirect_url(""))
+        else:
+            db.rollback()
     else:
-        visits = db.query(Visit).filter(Visit.id == visit_id)
-        if len(visits.all()) != 1:
-            return "Visit request bad"
-        form = CheckoutForm(obj=visits[0])
-        visit = visits[0]
+        form = CheckoutForm(obj=visit)
+        for item in form.items:
+            item.category.choices = categoryChoices
+
+    if len(form.items) == 0:
+        form.items.append_entry()
+        form.items[0].category.choices = categoryChoices
 
     checkoutDict = {}
     checkoutDict["form"] = form

@@ -19,7 +19,7 @@ $(document).ready(function () {
     $('.remove_button').click(function (e) {
         if ($('.remove_button').length > 1)
         {
-            var dependentGrandParent = $(e.target).parents("#dependent-fieldset");
+            var dependentGrandParent = $(e.target).parents("#shoppingitem-fieldset");
             dependentGrandParent.remove();
         }
     });
@@ -77,15 +77,25 @@ function clone_field_list(selector) {
             % get_field_errors(shoppingitem["name"])
         </div>
         <div class="form-group ">
-            <label for="items-{{shoppingitem_index}}-category-id" class="col-sm-2 control-label">Category</label>
+            <label for="items-{{shoppingitem_index}}-category" class="col-sm-2 control-label">Category</label>
             <div class="col-sm-10">
-                % if shoppingitem.category["id"].data is not None and not shoppingitem.category["id"].errors:
-                <input class="form-control" id="items-{{shoppingitem_index}}-category-id" name="items-{{shoppingitem_index}}-category-id" type="text" value="{{shoppingitem.category["id"].data}}">
+                % if shoppingitem.category.data is not None and not shoppingitem.category.errors:
+                <select class="form-control" id="items-{{shoppingitem_index}}-category" name="items-{{shoppingitem_index}}-category">
+                    % for option in shoppingitem["category"].choices:
+                    <option value="{{option.id}}">{{option.name}</option>
+                    % end
+                    # {{shoppingitem.category.data}}
+                </select>
                 % else:
-                <input class="form-control" id="items-{{shoppingitem_index}}-category-id" name="items-{{shoppingitem_index}}-category-id" type="text" value="">
+                <select class="form-control" id="items-{{shoppingitem_index}}-category" name="items-{{shoppingitem_index}}-category">
+                    % for option in shoppingitem["category"].choices:
+                    <option value="{{option[0]}}">{{option[1]}}</option>
+                    % end
+                    # {{shoppingitem.category.data}}
+                </select>
                 % end
             </div>
-            % get_field_errors(shoppingitem.category["id"])
+            % get_field_errors(shoppingitem.category)
         </div>
         <div class="form-group ">
             <div class="col-sm-10">

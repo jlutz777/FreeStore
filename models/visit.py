@@ -28,8 +28,8 @@ class Visit(base.Base):
         if (status == 'checkin'):
             self.checkin = datetime.now()
 
-    def fromForm(self, id, form, db):
-        self.id = id
+    def fromForm(self, visit_id, form, db):
+        self.id = visit_id
         self.checkin = form.checkin.data
         self.checkout = datetime.now()
 
@@ -42,5 +42,5 @@ class Visit(base.Base):
             item = ShoppingItem()
             item.id = formItem['id'].data
             item.name = formItem['name'].data
-            item.category_id = formItem['category_id'].data
+            item.category_id = formItem['category'].data
             self.items.append(item)
