@@ -10,7 +10,7 @@
 <body>
     <div class="container">
         <form action="login" method="post" name="Login" class="form-signin">
-            <h2 class="form-signin-heading">Please sign in</h2>
+            <h2 class="form-signin-heading">Free Store Customer Application</h2>
             <input name="username" type="text" class="input-block-level" placeholder="User name">
             <input name="password" type="password" class="input-block-level" placeholder="Password">
             <button class="btn btn-large btn-primary" type="submit">Sign in</button>
