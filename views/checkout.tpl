@@ -76,7 +76,7 @@ function rebuild_category_list()
         {
             catStr += " color:yellow;"
         }
-        else if (catLimitLeft == 0)
+        else if (catLimitLeft < 1)
         {
             catStr += " color:red;"
         }
