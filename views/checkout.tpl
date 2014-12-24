@@ -11,9 +11,19 @@
 <body>
 % get_menu()
 <script type="text/javascript">
+var categories = [];
+
+% category_index = -1
+% for cat in categoryChoices:
+% category_index += 1
+categories[{{category_index}}] = { id: '{{cat[0]}}', name: '{{cat[1]}}', dailyLimit: '{{cat[2]}}'};
+% end
+
 $(document).ready(function () {
     $('#add_another_button').click(function () {
         clone_field_list('.fieldset:last');
+        rebuild_category_list();
+        window.scrollTo(0,document.body.scrollHeight);
     });
     
     $('.remove_button').click(function (e) {
@@ -21,9 +31,61 @@ $(document).ready(function () {
         {
             var dependentGrandParent = $(e.target).parents("#shoppingitem-fieldset");
             dependentGrandParent.remove();
+            rebuild_category_list();
         }
     });
+
+    rebuild_category_list();
 });
+
+function rebuild_category_list()
+{
+    var catContainer = $('#cat-container')
+    catContainer.find(':not(.page-header)').remove();
+
+    var selectedItemCategories = {};
+    $('.shopping-item-category').each(function()
+        {
+            var itemIndex = $(this).val();
+            if (itemIndex in selectedItemCategories)
+            {
+                selectedItemCategories[itemIndex] += 1;
+            }
+            else
+            {
+                selectedItemCategories[itemIndex] = 1;
+            }
+        });
+
+    for(i=0; i<categories.length; i++)
+    {
+        var cat = categories[i];
+        var catUsed = 0;
+        if (cat.id in selectedItemCategories)
+        {
+            catUsed = selectedItemCategories[cat.id];
+        }
+        var catLimitLeft = cat.dailyLimit - catUsed;
+
+        if (catLimitLeft < 0)
+        {
+            alert("Over the limit on " + cat.name);
+        }
+        var catStr = '<div class="row" style="margin-left:0px; margin-right:0px;';
+        if (catLimitLeft == 1)
+        {
+            catStr += " color:yellow;"
+        }
+        else if (catLimitLeft == 0)
+        {
+            catStr += " color:red;"
+        }
+        catStr += '">';
+        catStr += cat.name + ': ' + catLimitLeft;
+        catStr += '</div>';
+        catContainer.append($(catStr));
+    }
+}
 
 function clone_field_list(selector) {
     var new_element = $(selector).parent().clone(true);
@@ -47,8 +109,32 @@ function clone_field_list(selector) {
     <div class="page-header">
     <h3>Checkout</h3>
     </div>
+    <div class="container">
+    <div class="container col-md-6">
+    <div class="page-header">
+    Family Information
+    </div>
+    % for dependent in visit.family.dependents:
     <div class="row" style="margin-left:0px; margin-right:0px">
-    Family email: {{visit.family.email}}
+    {{dependent.firstName}} {{dependent.lastName}}
+    </div>
+    % end
+    </div>
+    <div class="container col-md-6" id="cat-container">
+    <div class="page-header">
+    Available Categories:
+    </div>
+    % for cat in categoryChoices:
+    <div class="row" style="margin-left:0px; margin-right:0px">
+    {{cat[1]}}: {{cat[2]}}
+    </div>
+    % end
+    </div>
+    </div>
+    <div class="page-header">
+    This Visit
+    </div>
+    <div class="row" style="margin-left:0px; margin-right:0px">
     <div class="form-group ">
         <label for="checkin" class="col-sm-2 control-label">Checkin Time</label>
         <div class="col-sm-10">
@@ -80,18 +166,18 @@ function clone_field_list(selector) {
             <label for="items-{{shoppingitem_index}}-category" class="col-sm-2 control-label">Category</label>
             <div class="col-sm-10">
                 % if shoppingitem.category.data is not None and not shoppingitem.category.errors:
-                <select class="form-control" id="items-{{shoppingitem_index}}-category" name="items-{{shoppingitem_index}}-category">
-                    % for option in shoppingitem["category"].choices:
-                    <option value="{{option.id}}">{{option.name}</option>
-                    % end
-                    # {{shoppingitem.category.data}}
-                </select>
-                % else:
-                <select class="form-control" id="items-{{shoppingitem_index}}-category" name="items-{{shoppingitem_index}}-category">
+                <select class="form-control shopping-item-category" id="items-{{shoppingitem_index}}-category" name="items-{{shoppingitem_index}}-category" onchange="rebuild_category_list()">
                     % for option in shoppingitem["category"].choices:
                     <option value="{{option[0]}}">{{option[1]}}</option>
                     % end
+                    # TODO: category data needs to be selected
                     # {{shoppingitem.category.data}}
+                </select>
+                % else:
+                <select class="form-control shopping-item-category" id="items-{{shoppingitem_index}}-category" name="items-{{shoppingitem_index}}-category" onchange="rebuild_category_list()">
+                    % for option in shoppingitem["category"].choices:
+                    <option value="{{option[0]}}">{{option[1]}}</option>
+                    % end
                 </select>
                 % end
             </div>

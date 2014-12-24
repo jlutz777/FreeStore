@@ -24,7 +24,7 @@ class CustomerFamily(base.Base):
     state = Column('state', Unicode, default=unicode(''), nullable=False)
     zip = Column('zip', Unicode, default=unicode(''), nullable=False)
     datecreated = Column('datecreated', DateTime, nullable=False)
-    dependents = relationship("Dependent", backref="family")
+    dependents = relationship("Dependent", backref="family", order_by='Dependent.isPrimary.desc()')
     visits = relationship("Visit", backref="family")
 
     def fromForm(self, id, form):

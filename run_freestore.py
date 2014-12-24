@@ -190,7 +190,7 @@ def checkout(db, visit_id):
     authorize()
 
     form = CheckoutForm(bottle.request.POST)
-    categoryChoices = [(s.id, s.name) for s in db.query(ShoppingCategory).order_by('name')]
+    categoryChoices = [(s.id, s.name, s.dailyLimit) for s in db.query(ShoppingCategory).order_by('name')]
 
     for item in form.items:
         item.category.choices = categoryChoices
@@ -226,6 +226,7 @@ def checkout(db, visit_id):
     checkoutDict["form"] = form
     checkoutDict["visit"] = visit
     checkoutDict["post_url"] = post_url
+    checkoutDict["categoryChoices"] = categoryChoices
 
     return template('checkout', **checkoutDict)
 
