@@ -104,6 +104,12 @@ $(window).load(function()
     displayKey: 'fullName',
     source: customerSearch
   }).on('typeahead:selected', onSelected);
+
+  $('form input').keydown(function(evt){
+    if(evt.keyCode == 13) {
+      evt.preventDefault();
+    }
+  });
 });
 </script>
 <div id="hbox">
