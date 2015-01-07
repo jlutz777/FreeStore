@@ -15,8 +15,10 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    pass
+    op.add_column('shopping_item',
+                  sa.Column('quantity', sa.Integer))
 
 
 def downgrade():
-    pass
+    op.drop_column('shopping_item', 'quantity')
+

@@ -16,6 +16,6 @@ class ShoppingItem(base.Base):
 
     id = Column(Integer, primary_key=True)
     name = Column('name', Unicode)
-    quantity = Column('name', Integer)
+    quantity = Column('quantity', Integer)
     category_id = Column('category', Integer, ForeignKey(catId))
     visit_id = Column('visit', Integer, ForeignKey(visitId))
