@@ -28,19 +28,25 @@ class Visit(base.Base):
         if (status == 'checkin'):
             self.checkin = datetime.now()
 
-    def fromForm(self, visit_id, form, db):
+    def fromPost(self, visit_id, posted, categories, db):
         self.id = visit_id
-        self.checkin = form.checkin.data
+        self.checkin = posted["checkin"]
         self.checkout = datetime.now()
 
         customerQuery = db.query(CustomerFamily)
-        fam = customerQuery.filter(CustomerFamily.id == form.family_id.data)[0]
+        fam = customerQuery.filter(CustomerFamily.id == posted["family_id"])[0]
 
         self.family = fam
 
-        for formItem in form.items:
-            item = ShoppingItem()
-            item.id = formItem['id'].data
-            item.name = formItem['name'].data
-            item.category_id = formItem['category'].data
-            self.items.append(item)
+        for dependent in fam.dependents:
+            for category in categories:
+                itemKey = "row_" + str(dependent.id)
+                itemKey += "_col_" + str(category[0])
+                thisShoppingItem = posted.get(itemKey, "")
+                if thisShoppingItem != "" and thisShoppingItem != "0":
+                    item = ShoppingItem()
+                    # for editing:  item.id = ???
+                    item.category_id = category[0]
+                    item.dependent_id = dependent.id
+                    item.quantity = thisShoppingItem
+                    self.items.append(item)

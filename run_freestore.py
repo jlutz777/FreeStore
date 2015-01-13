@@ -2,9 +2,12 @@ from gevent import monkey
 monkey.patch_all()
 
 import models.base
-from models import CustomerFamily, Dependent, Visit, ShoppingCategory
+from models import CustomerFamily, Dependent, Visit
+from models import ShoppingCategory, ShoppingItem
 from forms.customer import CustomerForm
-from forms.checkout import CheckoutForm
+
+from sqlalchemy import select
+from sqlalchemy.sql import func
 
 import bottle
 from bottle import HTTPResponse, template, static_file, TEMPLATE_PATH
@@ -189,13 +192,9 @@ def visit(db):
 def checkout(db, visit_id):
     authorize()
 
-    form = CheckoutForm(bottle.request.POST)
-    categoryChoicesDL = [(s.id, s.name, s.dailyLimit) for s in db.query(ShoppingCategory).order_by('name')]
-    categoryChoices =  [(s.id, s.name) for s in db.query(ShoppingCategory).order_by('name')]
-
-    for item in form.items:
-        item.category.choices = categoryChoices
-
+    categoryChoices = [(s.id, s.name, s.dailyLimit, s.monthlyLimit,
+                       s.familyWideLimit) for s
+                       in db.query(ShoppingCategory).order_by('name')]
     post_url = get_redirect_url()
 
     visits = db.query(Visit).filter(Visit.id == visit_id)
@@ -203,31 +202,35 @@ def checkout(db, visit_id):
         return "Visit request bad"
     visit = visits[0]
 
-    if bottle.request.method == 'POST':
-        visit.fromForm(visit_id, form, db)
+    categoryTotals = select([ShoppingCategory.id, Dependent.id,
+                             func.sum(ShoppingItem.quantity)])\
+        .select_from(ShoppingItem.__table__
+                     .join(ShoppingCategory).join(Dependent))\
+        .where(Dependent.family_id == visit.family_id)\
+        .group_by(ShoppingCategory.id, Dependent.id)
+    reader = db.execute(categoryTotals)
+    categoryTotals = reader.fetchall()
+    for a, b, c in categoryTotals:
+        log.debug(str(a) + ":" + str(b) + ":" + str(c))
 
-        #TODO: editing a checkout ... right now it'll have a problem on the shopping items
-        if form.validate():
+    if bottle.request.method == 'POST':
+        visit.fromPost(visit_id, bottle.request.POST, categoryChoices, db)
+
+        #TODO: editing a checkout ... it has a problem on the shopping items
+        #TODO: need to validate the posted data somehow
+        if True:
             # Why do I have to filter above instead of doing a merge here?
             db.commit()
 
             return bottle.redirect(get_redirect_url(""))
         else:
             db.rollback()
-    else:
-        form = CheckoutForm(obj=visit)
-        for item in form.items:
-            item.category.choices = categoryChoices
-
-    if len(form.items) == 0:
-        form.items.append_entry()
-        form.items[0].category.choices = categoryChoices
 
     checkoutDict = {}
-    checkoutDict["form"] = form
     checkoutDict["visit"] = visit
     checkoutDict["post_url"] = post_url
-    checkoutDict["categoryChoices"] = categoryChoicesDL
+    checkoutDict["categoryChoices"] = categoryChoices
+    checkoutDict["categoryTotals"] = categoryTotals
 
     return template('checkout', **checkoutDict)
 
