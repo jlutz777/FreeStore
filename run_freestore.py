@@ -20,7 +20,7 @@ import os
 import json
 from bson import json_util
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 MODULEPATH = os.path.dirname(__file__)
 TEMPLATE_PATH.insert(0, os.path.join(MODULEPATH, "views"))
@@ -202,11 +202,15 @@ def checkout(db, visit_id):
         return "Visit request bad"
     visit = visits[0]
 
+    oneMonthAgo = datetime.utcnow() - timedelta(days=30)
+
     categoryTotals = select([ShoppingCategory.id, Dependent.id,
                              func.sum(ShoppingItem.quantity)])\
         .select_from(ShoppingItem.__table__
-                     .join(ShoppingCategory).join(Dependent))\
+                     .join(ShoppingCategory).join(Dependent)
+                     .join(Visit))\
         .where(Dependent.family_id == visit.family_id)\
+        .where(Visit.checkout > oneMonthAgo)\
         .group_by(ShoppingCategory.id, Dependent.id)
     reader = db.execute(categoryTotals)
     categoryTotals = reader.fetchall()

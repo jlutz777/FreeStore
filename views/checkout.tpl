@@ -3,6 +3,13 @@
 % get_field_errors = renders_namespace['get_field_errors']
 % get_menu = renders_namespace['get_menu']
 
+% from datetime import date
+
+% def calculateAge(born):
+%    today = date.today()
+%    return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+% end
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -75,6 +82,10 @@ function calculateLimits()
 
         if (isNaN(item_val))
         {
+            if ($(this).val() !== '')
+            {
+                $(this).val('');
+            }
             return;
         }
 
@@ -149,7 +160,7 @@ function calculateLimits()
             <tr>
                 % for dependent in visit.family.dependents:
                     % if dependent.isPrimary:
-                        <th>{{dependent.lastName}} Family</th>
+                        <th>{{dependent.lastName}} Family&nbsp;&nbsp;&nbsp;&nbsp;</th>
                         % break
                     % end
                 % end
@@ -159,7 +170,8 @@ function calculateLimits()
             </tr>
             % for dependent in visit.family.dependents:
             <tr>
-                <td>{{dependent.firstName}} ({{dependent.birthdate.strftime("%m/%d/%Y")}})</td>
+                % dependentAge = calculateAge(dependent.birthdate)
+                <td>{{dependent.firstName}} ({{dependentAge}})</td>
                 % for option in categoryChoices:
                 <td><input type="text" name="row_{{dependent.id}}_col_{{option[0]}}" onchange="calculateLimits()" class="shopping_item category_{{option[0]}}" value=""></input></td>
                 % end
