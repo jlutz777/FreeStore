@@ -6,7 +6,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta name="viewport" content="width=devuce-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta content="text/html; charset=utf-8" http-equiv="content-type">
 </head>
 <body>
@@ -41,6 +41,16 @@ function clone_field_list(selector) {
             return;
         var id = $(this).attr('id').replace('-' + (elem_num - 1) + '-', '-' + elem_num + '-');
         $(this).attr({'name': id, 'id': id}).val('').removeAttr('checked');
+        // Remove the old datepicker and re-add so it doesn't share with the cloned one
+        if (id.indexOf('-birthdate') != -1)
+        {
+            var elemWithoutDatepicker = $(this).clone(false);
+            $(this).replaceWith(elemWithoutDatepicker);
+            elemWithoutDatepicker.datepicker({
+                startDate: "01/01/1900",
+                endDate: "01/01/2100"
+            });
+        }
     });
     new_element.find('label').each(function() {
         var new_for = $(this).attr('for').replace('-' + (elem_num - 1) + '-', '-' + elem_num + '-');

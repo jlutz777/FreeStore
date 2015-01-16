@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="content-type">
-<meta name="viewport" content="width=devuce-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <link rel="stylesheet" href="/css/bootstrap.min.css">
 <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
