@@ -136,14 +136,20 @@ def customer(db, customer_id=None):
     post_url = get_redirect_url()
     visits = None
     if bottle.request.method == 'POST':
-        if form.validate():
-            family = CustomerFamily()
-            family.fromForm(customer_id, form)
-            family = db.merge(family)
-            db.commit()
+        family = None
+        try:
+            if form.validate():
+                family = CustomerFamily()
+                family.fromForm(customer_id, form)
+                family = db.merge(family)
+                db.commit()
 
-            customer_url = get_redirect_url('customer/' + str(family.id))
-            return bottle.redirect(customer_url)
+                customer_url = get_redirect_url('customer/' + str(family.id))
+                return bottle.redirect(customer_url)
+        except Exception, ex:
+            log.debug(ex)
+            db.rollback()
+            visits = family.visits
     elif customer_id is not None:
         customerQuery = db.query(CustomerFamily)
         fams = customerQuery.filter(CustomerFamily.id == customer_id)
@@ -151,6 +157,9 @@ def customer(db, customer_id=None):
             return "Customer request bad"
         form = CustomerForm(obj=fams[0])
         visits = fams[0].visits
+    else:
+        # Mark one of the two dependents as primary
+        form.dependents[0].isPrimary.data = True
 
     customerDict = {}
     customerDict['form'] = form

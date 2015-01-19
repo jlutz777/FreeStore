@@ -12,6 +12,7 @@
 <body>
 % get_menu()
 <script src="/js/bootstrap-datepicker.js"></script>
+<script src="/js/jquery.mask.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function () {
     $('#add_another_button').click(function () {
@@ -30,6 +31,9 @@ $(document).ready(function () {
         startDate: "01/01/1900",
         endDate: "01/01/2100"
     });
+
+    $('#phone').mask('(000) 000-0000');
+    $('#zip').mask('00000')
 });
 
 function clone_field_list(selector) {
@@ -61,24 +65,53 @@ function clone_field_list(selector) {
 </script>
 <div class="your-form">
     <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
+    % if form.errors:
+    <div class="page-header">
+    <h3>Correct The Errors Below!</h3>
+    </div>
+    % end
     <div class="page-header">
     <h3>Family Information</h3>
     </div>
     <div class="row">
-    <div class="form-group ">
-        <label for="email" class="col-sm-2 control-label">Email</label>
-        <div class="col-sm-10">
-            <input class="form-control" id="email" name="email" type="text" value="{{form.email.data}}">
+    % dependent_index = -1
+    % for dependent in form.dependents:
+    % dependent_index += 1
+    % if not dependent.isPrimary.data:
+    % continue
+    % end
+        <input class="form-control" id="dependents-{{dependent_index}}-isPrimary" name="dependents-{{dependent_index}}-isPrimary" type="hidden" value="True">
+        <div class="form-group ">
+            <label for="dependents-{{dependent_index}}-firstName" class="col-sm-2 control-label">Primary First Name</label>
+            <div class="col-sm-10">
+                <input class="form-control" id="dependents-{{dependent_index}}-firstName" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
+            </div>
+            % get_field_errors(dependent.firstName)
         </div>
-        % get_field_errors(form.email)
-    </div>
-    <div class="form-group ">
-        <label for="phone" class="col-sm-2 control-label">Phone</label>
-        <div class="col-sm-10">
-            <input class="form-control" id="phone" name="phone" type="text" value="{{form.phone.data}}">
+        <div class="form-group ">
+            <label for="dependents-{{dependent_index}}-lastName" class="col-sm-2 control-label">Primary Last Name</label>
+            <div class="col-sm-10">
+                <input class="form-control" id="dependents-{{dependent_index}}-lastName" name="dependents-{{dependent_index}}-lastName" type="text" value="{{dependent.lastName.data}}">
+            </div>
+            % get_field_errors(dependent.lastName)
         </div>
-        % get_field_errors(form.phone)
-    </div>
+        <div class="form-group ">
+            <label for="dependents-{{dependent_index}}-birthdate" class="col-sm-2 control-label">Primary Birthday</label>
+            <div class="col-sm-10">
+                % if dependent.birthdate.data is not None and not dependent.birthdate.errors:
+                <input class="form-control dependent-birthdate" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="{{dependent.birthdate.data.strftime("%m/%d/%Y")}}">
+                % else:
+                <input class="form-control dependent-birthdate" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="">
+                % end
+            </div>
+            % get_field_errors(dependent.birthdate)
+        </div>
+            % if dependent["id"].data is not None:
+                <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="{{dependent["id"].data}}">
+            % else:
+                <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="">
+            % end
+    % end
     <div class="form-group ">
         <label for="address" class="col-sm-2 control-label">Street Address</label>
         <div class="col-sm-10">
@@ -107,6 +140,20 @@ function clone_field_list(selector) {
         </div>
         % get_field_errors(form.zip)
     </div>
+    <div class="form-group ">
+        <label for="email" class="col-sm-2 control-label">Email</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="email" name="email" type="text" value="{{form.email.data}}">
+        </div>
+        % get_field_errors(form.email)
+    </div>
+    <div class="form-group ">
+        <label for="phone" class="col-sm-2 control-label">Phone</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="phone" name="phone" type="text" value="{{form.phone.data}}">
+        </div>
+        % get_field_errors(form.phone)
+    </div>
     % if form.datecreated.data is not None:
     <div class="form-group ">
         <label for="datecreated" class="col-sm-2 control-label">Date Created</label>
@@ -123,21 +170,14 @@ function clone_field_list(selector) {
     % dependent_index = -1
     % for dependent in form.dependents:
     % dependent_index += 1
+    % if dependent.isPrimary.data:
+    % continue
+    % end
     <div class="row" style="margin-left:0px; margin-right:0px">
     <div class="form-group fieldset" data-toggle="fieldset" id="dependent-fieldset">
         Dependent
     <div data-toggle="fieldset-entry">
-        <div class="form-group ">
-            <label for="dependents-{{dependent_index}}-isPrimary" class="col-sm-2 control-label">Primary</label>
-            <div class="col-sm-10">
-                <input
-                % if dependent.isPrimary.data:
-                checked
-                % end
-                class="form-control" id="dependents-{{dependent_index}}-isPrimary" name="dependents-{{dependent_index}}-isPrimary" type="checkbox" value="{{dependent.isPrimary.data}}">
-            </div>
-            % get_field_errors(dependent.isPrimary)
-        </div>
+        <input type="hidden" id="dependents-{{dependent_index}}-isPrimary" name="dependents-{{dependent_index}}-isPrimary" value="">
         <div class="form-group ">
             <label for="dependents-{{dependent_index}}-firstName" class="col-sm-2 control-label">First Name</label>
             <div class="col-sm-10">

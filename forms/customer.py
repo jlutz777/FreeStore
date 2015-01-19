@@ -14,13 +14,13 @@ class DependentForm(ModelForm):
                 'validators': [validators.Optional()]
             },
             'firstName': {
-                'validators': [validators.InputRequired()]
+                'validators': [validators.Optional()]
             },
             'lastName': {
-                'validators': [validators.InputRequired()]
+                'validators': [validators.Optional()]
             },
             'birthdate': {
-                'validators': [validators.InputRequired()]
+                'validators': [validators.Optional()]
             }
         }
 
@@ -47,4 +47,4 @@ class CustomerForm(ModelForm):
             }
         }
 
-    dependents = ModelFieldList(FormField(DependentForm), min_entries=1)
+    dependents = ModelFieldList(FormField(DependentForm), min_entries=2)

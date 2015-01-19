@@ -42,10 +42,36 @@ class CustomerFamily(base.Base):
         self.zip = form.zip.data
 
         for formDependent in form.dependents:
+            if not formDependent['isPrimary'].data and \
+                (formDependent['firstName'].data == '' and \
+                formDependent['lastName'].data == ''):
+                continue
+
+            missingData = False
+
             dependent = Dependent()
             dependent.id = formDependent['id'].data
             dependent.isPrimary = formDependent['isPrimary'].data
+
+            if formDependent['firstName'].data == '':
+                formDependent['firstName'].errors.append('First name is required')
+                form.errors['dependent_firstname'] = 'required'
+                missingData = True
             dependent.firstName = formDependent['firstName'].data
+
+            if formDependent['lastName'].data == '':
+                formDependent['lastName'].errors.append('Last name is required')
+                form.errors['dependent_lastname'] = 'required'
+                missingData = True
             dependent.lastName = formDependent['lastName'].data
+
+            if formDependent['birthdate'].data is None:
+                formDependent['birthdate'].errors.append('Birthday is required')
+                form.errors['dependent_birthdate'] = 'required'
+                missingData = True
             dependent.birthdate = formDependent['birthdate'].data
+
+            if missingData:
+                raise Exception('Dependent data needed')
+
             self.dependents.append(dependent)
