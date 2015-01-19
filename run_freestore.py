@@ -30,6 +30,7 @@ logging.basicConfig(format='localhost - - [%(asctime)s] %(message)s',
 log = logging.getLogger(__name__)
 
 postgresConn = os.environ.get("POSTGRES_CONN", "")
+sessionEncryptKey = os.environ.get("SESSION_KEY", "asdfghjkl")
 corkBackend = SqlAlchemyBackend(postgresConn, initialize=False)
 aaa = Cork(backend=corkBackend, email_sender='', smtp_url='')
 
@@ -39,7 +40,7 @@ app.install(dbPlugin)
 
 session_opts = {
     'session.cookie_expires': True,
-    'session.encrypt_key': 'ASD342sad856vsd',
+    'session.encrypt_key': sessionEncryptKey,
     'session.httponly': True,
     'session.timeout': 3600 * 24,  # 1 day
     'session.type': 'cookie',
