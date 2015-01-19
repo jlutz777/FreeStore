@@ -86,6 +86,9 @@ function calculateLimits()
             {
                 $(this).val('');
             }
+
+            $(this).removeClass("item_warning item_over_limit item_limit_reached");
+
             return;
         }
 
@@ -118,7 +121,10 @@ function calculateLimits()
 
             for (var this_dep_id in previousTotals[cat_id])
             {
-                latestTotal += previousTotals[cat_id][dep_id];
+                if(previousTotals[cat_id].hasOwnProperty(this_dep_id))
+                {
+                    latestTotal += previousTotals[cat_id][this_dep_id];
+                }
             }
         }
 
@@ -126,6 +132,7 @@ function calculateLimits()
 
         if (latestTotal > curr_cat.monthlyLimit || item_val > curr_cat.dailyLimit)
         {
+            $(this).val('');
             $(this).addClass("item_over_limit");
         }
         else if (latestTotal == curr_cat.monthlyLimit || item_val == curr_cat.dailyLimit)
