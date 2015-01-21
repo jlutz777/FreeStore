@@ -48,6 +48,9 @@ session_opts = {
 }
 sessionApp = SessionMiddleware(app, session_opts)
 
+# Put the cork object on the base template
+bottle.BaseTemplate.defaults['aaa'] = aaa
+
 # Utilities
 
 
@@ -224,8 +227,6 @@ def checkout(db, visit_id):
         .group_by(ShoppingCategory.id, Dependent.id)
     reader = db.execute(categoryTotals)
     categoryTotals = reader.fetchall()
-    for a, b, c in categoryTotals:
-        log.debug(str(a) + ":" + str(b) + ":" + str(c))
 
     if bottle.request.method == 'POST':
         visit.fromPost(visit_id, bottle.request.POST, categoryChoices, db)

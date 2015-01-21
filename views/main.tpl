@@ -53,6 +53,7 @@
 </head>
 <body>
 % get_menu()
+<script src="/js/typeahead.jquery.min.js"></script>
 <script type="text/javascript">
 var currentVisitsElem;
 

@@ -1,42 +1,64 @@
+% include renders
+% renders_namespace = _ 
+% get_field_errors = renders_namespace['get_field_errors']
+% get_menu = renders_namespace['get_menu']
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta content="text/html; charset=utf-8" http-equiv="content-type">
+</head>
+<body>
+% get_menu()
 <div id='main'>
     <h2>Cork - Administration page</h2>
-    <p>Welcome {{current_user.username}}, your role is: {{current_user.role}},
-    access time: {{current_user.session_accessed_time}}</p>
     <div id='commands'>
       <p>Create new user:</p>
       <form action="create_user" method="post">
           <p><label>Username</label> <input type="text" name="username" /></p>
           <p><label>Role</label> <input type="text" name="role" /></p>
           <p><label>Password</label> <input type="password" name="password" /></p>
-          <button type="submit" > OK </button>
-          <button type="button" class="close"> Cancel </button>
+          <div class="row">
+          <div class="form-group">
+          <div class="col-sm-2"><button type="submit" class="btn btn-default">OK</button></div>
+          <div class="col-sm-2"><button type="button" class="btn">Cancel</button></div>
+          </div>
+          </div>
       </form>
       <br />
       <p>Delete user:</p>
       <form action="delete_user" method="post">
           <p><label>Username</label> <input type="text" name="username" /></p>
-          <button type="submit" > OK </button>
-          <button type="button" class="close"> Cancel </button>
+          <div class="row">
+          <div class="form-group">
+          <div class="col-sm-2"><button type="submit" class="btn btn-default">OK</button></div>
+          <div class="col-sm-2"><button type="button" class="btn">Cancel</button></div>
+          </div>
+          </div>
       </form>
       <br />
       <p>Create new role:</p>
       <form action="create_role" method="post">
           <p><label>Role</label> <input type="text" name="role" /></p>
           <p><label>Level</label> <input type="text" name="level" /></p>
-          <button type="submit" > OK </button>
-          <button type="button" class="close"> Cancel </button>
+          <div class="row">
+          <div class="form-group">
+          <div class="col-sm-2"><button type="submit" class="btn btn-default">OK</button></div>
+          <div class="col-sm-2"><button type="button" class="btn">Cancel</button></div>
+          </div>
+          </div>
       </form>
       <br />
       <p>Delete role:</p>
       <form action="delete_role" method="post">
           <p><label>Role</label> <input type="text" name="role" /></p>
-          <button type="submit" > OK </button>
-          <button type="button" class="close"> Cancel </button>
+          <div class="row">
+          <div class="form-group">
+          <div class="col-sm-2"><button type="submit" class="btn btn-default">OK</button></div>
+          <div class="col-sm-2"><button type="button" class="btn">Cancel</button></div>
+          </div>
+          </div>
       </form>
     </div>
     <div id="users">
@@ -59,9 +81,6 @@
     <div class="clear"></div>
 
     <div id='status'><p>Ready.</p></div>
-    <div id="urls">
-      <a href="/">index</a> <a href="/logout">logout</a>
-    </div>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script>
         // Prevent form submission, send POST asynchronously and parse returned JSON
@@ -119,10 +138,6 @@ div#status {
     border-radius: 10px;
 }
 .clear { clear: both;}
-div#urls {
-  position:absolute;
-  top:0;
-  right:1em;
-}
 </style>
-
+</body>
+</html>
