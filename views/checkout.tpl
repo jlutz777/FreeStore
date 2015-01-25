@@ -18,19 +18,13 @@
 <style>
 .item_warning
 {
-    color: yellow;
+    background-color: orange;
     font-weight: normal;
 }
 
 .item_limit_reached
 {
-    color: orange;
-    font-weight: normal;
-}
-
-.item_over_limit
-{
-    color: red;
+    background-color: red;
     font-weight: normal;
 }
 </style>
@@ -167,20 +161,22 @@ function calculateLimits()
             <tr>
                 % for dependent in visit.family.dependents:
                     % if dependent.isPrimary:
-                        <th>{{dependent.lastName}} Family&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                        <th>{{dependent.lastName}} Household&nbsp;&nbsp;&nbsp;&nbsp;</th>
                         % break
                     % end
                 % end
+                <th style="text-align:center; width:30px;">Age</th>
                 % for option in categoryChoices:
-                <th>{{option[1]}}</th>
+                <th style="text-align:center; width:75px;">{{option[1]}}</th>
                 % end
             </tr>
             % for dependent in visit.family.dependents:
             <tr>
                 % dependentAge = calculateAge(dependent.birthdate)
-                <td>{{dependent.firstName}} ({{dependentAge}})</td>
+                <td>{{dependent.firstName}}</td>
+                <td style="text-align: center;">{{dependentAge}}</td>
                 % for option in categoryChoices:
-                <td><input type="text" name="row_{{dependent.id}}_col_{{option[0]}}" onchange="calculateLimits()" class="shopping_item category_{{option[0]}}" value=""></input></td>
+                <td style="text-align: center;"><input type="text" name="row_{{dependent.id}}_col_{{option[0]}}" onchange="calculateLimits()" maxlength="2" style="width:30px;" class="shopping_item category_{{option[0]}}" value=""></input></td>
                 % end
             </tr>
             % end
