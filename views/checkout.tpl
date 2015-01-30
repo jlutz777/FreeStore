@@ -62,8 +62,10 @@ $(document).ready(function () {
     });
 });
 
-function calculateLimits()
+function calculateLimits(e)
 {
+    var changedItem = null;
+
     $('.shopping_item').each(function()
     {
         var item_name = $(this)[0].name;
@@ -79,6 +81,7 @@ function calculateLimits()
             if ($(this).val() !== '')
             {
                 $(this).val('');
+                changedItem = $(this);
             }
 
             $(this).removeClass("item_warning item_over_limit item_limit_reached");
@@ -127,6 +130,7 @@ function calculateLimits()
         if (latestTotal > curr_cat.monthlyLimit || item_val > curr_cat.dailyLimit)
         {
             $(this).val('');
+            changedItem = $(this);
             $(this).addClass("item_over_limit");
         }
         else if (latestTotal == curr_cat.monthlyLimit || item_val == curr_cat.dailyLimit)
@@ -140,6 +144,13 @@ function calculateLimits()
     });
 
     alertLimitReached();
+
+    setTimeout(function () {
+        if (changedItem != null)
+        {
+            changedItem.focus();
+        }    
+    }, 10);
 }
 </script>
 <div class="your-form">
@@ -165,7 +176,7 @@ function calculateLimits()
                         % break
                     % end
                 % end
-                <th style="text-align:center; width:30px;">Age</th>
+                <th style="text-align:center; width:30px;">&nbsp;&nbsp;Age&nbsp;&nbsp;</th>
                 % for option in categoryChoices:
                 <th style="text-align:center; width:75px;">{{option[1]}}</th>
                 % end

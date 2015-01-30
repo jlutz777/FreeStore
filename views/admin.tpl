@@ -11,8 +11,10 @@
 </head>
 <body>
 % get_menu()
+<div class="page-header">
+    <h3>Administration</h3>
+</div>
 <div id='main'>
-    <h2>Cork - Administration page</h2>
     <div id='commands'>
       <p>Create new user:</p>
       <form action="create_user" method="post">

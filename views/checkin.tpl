@@ -55,8 +55,6 @@
 % get_menu()
 <script src="/js/typeahead.jquery.min.js"></script>
 <script type="text/javascript">
-var currentVisitsElem;
-
 var customerSearch = function(q, cb) {
    return $.post('/customersearch', { 'searchTerm': q}, function(data)
    {
@@ -66,30 +64,6 @@ var customerSearch = function(q, cb) {
 
 $(window).load(function()
 {
-  currentVisitsElem = document.getElementById('currentVisits');
-
-  function getCurrentVisits()
-  {
-     $.get('/currentVisits', function(data)
-      {
-          var currVisitsHTML = '';
-          var i;
-          for (i=0; i<data.length; i++)
-          {
-            currVisitsHTML += '<p><a href="/customer/' + data[i].familyId + '">';
-            currVisitsHTML += data[i].lastName + "</a>: " + data[i].timeInStore;
-            currVisitsHTML += '</p><p style="margin-bottom:15px"><a href="/checkout/' + data[i].visitId;
-            currVisitsHTML += '" role="button" class="btn btn-default">Checkout ';
-            currVisitsHTML += data[i].lastName + '</a>';
-            currVisitsHTML += '</p>';
-          }
-          currentVisitsElem.innerHTML = currVisitsHTML;
-      });
-  }
-
-  getCurrentVisits();
-  setInterval(getCurrentVisits, 10000);
-
   function onSelected(e,d)
   {
     window.location = '/customer/' + d.family_id;
@@ -113,9 +87,11 @@ $(window).load(function()
   });
 });
 </script>
+<div class="page-header">
+    <h3>Search for Customer</h3>
+</div>
 <div id="hbox">
   <div class="box">
-      <h2>Search for Customer</h2>
       <form action="customersearch" method="post" name="customersearch">
         <div id="the-basics">
           <input class="typeahead" type="text" id="customername" name="customername" />
@@ -125,8 +101,6 @@ $(window).load(function()
       <br />
   </div>
   <br style="clear: left;" />
-  <div id="currentVisits">
-  </div>
 </div>
 </body>
 </html>

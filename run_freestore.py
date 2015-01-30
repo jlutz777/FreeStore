@@ -10,7 +10,8 @@ from sqlalchemy import select
 from sqlalchemy.sql import func
 
 import bottle
-from bottle import HTTPResponse, template, static_file, TEMPLATE_PATH
+from bottle import HTTPResponse, HTTPError, template
+from bottle import static_file, TEMPLATE_PATH
 from bottle.ext import sqlalchemy
 from cork import Cork
 from cork.backends import SqlAlchemyBackend
@@ -50,6 +51,7 @@ sessionApp = SessionMiddleware(app, session_opts)
 
 # Put the cork object on the base template
 bottle.BaseTemplate.defaults['aaa'] = aaa
+bottle.BaseTemplate.defaults['page'] = ''
 
 # Utilities
 
@@ -102,10 +104,12 @@ def authorize(fail_redirect='login', role='user'):
 
 
 @app.route('/')
-def main(db):
+def checkout_search(db):
     authorize()
 
-    return template('main', currentVisits=currentVisits)
+    bottle.BaseTemplate.defaults['page'] = '/'
+
+    return template('checkout_search', currentVisits=currentVisits)
 
 
 @app.route('/currentVisits')
@@ -122,6 +126,7 @@ def currentVisits(db):
                 thisVisit["familyId"] = visit.family.id
                 thisVisit["visitId"] = visit.id
                 thisVisit["lastName"] = dependent.lastName
+                thisVisit["firstName"] = dependent.firstName
                 thisVisit["timeInStore"] = timeInStore
                 currentVisitsArray.append(thisVisit)
                 break
@@ -135,6 +140,8 @@ def currentVisits(db):
 def customer(db, customer_id=None):
     authorize()
 
+    bottle.BaseTemplate.defaults['page'] = '/customer'
+
     form = CustomerForm(bottle.request.POST)
     post_url = get_redirect_url()
     visits = None
@@ -145,10 +152,14 @@ def customer(db, customer_id=None):
                 family = CustomerFamily()
                 family.fromForm(customer_id, form)
                 family = db.merge(family)
-                db.commit()
-
+                db.flush()
                 customer_url = get_redirect_url('customer/' + str(family.id))
+                db.commit()
                 return bottle.redirect(customer_url)
+        except HTTPResponse, hres:
+            raise hres
+        except HTTPError, herr:
+            raise herr
         except Exception, ex:
             log.debug(ex)
             db.rollback()
@@ -178,13 +189,23 @@ def customersearch(db):
     authorize()
 
     searchTerm = "%" + post_get('searchTerm') + "%"
-    deps = db.query(Dependent).filter(Dependent.lastName.like(searchTerm))
+    deps = db.query(Dependent).filter(Dependent.isPrimary)\
+        .filter(Dependent.lastName.like(searchTerm))
     depDict = []
     for dep in deps:
         depDict.append(dep.getDict())
     jsonInfo = json.dumps(depDict, default=json_util.default)
     return HTTPResponse(jsonInfo, status=200,
                         header={'Content-Type': 'application/json'})
+
+
+@app.route('/checkin', method=['GET'])
+def checkin(db):
+    authorize()
+
+    bottle.BaseTemplate.defaults['page'] = '/checkin'
+
+    return template('checkin')
 
 
 @app.route('/checkin', method=['POST'])
@@ -197,17 +218,19 @@ def visit(db):
     db.add(visit)
     db.commit()
 
-    main_url = get_redirect_url('')
-    return bottle.redirect(main_url)
+    checkout_url = get_redirect_url('')
+    return bottle.redirect(checkout_url)
 
 
 @app.route('/checkout/<visit_id>', method=['GET', 'POST'])
 def checkout(db, visit_id):
     authorize()
 
+    bottle.BaseTemplate.defaults['page'] = ''
+
     categoryChoices = [(s.id, s.name, s.dailyLimit, s.monthlyLimit,
                        s.familyWideLimit) for s
-                       in db.query(ShoppingCategory).order_by('name')]
+                       in db.query(ShoppingCategory).order_by('"order"')]
     post_url = get_redirect_url()
 
     visits = db.query(Visit).filter(Visit.id == visit_id)
@@ -318,10 +341,12 @@ def sorry_page():
 # Admin pages
 
 @app.get('/admin')
-@bottle.view('admin_page')
+@bottle.view('admin')
 def admin():
     """Only admin users can see this"""
     authorize(fail_redirect='sorry_page', role='admin')
+
+    bottle.BaseTemplate.defaults['page'] = '/admin'
 
     adminDict = {}
     adminDict["current_user"] = aaa.current_user

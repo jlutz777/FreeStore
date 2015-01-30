@@ -13,14 +13,29 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/">Twice Blessed</a>
+      <!--<a class="navbar-brand" href="/">Twice Blessed</a>-->
     </div>
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="/customer">Registration <span class="sr-only">(current)</span></a></li>
+        % isCheckin = ""
+        % isCustomer = ""
+        % isCheckoutSearch = ""
+        % isAdmin = ""
+        % if page == "/":
+        % isCheckoutSearch = "active"
+        % elif page == "/checkin":
+        % isCheckin = "active"
+        % elif page == "/customer":
+        % isCustomer = "active"
+        % elif page == "/admin":
+        % isAdmin = "active"
+        % end
+        <li class="{{isCheckin}}"><a href="/checkin">Check In</a>
+        <li class="{{isCustomer}}"><a href="/customer">Registration</a></li>
+        <li class="{{isCheckoutSearch}}"><a href="/">Check Out</a>
         % if aaa.current_user.role == 'admin':
-        <li><a href="/admin">Admin</a></li>
+        <li class="{{isAdmin}}"><a href="/admin">Admin</a></li>
         % end
       </ul>
       <ul class="nav navbar-nav navbar-right">

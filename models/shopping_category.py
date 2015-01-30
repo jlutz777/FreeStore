@@ -17,4 +17,5 @@ class ShoppingCategory(base.Base):
     dailyLimit = Column('daily_limit', Integer)
     monthlyLimit = Column('monthly_limit', Integer)
     familyWideLimit = Column('family_wide', Boolean)
+    order = Column('order', Integer)
     items = relationship("ShoppingItem", backref="category")
