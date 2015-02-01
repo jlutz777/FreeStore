@@ -71,7 +71,7 @@ function clone_field_list(selector) {
     </div>
     % end
     <div class="page-header">
-    <h3>Family Information</h3>
+    <h3>Primary Household Member</h3>
     </div>
     <div class="row">
     % dependent_index = -1
@@ -82,21 +82,21 @@ function clone_field_list(selector) {
     % end
         <input class="form-control" id="dependents-{{dependent_index}}-isPrimary" name="dependents-{{dependent_index}}-isPrimary" type="hidden" value="True">
         <div class="form-group ">
-            <label for="dependents-{{dependent_index}}-firstName" class="col-sm-2 control-label">Primary First Name</label>
+            <label for="dependents-{{dependent_index}}-firstName" class="col-sm-2 control-label">First Name</label>
             <div class="col-sm-10">
                 <input class="form-control" id="dependents-{{dependent_index}}-firstName" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
             </div>
             % get_field_errors(dependent.firstName)
         </div>
         <div class="form-group ">
-            <label for="dependents-{{dependent_index}}-lastName" class="col-sm-2 control-label">Primary Last Name</label>
+            <label for="dependents-{{dependent_index}}-lastName" class="col-sm-2 control-label">Last Name</label>
             <div class="col-sm-10">
                 <input class="form-control" id="dependents-{{dependent_index}}-lastName" name="dependents-{{dependent_index}}-lastName" type="text" value="{{dependent.lastName.data}}">
             </div>
             % get_field_errors(dependent.lastName)
         </div>
         <div class="form-group ">
-            <label for="dependents-{{dependent_index}}-birthdate" class="col-sm-2 control-label">Primary Birthday</label>
+            <label for="dependents-{{dependent_index}}-birthdate" class="col-sm-2 control-label">Birthday</label>
             <div class="col-sm-10">
                 % if dependent.birthdate.data is not None and not dependent.birthdate.errors:
                 <input class="form-control dependent-birthdate" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="{{dependent.birthdate.data.strftime("%m/%d/%Y")}}">
@@ -165,7 +165,7 @@ function clone_field_list(selector) {
     % end
     </div>
     <div class="page-header">
-    <h3>Dependents</h3>
+    <h3>Household Members</h3>
     </div>
     % dependent_index = -1
     % for dependent in form.dependents:
@@ -175,7 +175,7 @@ function clone_field_list(selector) {
     % end
     <div class="row" style="margin-left:0px; margin-right:0px">
     <div class="form-group fieldset" data-toggle="fieldset" id="dependent-fieldset">
-        Dependent
+        Household Member
     <div data-toggle="fieldset-entry">
         <input type="hidden" id="dependents-{{dependent_index}}-isPrimary" name="dependents-{{dependent_index}}-isPrimary" value="">
         <div class="form-group ">
@@ -224,7 +224,7 @@ function clone_field_list(selector) {
     <div class="row">
         <div class="form-group"> 
             <div class="col-sm-10">
-                <button type="button" class="btn btn-success" id="add_another_button">Add Dependent</button>
+                <button type="button" class="btn btn-success" id="add_another_button">Add Household Member</button>
             </div>
         </div>
     </div>

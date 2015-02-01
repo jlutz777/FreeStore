@@ -58,7 +58,12 @@ function alertLimitReached()
 
 $(document).ready(function () {
     $('form').submit(function() {
-        return !alertLimitReached();
+        var continueSubmit = !alertLimitReached();
+        if (continueSubmit)
+        {
+            continueSubmit = confirm("Are you sure you want to check out?");
+        }
+        return continueSubmit;
     });
 });
 
@@ -160,9 +165,10 @@ function calculateLimits(e)
     </div>
     <div class="row" style="margin-left:0px; margin-right:0px">
     <div class="form-group ">
-        <label for="checkin" class="col-sm-2 control-label">Checkin Time</label>
+        <label class="col-sm-2 control-label">Checkin Time</label>
         <div class="col-sm-10">
-            <input class="form-control" readonly id="checkin" name="checkin" type="text" value="{{visit.checkin.strftime("%m/%d/%Y %H:%M:%S")}}" />
+            <label>{{visit.checkin.strftime("%I:%M:%S %p")}} ({{timeInStore}} in store)</label>
+            <input type="hidden" id="checkin" name="checkin" type="text" value="{{visit.checkin.strftime("%m/%d/%Y %H:%M:%S")}}" />
             <input type="hidden" id="family_id" name="family_id" value="{{visit.family.id}}" />
         </div>
     </div>
@@ -181,13 +187,19 @@ function calculateLimits(e)
                 <th style="text-align:center; width:75px;">{{option[1]}}</th>
                 % end
             </tr>
+            % depIndex = -1
             % for dependent in visit.family.dependents:
+            % depIndex += 1
             <tr>
                 % dependentAge = calculateAge(dependent.birthdate)
                 <td>{{dependent.firstName}}</td>
                 <td style="text-align: center;">{{dependentAge}}</td>
                 % for option in categoryChoices:
-                <td style="text-align: center;"><input type="text" name="row_{{dependent.id}}_col_{{option[0]}}" onchange="calculateLimits()" maxlength="2" style="width:30px;" class="shopping_item category_{{option[0]}}" value=""></input></td>
+                <td style="text-align: center;">
+                % if not option[4] or depIndex == 0:
+                <input type="text" name="row_{{dependent.id}}_col_{{option[0]}}" onchange="calculateLimits()" maxlength="2" style="width:30px;" class="shopping_item category_{{option[0]}}" value=""></input>
+                % end
+                </td>
                 % end
             </tr>
             % end

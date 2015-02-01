@@ -269,6 +269,8 @@ def checkout(db, visit_id):
     checkoutDict["post_url"] = post_url
     checkoutDict["categoryChoices"] = categoryChoices
     checkoutDict["categoryTotals"] = categoryTotals
+    timeInStore = td_format(datetime.now()-visit.checkin)
+    checkoutDict["timeInStore"] = timeInStore
 
     return template('checkout', **checkoutDict)
 
