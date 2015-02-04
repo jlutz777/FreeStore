@@ -26,8 +26,8 @@ $(document).ready(function () {
         }
     });
 
-    $('#phone').mask('(000) 000-0000');
-    $('#zip').mask('00000');
+    $('#phone').mask('(000) 000-0000', {clearIfNotMatch: true, placeholder: "(XXX) XXX-XXXX"});
+    $('#zip').mask('00000', {clearIfNotMatch: true, placeholder: "XXXXX"});
     $('.dependent-birthdate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/dd/YYYY"});
 });
 
