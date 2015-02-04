@@ -11,7 +11,6 @@
 </head>
 <body>
 % get_menu()
-<script src="/js/bootstrap-datepicker.js"></script>
 <script src="/js/jquery.mask.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function () {
@@ -27,13 +26,9 @@ $(document).ready(function () {
         }
     });
 
-    $('.dependent-birthdate').datepicker({
-        startDate: "01/01/1900",
-        endDate: "01/01/2100"
-    });
-
     $('#phone').mask('(000) 000-0000');
-    $('#zip').mask('00000')
+    $('#zip').mask('00000');
+    $('.dependent-birthdate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/dd/YYYY"});
 });
 
 function clone_field_list(selector) {
@@ -48,12 +43,9 @@ function clone_field_list(selector) {
         // Remove the old datepicker and re-add so it doesn't share with the cloned one
         if (id.indexOf('-birthdate') != -1)
         {
-            var elemWithoutDatepicker = $(this).clone(false);
-            $(this).replaceWith(elemWithoutDatepicker);
-            elemWithoutDatepicker.datepicker({
-                startDate: "01/01/1900",
-                endDate: "01/01/2100"
-            });
+            var elemWithoutMask = $(this).clone(false);
+            $(this).replaceWith(elemWithoutMask);
+            elemWithoutMask.mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/dd/YYYY"});
         }
     });
     new_element.find('label').each(function() {
@@ -127,11 +119,12 @@ function clone_field_list(selector) {
         % get_field_errors(form.city)
     </div>
     <div class="form-group ">
-        <label for="state" class="col-sm-2 control-label">State</label>
+        <!--<label for="state" class="col-sm-2 control-label">State</label>
         <div class="col-sm-10">
             <input class="form-control" id="state" name="state" required type="text" value="{{form.state.data}}">
-        </div>
-        % get_field_errors(form.state)
+        </div>-->
+        <input id="state" name="state" type="hidden" value="Ohio">
+        % #get_field_errors(form.state)
     </div>
     <div class="form-group ">
         <label for="zip" class="col-sm-2 control-label">Zip</label>

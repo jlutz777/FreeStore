@@ -3,6 +3,20 @@
 <link rel="stylesheet" href="/css/bootstrap.min.css">
 <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
 <script src="/js/bootstrap.min.js"></script>
+<style>
+.navbar-default .navbar-nav>.active>a
+{
+    background-color: rgb(0, 88, 110);
+    color: #FDFDFD;
+    background-image:inherit;
+}
+.navbar-default .navbar-nav>.active>a:hover
+{
+    background-color: rgb(0, 78, 100);
+    color: #FDFDFD;
+    background-image:inherit;
+}
+</style>
 <nav class="navbar navbar-default" role="navigation">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->

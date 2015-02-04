@@ -196,8 +196,10 @@ function calculateLimits(e)
                 <td style="text-align: center;">{{dependentAge}}</td>
                 % for option in categoryChoices:
                 <td style="text-align: center;">
+                % if (option[5] is None or dependentAge >= option[5]) and (option[6] is None or dependentAge <= option[6]):
                 % if not option[4] or depIndex == 0:
                 <input type="text" name="row_{{dependent.id}}_col_{{option[0]}}" onchange="calculateLimits()" maxlength="2" style="width:30px;" class="shopping_item category_{{option[0]}}" value=""></input>
+                % end
                 % end
                 </td>
                 % end

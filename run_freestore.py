@@ -8,6 +8,7 @@ from forms.customer import CustomerForm
 
 from sqlalchemy import select
 from sqlalchemy.sql import func
+from sqlalchemy.sql.expression import false
 
 import bottle
 from bottle import HTTPResponse, HTTPError, template
@@ -82,6 +83,9 @@ def td_format(td_object):
                 strings.append("%s %s" % (period_value, period_name))
             else:
                 strings.append("%s %ss" % (period_value, period_name))
+
+    if len(strings) == 0:
+        strings.append("Less than one minute")
 
     return ", ".join(strings)
 
@@ -229,8 +233,10 @@ def checkout(db, visit_id):
     bottle.BaseTemplate.defaults['page'] = ''
 
     categoryChoices = [(s.id, s.name, s.dailyLimit, s.monthlyLimit,
-                       s.familyWideLimit) for s
-                       in db.query(ShoppingCategory).order_by('"order"')]
+                       s.familyWideLimit, s.minAge, s.maxAge) for s
+                       in db.query(ShoppingCategory)
+                       .filter(ShoppingCategory.disabled == false())
+                       .order_by('"order"')]
     post_url = get_redirect_url()
 
     visits = db.query(Visit).filter(Visit.id == visit_id)
