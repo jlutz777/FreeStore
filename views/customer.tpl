@@ -236,13 +236,27 @@ function clone_field_list(selector) {
         <h3>Visits</h3>
     </div>
     <div class="row">
+        <form method="POST" action="/checkin" role="form" class="form_horizontal">
+            <div class="form-group ">
+                <div class="col-sm-10">
+                    <input type="hidden" id="customer_id" name="customer_id" value="{{customer_id}}" />
+                    <button type="submit" class="btn btn-default">Check In</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="row">
         <div class="form-group ">
         <div class="row" style="margin-left:0px; margin-right:0px">
+        <div class="col-sm-2"><span style="font-weight:bold"></span></div>
         <div class="col-sm-2"><span style="font-weight:bold">Checkin</span></div>
         <div class="col-sm-2"><span style="font-weight:bold">Checkout</span></div>
         </div>
         % for visit in visits:
             <div class="row" style="margin-left:0px; margin-right:0px">
+            <div class="col-sm-2">
+                <a href="{{visit_url_root}}/{{visit.id}}">Visit</a>
+            </div>
             <div class="col-sm-2">
                 {{visit.checkin.strftime("%m/%d/%Y %H:%M")}}
             </div>
@@ -258,16 +272,6 @@ function clone_field_list(selector) {
             </div>
         % end
         </div>
-    </div>
-    <div class="row">
-        <form method="POST" action="/checkin" role="form" class="form_horizontal">
-            <div class="form-group ">
-                <div class="col-sm-10">
-                    <input type="hidden" id="customer_id" name="customer_id" value="{{customer_id}}" />
-                    <button type="submit" class="btn btn-default">Check In</button>
-                </div>
-            </div>
-        </form>
     </div>
 </div>
 % end

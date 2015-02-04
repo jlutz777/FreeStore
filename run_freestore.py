@@ -148,6 +148,7 @@ def customer(db, customer_id=None):
 
     form = CustomerForm(bottle.request.POST)
     post_url = get_redirect_url()
+    visit_url_root = get_redirect_url('checkout')
     visits = None
     if bottle.request.method == 'POST':
         family = None
@@ -184,6 +185,7 @@ def customer(db, customer_id=None):
     customerDict['customer_id'] = customer_id
     customerDict['visits'] = visits
     customerDict['post_url'] = post_url
+    customerDict['visit_url_root'] = visit_url_root
 
     return template('customer', **customerDict)
 
@@ -231,6 +233,7 @@ def checkout(db, visit_id):
     authorize()
 
     bottle.BaseTemplate.defaults['page'] = ''
+    previousShoppingItems = {}
 
     categoryChoices = [(s.id, s.name, s.dailyLimit, s.monthlyLimit,
                        s.familyWideLimit, s.minAge, s.maxAge) for s
@@ -253,6 +256,7 @@ def checkout(db, visit_id):
                      .join(Visit))\
         .where(Dependent.family_id == visit.family_id)\
         .where(Visit.checkout > oneMonthAgo)\
+        .where(Visit.id != visit.id)\
         .group_by(ShoppingCategory.id, Dependent.id)
     reader = db.execute(categoryTotals)
     categoryTotals = reader.fetchall()
@@ -260,7 +264,6 @@ def checkout(db, visit_id):
     if bottle.request.method == 'POST':
         visit.fromPost(visit_id, bottle.request.POST, categoryChoices, db)
 
-        #TODO: editing a checkout ... it has a problem on the shopping items
         #TODO: need to validate the posted data somehow
         if True:
             # Why do I have to filter above instead of doing a merge here?
@@ -269,12 +272,16 @@ def checkout(db, visit_id):
             return bottle.redirect(get_redirect_url(""))
         else:
             db.rollback()
+    else:
+        # Get the shopping items
+        previousShoppingItems = visit.getShoppingItemsDict()
 
     checkoutDict = {}
     checkoutDict["visit"] = visit
     checkoutDict["post_url"] = post_url
     checkoutDict["categoryChoices"] = categoryChoices
     checkoutDict["categoryTotals"] = categoryTotals
+    checkoutDict["previousShoppingItems"] = previousShoppingItems
     timeInStore = td_format(datetime.now()-visit.checkin)
     checkoutDict["timeInStore"] = timeInStore
 

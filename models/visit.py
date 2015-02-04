@@ -38,6 +38,10 @@ class Visit(base.Base):
 
         self.family = fam
 
+        items = self.items
+        for item in items:
+            self.items.remove(item)
+
         for dependent in fam.dependents:
             for category in categories:
                 itemKey = "row_" + str(dependent.id)
@@ -50,3 +54,13 @@ class Visit(base.Base):
                     item.dependent_id = dependent.id
                     item.quantity = thisShoppingItem
                     self.items.append(item)
+
+    def getShoppingItemsDict(self):
+        itemsDict = {}
+
+        for item in self.items:
+            itemKey = "row_" + str(item.dependent_id)
+            itemKey += "_col_" + str(item.category_id)
+            itemsDict[itemKey] = str(item.quantity)
+
+        return itemsDict

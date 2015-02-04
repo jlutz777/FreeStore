@@ -65,6 +65,8 @@ $(document).ready(function () {
         }
         return continueSubmit;
     });
+
+    calculateLimits();
 });
 
 function calculateLimits(e)
@@ -196,10 +198,14 @@ function calculateLimits(e)
                 <td style="text-align: center;">{{dependentAge}}</td>
                 % for option in categoryChoices:
                 <td style="text-align: center;">
+                % inputName = "row_" + str(dependent.id) + "_col_" + str(option[0])
                 % if (option[5] is None or dependentAge >= option[5]) and (option[6] is None or dependentAge <= option[6]):
                 % if not option[4] or depIndex == 0:
-                <input type="text" name="row_{{dependent.id}}_col_{{option[0]}}" onchange="calculateLimits()" maxlength="2" style="width:30px;" class="shopping_item category_{{option[0]}}" value=""></input>
+                <input type="text" name="{{inputName}}" onchange="calculateLimits()" maxlength="2" style="width:30px;" class="shopping_item category_{{option[0]}}" value="{{previousShoppingItems.get(inputName, '')}}"></input>
                 % end
+                % else:
+                {{previousShoppingItems.get(inputName, '')}}
+                <input type="hidden" name="{{inputName}}" value="{{previousShoppingItems.get(inputName, '')}}"></input>
                 % end
                 </td>
                 % end
