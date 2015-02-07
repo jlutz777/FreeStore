@@ -28,7 +28,7 @@ $(document).ready(function () {
 
     $('#phone').mask('(000) 000-0000', {clearIfNotMatch: true, placeholder: "(XXX) XXX-XXXX"});
     $('#zip').mask('00000', {clearIfNotMatch: true, placeholder: "XXXXX"});
-    $('.dependent-birthdate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/dd/YYYY"});
+    $('.dependent-birthdate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
 });
 
 function clone_field_list(selector) {
@@ -45,7 +45,7 @@ function clone_field_list(selector) {
         {
             var elemWithoutMask = $(this).clone(false);
             $(this).replaceWith(elemWithoutMask);
-            elemWithoutMask.mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/dd/YYYY"});
+            elemWithoutMask.mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
         }
     });
     new_element.find('label').each(function() {
