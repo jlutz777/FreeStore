@@ -54,7 +54,8 @@ sessionApp = SessionMiddleware(app, session_opts)
 bottle.BaseTemplate.defaults['aaa'] = aaa
 bottle.BaseTemplate.defaults['page'] = ''
 
-# Utilities
+
+# Section: Utilities
 
 
 def postd():
@@ -104,7 +105,8 @@ def authorize(fail_redirect='login', role='user'):
     full_fail_redirect = get_redirect_url(fail_redirect)
     aaa.require(fail_redirect=full_fail_redirect, role=role)
 
-# App Pages
+
+# Section: App Pages
 
 
 @app.route('/')
@@ -288,7 +290,8 @@ def checkout(db, visit_id):
     return template('checkout', **checkoutDict)
 
 
-# Login/logout pages
+# Section: Login/logout pages
+
 
 @app.get('/login')
 @bottle.view('login_form')
@@ -317,7 +320,7 @@ def logout():
     aaa.logout(success_redirect=login_url)
 
 
-# General and Static pages
+# Section: General and Static pages
 
 @app.route('/js/<filename>', 'GET')
 def js_static(filename):
@@ -353,7 +356,8 @@ def sorry_page():
     return '<p>Sorry, you are not authorized to perform this action</p>'
 
 
-# Admin pages
+# Section: Admin pages
+
 
 @app.get('/admin')
 @bottle.view('admin')
@@ -415,21 +419,24 @@ def delete_role():
     except Exception, e:
         return dict(ok=False, msg=e.message)
 
-# Setup stuff
-# def setupDB():
-#     corkBackend.roles.insert({'role': 'admin', 'level': 100})
-#     corkBackend.roles.insert({'role': 'user', 'level': 50})
-#
-#     corkBackend.users.insert({
-#             "username": "admin",
-#             "email_addr": "admin@localhost.local",
-#             "desc": "admin test user",
-#             "role": "admin",
-#             "hash": "cLzRnzbEwehP6ZzTREh3A4MXJyNo+TV8Hs4//EEbPbiDoo+dmNg22f2RJC282aSwgyWv/O6s3h42qrA6iHx8yfw=",
-#             "creation_date": "2012-10-28 20:50:26.286723",
-#             "last_login": "2012-10-28 20:50:26.286723"
-#         })
-#     assert len(corkBackend.roles) == 2
-#     assert len(corkBackend.users) == 1
 
-#setupDB()
+# Section: Report pages
+
+
+@app.get('/report')
+@bottle.view('vega')
+def report_landing():
+    authorize(fail_redirect='sorry_page', role='admin')
+    
+    return {}
+
+
+@app.get('/report/1')
+@bottle.view('vega')
+def example_report():
+    authorize(fail_redirect='sorry_page', role='admin')
+    
+    import vincent
+    list_data = [10,20,30,40,50]
+    bar = vincent.Bar(list_data)
+    return bar.to_json()
