@@ -198,7 +198,9 @@ def customersearch(db):
 
     searchTerm = "%" + post_get('searchTerm') + "%"
     deps = db.query(Dependent).filter(Dependent.isPrimary)\
-        .filter(Dependent.lastName.like(searchTerm))
+        .filter(func.concat(Dependent.firstName, ' ', Dependent.lastName)
+                .ilike(searchTerm))
+
     depDict = []
     for dep in deps:
         depDict.append(dep.getDict())
