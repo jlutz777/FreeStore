@@ -81,9 +81,9 @@ function calculateLimits(e)
         var dep_id = parseInt(temp[0], 10);
         var cat_id = parseInt(temp[1], 10);
         
-        var item_val = parseInt($(this).val(), 10);
+        var item_val = Number($(this).val());
 
-        if (isNaN(item_val))
+        if (isNaN(item_val) || item_val === 0)
         {
             if ($(this).val() !== '')
             {
