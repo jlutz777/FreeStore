@@ -24,7 +24,8 @@ class CustomerFamily(base.Base):
     state = Column('state', Unicode, default=unicode(''), nullable=False)
     zip = Column('zip', Unicode, default=unicode(''), nullable=False)
     datecreated = Column('datecreated', DateTime, nullable=False)
-    dependents = relationship("Dependent", backref="family", order_by='Dependent.isPrimary.desc()')
+    depOrder = 'Dependent.isPrimary.desc()'
+    dependents = relationship("Dependent", backref="family", order_by=depOrder)
     visits = relationship("Visit", backref="family")
 
     def fromForm(self, id, form):
@@ -43,35 +44,35 @@ class CustomerFamily(base.Base):
 
         for formDependent in form.dependents:
             if not formDependent['isPrimary'].data and \
-                (formDependent['firstName'].data == '' and \
-                formDependent['lastName'].data == ''):
+                (formDependent['firstName'].data == '' and
+                 formDependent['lastName'].data == ''):
                 continue
 
-            missingData = False
+            formError = ''
 
             dependent = Dependent()
             dependent.id = formDependent['id'].data
             dependent.isPrimary = formDependent['isPrimary'].data
 
             if formDependent['firstName'].data == '':
-                formDependent['firstName'].errors.append('First name is required')
+                formError = 'First name is required'
+                formDependent['firstName'].errors.append(formError)
                 form.errors['dependent_firstname'] = 'required'
-                missingData = True
             dependent.firstName = formDependent['firstName'].data
 
             if formDependent['lastName'].data == '':
-                formDependent['lastName'].errors.append('Last name is required')
+                formError = 'Last name is required'
+                formDependent['lastName'].errors.append(formError)
                 form.errors['dependent_lastname'] = 'required'
-                missingData = True
             dependent.lastName = formDependent['lastName'].data
 
             if formDependent['birthdate'].data is None:
-                formDependent['birthdate'].errors.append('Birthday is required')
+                formError = 'Birthday is required'
+                formDependent['birthdate'].errors.append(formError)
                 form.errors['dependent_birthdate'] = 'required'
-                missingData = True
             dependent.birthdate = formDependent['birthdate'].data
 
-            if missingData:
+            if formError != '':
                 raise Exception('Dependent data needed')
 
             self.dependents.append(dependent)
