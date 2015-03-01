@@ -62,6 +62,18 @@ function clone_field_list(selector) {
     <h3>Correct The Errors Below!</h3>
     </div>
     % end
+    % if customer_id:
+    <div class="row">
+        <form method="POST" action="/checkin" role="form" class="form_horizontal">
+            <div class="form-group ">
+                <div class="col-sm-10">
+                    <input type="hidden" id="customer_id" name="customer_id" value="{{customer_id}}" />
+                    <button type="submit" class="btn btn-default">Check In</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    % end
     <div class="page-header">
     <h3>Primary Household Member</h3>
     </div>
@@ -234,16 +246,6 @@ function clone_field_list(selector) {
 <div class="your-form">
     <div class="page_header">
         <h3>Visits</h3>
-    </div>
-    <div class="row">
-        <form method="POST" action="/checkin" role="form" class="form_horizontal">
-            <div class="form-group ">
-                <div class="col-sm-10">
-                    <input type="hidden" id="customer_id" name="customer_id" value="{{customer_id}}" />
-                    <button type="submit" class="btn btn-default">Check In</button>
-                </div>
-            </div>
-        </form>
     </div>
     <div class="row">
         <div class="form-group ">
