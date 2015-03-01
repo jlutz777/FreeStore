@@ -159,10 +159,20 @@ def customer(db, customer_id=None):
                 family = CustomerFamily()
                 family.fromForm(customer_id, form)
                 family = db.merge(family)
+
                 db.flush()
-                customer_url = get_redirect_url('customer/' + str(family.id))
+
+                if customer_id is None:
+                    visit = Visit()
+                    visit.setStatus(status='checkin', family_id=family.id)
+                    db.add(visit)
+                    next_url = get_redirect_url('checkin')
+                else:
+                    next_url = get_redirect_url('customer/' + str(family.id))
+
                 db.commit()
-                return bottle.redirect(customer_url)
+
+                return bottle.redirect(next_url)
         except HTTPResponse, hres:
             raise hres
         except HTTPError, herr:
@@ -228,7 +238,7 @@ def visit(db):
     db.add(visit)
     db.commit()
 
-    checkout_url = get_redirect_url('')
+    checkout_url = get_redirect_url('checkin')
     return bottle.redirect(checkout_url)
 
 
