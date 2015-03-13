@@ -464,20 +464,30 @@ def report_landing():
 def example_report(db):
     authorize(fail_redirect='sorry_page', role='admin')
 
-    families = select([CustomerFamily.datecreated])\
+    import pandas as pd
+    families = select([func.DATE(CustomerFamily.datecreated), func.count()])\
         .select_from(CustomerFamily.__table__)\
-        .order_by(CustomerFamily.datecreated)
-    reader = db.execute(families)
-    familyData = reader.fetchall()
+        .group_by(func.DATE(CustomerFamily.datecreated))\
+        .order_by(func.DATE(CustomerFamily.datecreated))
 
-    from pandas import DataFrame
-    df = DataFrame(familyData)
-    df.columns = reader.keys()
+    reader = db.execute(families)
+    categoryTotals = reader.fetchall()
+
+    # Loop through and keep a running total to show the increase over time
+    columns = ["date", "count"]
+    results = []
+    prevVal = 0
+    
+    for row in categoryTotals:
+        prevVal = prevVal + row[1]
+        results.append(dict(zip(columns, [row[0], prevVal])))
+    
+    frame = pd.DataFrame().from_records(results, index="date", columns=["date", "count"])
 
     import vincent
-    data = vincent.Data.from_pandas(df)
-    #list_data = [10, 20, 30, 40, 50]
-    #bar = vincent.Bar(list_data)
-    line = vincent.Line(data)
-    line.axis_titles(x='Index', y='Value')
-    return line.to_json()
+    vis = vincent.Line(frame)
+    vis.scales[0].type = 'time'
+    vis.axis_titles(x='Date', y='Customers')
+    vis.legend(title='Customer Count Over Time')
+    
+    return vis.to_json()
