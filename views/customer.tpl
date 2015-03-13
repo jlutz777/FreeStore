@@ -76,7 +76,6 @@ function clone_field_list(selector) {
 }
 </script>
 <div class="your-form">
-    <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
     % if form.errors:
     <div class="page-header">
     <h3 style="color:red">Correct The Errors Below!</h3>
@@ -103,6 +102,7 @@ function clone_field_list(selector) {
     </div>
     % end
     % end
+    <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
     <div class="page-header">
     <h3>Primary Household Member</h3>
     </div>
@@ -308,3 +308,4 @@ function clone_field_list(selector) {
 % end
 </body>
 </html>
+
