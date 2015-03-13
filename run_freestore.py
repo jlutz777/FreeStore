@@ -125,17 +125,18 @@ def currentVisits(db):
     currentVisits = db.query(Visit).filter(Visit.checkout == None)
     currentVisitsArray = []
     for visit in currentVisits:
-        for dependent in visit.family.dependents:
-            if dependent.isPrimary:
-                thisVisit = {}
-                timeInStore = td_format(datetime.now()-visit.checkin)
-                thisVisit["familyId"] = visit.family.id
-                thisVisit["visitId"] = visit.id
-                thisVisit["lastName"] = dependent.lastName
-                thisVisit["firstName"] = dependent.firstName
-                thisVisit["timeInStore"] = timeInStore
-                currentVisitsArray.append(thisVisit)
-                break
+        if visit.family is not None:
+            for dependent in visit.family.dependents:
+                if dependent.isPrimary:
+                    thisVisit = {}
+                    timeInStore = td_format(datetime.now()-visit.checkin)
+                    thisVisit["familyId"] = visit.family.id
+                    thisVisit["visitId"] = visit.id
+                    thisVisit["lastName"] = dependent.lastName
+                    thisVisit["firstName"] = dependent.firstName
+                    thisVisit["timeInStore"] = timeInStore
+                    currentVisitsArray.append(thisVisit)
+                    break
     jsonInfo = json.dumps(currentVisitsArray, default=json_util.default)
     return HTTPResponse(jsonInfo, status=200,
                         header={'Content-Type': 'application/json'})
