@@ -14,16 +14,36 @@
 <script src="/js/jquery.mask.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function () {
-    $('#add_another_button').click(function () {
+    $('#add_another_button').click(function ()
+    {
         clone_field_list('.fieldset:last');
     });
     
-    $('.remove_button').click(function (e) {
+    $('.remove_button').click(function (e)
+    {
         if ($('.remove_button').length > 1)
         {
             var dependentGrandParent = $(e.target).parents("#dependent-fieldset");
             dependentGrandParent.remove();
         }
+    });
+
+    $('#delete_button').click(function (e)
+    {
+        var continueSubmit = confirm("Are you sure you want to delete this customer?");
+        
+        if (continueSubmit)
+        {
+            $.ajax({url: '{{post_url}}',
+                type: 'DELETE',
+                success: function(result)
+                {
+                    // TODO: delete with errors
+                    window.location.href = '{{checkin_url}}';
+                }
+               });
+        }
+        e.preventDefault();
     });
 
     $('#phone').mask('(000) 000-0000', {clearIfNotMatch: true, placeholder: "(XXX) XXX-XXXX"});
@@ -59,7 +79,7 @@ function clone_field_list(selector) {
     <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
     % if form.errors:
     <div class="page-header">
-    <h3>Correct The Errors Below!</h3>
+    <h3 style="color:red">Correct The Errors Below!</h3>
     </div>
     % end
     % if customer_id:
@@ -73,6 +93,15 @@ function clone_field_list(selector) {
             </div>
         </form>
     </div>
+    % if aaa.current_user.role == 'admin':
+    <div class="row">
+        <div class="form-group ">
+            <div class="col-sm-10">
+                <button class="btn btn-default" id="delete_button">Delete</button>
+            </div>
+        </div>
+    </div>
+    % end
     % end
     <div class="page-header">
     <h3>Primary Household Member</h3>

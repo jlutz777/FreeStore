@@ -151,6 +151,7 @@ def customer(db, customer_id=None):
     form = CustomerForm(bottle.request.POST)
     post_url = get_redirect_url()
     visit_url_root = get_redirect_url('checkout')
+    checkin_url = get_redirect_url('checkin')
     visits = None
     if bottle.request.method == 'POST':
         family = None
@@ -197,6 +198,7 @@ def customer(db, customer_id=None):
     customerDict['customer_id'] = customer_id
     customerDict['visits'] = visits
     customerDict['post_url'] = post_url
+    customerDict['checkin_url'] = checkin_url
     customerDict['visit_url_root'] = visit_url_root
 
     return template('customer', **customerDict)
@@ -213,7 +215,8 @@ def customersearch(db):
 
     depDict = []
     for dep in deps:
-        depDict.append(dep.getDict())
+        if dep.family_id is not None:
+            depDict.append(dep.getDict())
     jsonInfo = json.dumps(depDict, default=json_util.default)
     return HTTPResponse(jsonInfo, status=200,
                         header={'Content-Type': 'application/json'})
@@ -432,6 +435,18 @@ def delete_role():
         return dict(ok=False, msg=e.message)
 
 
+@app.route('/customer/<customer_id>', method=['DELETE'])
+def delete_customer(db, customer_id):
+    authorize(fail_redirect='sorry_page', role='admin')
+
+    try:
+        customer = db.query(CustomerFamily).filter(CustomerFamily.id == customer_id)[0]
+        db.delete(customer)
+        db.commit()
+        return dict(ok=True, msg='')
+    except Exception, e:
+        return dict(ok=False, msg=e.message)
+
 # Section: Report pages
 
 
@@ -439,16 +454,28 @@ def delete_role():
 @bottle.view('vega')
 def report_landing():
     authorize(fail_redirect='sorry_page', role='admin')
-    
+
     return {}
 
 
 @app.get('/report/1')
-@bottle.view('vega')
-def example_report():
+def example_report(db):
     authorize(fail_redirect='sorry_page', role='admin')
-    
+
+    families = select([CustomerFamily.datecreated])\
+        .select_from(CustomerFamily.__table__)\
+        .order_by(CustomerFamily.datecreated)
+    reader = db.execute(families)
+    familyData = reader.fetchall()
+
+    from pandas import DataFrame
+    df = DataFrame(familyData)
+    df.columns = reader.keys()
+
     import vincent
-    list_data = [10,20,30,40,50]
-    bar = vincent.Bar(list_data)
-    return bar.to_json()
+    data = vincent.Data.from_pandas(df)
+    #list_data = [10, 20, 30, 40, 50]
+    #bar = vincent.Bar(list_data)
+    line = vincent.Line(data)
+    line.axis_titles(x='Index', y='Value')
+    return line.to_json()

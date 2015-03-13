@@ -14,6 +14,6 @@
 function parse(spec) {
   vg.parse.spec(spec, function(chart) { chart({el:"#vis"}).update(); });
 }
-parse("/report/1", "bar")
+parse("/report/1", "line")
 </script>
 </html>
