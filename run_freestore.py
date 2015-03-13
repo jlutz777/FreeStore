@@ -370,7 +370,9 @@ def css_static(filename):
 @app.route('/sorry_page')
 def sorry_page():
     """Serve sorry page"""
-    return '<p>Sorry, you are not authorized to perform this action</p>'
+    sorryMsg = '<p>Sorry, you are not authorized to perform this action</p>'
+    sorryMsg += '<p><a href="/login">Login Here</a></p>'
+    return sorryMsg
 
 
 # Section: Admin pages
