@@ -70,6 +70,11 @@ class CustomerFamily(base.Base):
                 formError = 'Birthday is required'
                 formDependent['birthdate'].errors.append(formError)
                 form.errors['dependent_birthdate'] = 'required'
+            if formDependent['birthdate'].data < datetime(1900, 1, 1):
+                formError = 'Birthday must be after 1900'
+                formDependent['birthdate'].errors.append(formError)
+                form.errors['dependent_birthdate'] = 'required'
+                formDependent['birthdate'].data = None
             dependent.birthdate = formDependent['birthdate'].data
 
             if formError != '':
