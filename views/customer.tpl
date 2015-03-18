@@ -188,6 +188,17 @@ function clone_field_list(selector) {
         </div>
         % get_field_errors(form.phone)
     </div>
+    <div class="form-group ">
+        <label for="comments" class="col-sm-2 control-label">Comments</label>
+        <div class="col-sm-10">
+            % if form.comments.data is not None and not form.comments.errors:
+            <input class="form-control" id="comments" name="comments" type="text" value="{{form.comments.data}}">
+            % else:
+            <input class="form-control" id="comments" name="comments" type="text" value="">
+            % end
+        </div>
+        % get_field_errors(form.comments)
+    </div>
     % if form.datecreated.data is not None:
     <div class="form-group ">
         <label for="datecreated" class="col-sm-2 control-label">Date Created</label>
