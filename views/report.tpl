@@ -20,9 +20,13 @@
   </body>
 <script type="text/javascript">
 // parse a spec and create a visualization view
-function parse(spec) {
-  vg.parse.spec(spec, function(chart) { chart({el:"#vis"}).update(); });
+function parse(spec)
+{
+    vg.parse.spec(spec, function(chart){ chart({el:"#vis"}).update(); });
 }
-parse("/report/1", "line")
+$.ajax({ url: "/report/info/1", success: function() {
+    parse("/report/graphdata/1", "line");  
+} });
+
 </script>
 </html>

@@ -12,7 +12,7 @@ from sqlalchemy.sql.expression import false
 
 import bottle
 from bottle import HTTPResponse, HTTPError, template
-from bottle import static_file, TEMPLATE_PATH
+from bottle import static_file, TEMPLATE_PATH, hook
 from bottle.ext import sqlalchemy
 from cork import Cork
 from cork.backends import SqlAlchemyBackend
@@ -47,6 +47,7 @@ session_opts = {
     'session.timeout': 3600 * 24,  # 1 day
     'session.type': 'cookie',
     'session.validate_key': True,
+    'session.auto': True
 }
 sessionApp = SessionMiddleware(app, session_opts)
 
@@ -104,6 +105,11 @@ def get_redirect_url(relative_path=None):
 def authorize(fail_redirect='login', role='user'):
     full_fail_redirect = get_redirect_url(fail_redirect)
     aaa.require(fail_redirect=full_fail_redirect, role=role)
+
+
+@hook('before_request')
+def setup_request():
+    bottle.request.session = bottle.request.environ['beaker.session']
 
 
 # Section: App Pages
@@ -311,7 +317,7 @@ def checkout(db, visit_id):
 
 
 @app.get('/login')
-@bottle.view('login_form')
+@bottle.view('login')
 def login_form():
     """Serve login form"""
     return {}
@@ -465,11 +471,8 @@ def report_landing():
     return {}
 
 
-@app.get('/report/1')
-def example_report(db):
-    authorize(fail_redirect='sorry_page', role='admin')
-
-    import pandas as pd
+@app.get('/report/info/<report_num>')
+def report_info(db, report_num):
     families = select([func.DATE(CustomerFamily.datecreated), func.count()])\
         .select_from(CustomerFamily.__table__)\
         .group_by(func.DATE(CustomerFamily.datecreated))\
@@ -478,21 +481,32 @@ def example_report(db):
     reader = db.execute(families)
     categoryTotals = reader.fetchall()
 
+    bottle.request.session['report_info'] = categoryTotals
+    return {}
+
+
+@app.get('/report/graphdata/<report_num>')
+def report_graph_data(db, report_num):
+    authorize(fail_redirect='sorry_page', role='admin')
+
+    categoryTotals = bottle.request.session['report_info']
     # Loop through and keep a running total to show the increase over time
     columns = ["date", "count"]
     results = []
     prevVal = 0
-    
+
     for row in categoryTotals:
         prevVal = prevVal + row[1]
         results.append(dict(zip(columns, [row[0], prevVal])))
-    
-    frame = pd.DataFrame().from_records(results, index="date", columns=["date", "count"])
+
+    import pandas as pd
+    frame = pd.DataFrame().from_records(results, index="date",
+                                        columns=["date", "count"])
 
     import vincent
     vis = vincent.Line(frame)
     vis.scales[0].type = 'time'
     vis.axis_titles(x='Date', y='Customers')
     vis.legend(title='Customer Count Over Time')
-    
+
     return vis.to_json()
