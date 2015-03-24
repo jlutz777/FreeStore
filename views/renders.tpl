@@ -36,6 +36,7 @@
         % isCustomer = ""
         % isCheckoutSearch = ""
         % isAdmin = ""
+        % isReport = ""
         % if page == "/":
         % isCheckoutSearch = "active"
         % elif page == "/checkin":
@@ -44,12 +45,15 @@
         % isCustomer = "active"
         % elif page == "/admin":
         % isAdmin = "active"
+        % elif page == "/report":
+        % isReport = "active"
         % end
         <li class="{{isCheckin}}"><a href="/checkin">Check In</a>
         <li class="{{isCustomer}}"><a href="/customer">Registration</a></li>
         <li class="{{isCheckoutSearch}}"><a href="/">Check Out</a>
         % if aaa.current_user.role == 'admin':
         <li class="{{isAdmin}}"><a href="/admin">Admin</a></li>
+        <li class="{{isReport}}"><a href="/report">Reports</a></li>
         % end
       </ul>
       <ul class="nav navbar-nav navbar-right">

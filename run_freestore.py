@@ -97,7 +97,6 @@ def get_redirect_url(relative_path=None):
     if relative_path is None:
         relative_path = '/'.join(splitted[3:])
     https_url = 'https://' + splitted[2] + '/' + relative_path
-    
 
     return https_url
 
@@ -445,7 +444,8 @@ def delete_customer(db, customer_id):
     authorize(fail_redirect='sorry_page', role='admin')
 
     try:
-        customer = db.query(CustomerFamily).filter(CustomerFamily.id == customer_id)[0]
+        customer = db.query(CustomerFamily).\
+            filter(CustomerFamily.id == customer_id)[0]
         db.delete(customer)
         db.commit()
         return dict(ok=True, msg='')
@@ -456,9 +456,11 @@ def delete_customer(db, customer_id):
 
 
 @app.get('/report')
-@bottle.view('vega')
+@bottle.view('report')
 def report_landing():
     authorize(fail_redirect='sorry_page', role='admin')
+
+    bottle.BaseTemplate.defaults['page'] = '/report'
 
     return {}
 
