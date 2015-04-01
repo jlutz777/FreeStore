@@ -117,7 +117,7 @@ function clone_field_list(selector) {
         <div class="form-group ">
             <label for="dependents-{{dependent_index}}-firstName" class="col-sm-2 control-label">First Name</label>
             <div class="col-sm-10">
-                <input class="form-control" id="dependents-{{dependent_index}}-firstName" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
+                <input autofocus class="form-control" id="dependents-{{dependent_index}}-firstName" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
             </div>
             % get_field_errors(dependent.firstName)
         </div>

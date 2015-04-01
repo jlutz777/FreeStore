@@ -94,7 +94,7 @@ $(window).load(function()
   <div class="box">
       <form action="customersearch" method="post" name="customersearch">
         <div id="the-basics">
-          <input class="typeahead" type="text" id="customername" name="customername" />
+          <input autofocus class="typeahead" type="text" id="customername" name="customername" />
         </div>
           <button type="submit" >OK</button>
       </form>
