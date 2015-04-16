@@ -1,28 +1,29 @@
 from gevent import monkey
 monkey.patch_all()
 
+from forms.customer import CustomerForm
 import models.base
 from models import CustomerFamily, Dependent, Visit
 from models import ShoppingCategory, ShoppingItem
-from forms.customer import CustomerForm
 
 from sqlalchemy import select
 from sqlalchemy.sql import func
 from sqlalchemy.sql.expression import false
 
+from beaker.middleware import SessionMiddleware
 import bottle
 from bottle import HTTPResponse, HTTPError, template
 from bottle import static_file, TEMPLATE_PATH, hook
 from bottle.ext import sqlalchemy
 from cork import Cork
 from cork.backends import SqlAlchemyBackend
-from beaker.middleware import SessionMiddleware
 
-import os
-import json
 from bson import json_util
-import logging
 from datetime import datetime, timedelta, date
+import json
+import logging
+from operator import itemgetter
+import os
 
 MODULEPATH = os.path.dirname(__file__)
 TEMPLATE_PATH.insert(0, os.path.join(MODULEPATH, "views"))
@@ -129,6 +130,7 @@ def currentVisits(db):
     authorize()
 
     currentVisits = db.query(Visit).filter(Visit.checkout == None)
+
     currentVisitsArray = []
     for visit in currentVisits:
         if visit.family is not None:
@@ -143,6 +145,9 @@ def currentVisits(db):
                     thisVisit["timeInStore"] = timeInStore
                     currentVisitsArray.append(thisVisit)
                     break
+
+    currentVisitsArray = sorted(currentVisitsArray, key=itemgetter("lastName"))
+
     jsonInfo = json.dumps(currentVisitsArray, default=json_util.default)
     return HTTPResponse(jsonInfo, status=200,
                         header={'Content-Type': 'application/json'})

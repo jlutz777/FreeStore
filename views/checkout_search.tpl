@@ -10,6 +10,13 @@
 </head>
 <body>
 % get_menu()
+<style>
+  a.customer
+  {
+      color: rgb(0, 78, 110);
+      font-weight: bold;
+  }
+</style>
 <script type="text/javascript">
 var currentVisitsElem;
 
@@ -25,7 +32,7 @@ $(window).load(function()
           var i;
           for (i=0; i<data.length; i++)
           {
-            currVisitsHTML += '<p><a href="/customer/' + data[i].familyId + '">';
+            currVisitsHTML += '<p><a class="customer" href="/customer/' + data[i].familyId + '">';
             currVisitsHTML += data[i].lastName + ", " + data[i].firstName;
             currVisitsHTML += "</a>: " + data[i].timeInStore;
             currVisitsHTML += '</p><p style="margin-bottom:15px"><a href="/checkout/' + data[i].visitId;
