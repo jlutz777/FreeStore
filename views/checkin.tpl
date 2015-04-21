@@ -93,10 +93,10 @@ $(window).load(function()
 <div id="hbox">
   <div class="box">
       <form action="customersearch" method="post" name="customersearch">
+        <label>Type part of name to search</label>
         <div id="the-basics">
           <input autofocus class="typeahead" type="text" id="customername" name="customername" />
         </div>
-          <button type="submit" >OK</button>
       </form>
       <br />
   </div>
