@@ -81,11 +81,12 @@ function calculateLimits(e)
         var dep_id = parseInt(temp[0], 10);
         var cat_id = parseInt(temp[1], 10);
         
-        var item_val = Number($(this).val());
+        var orig_item_val = $(this).val();
+        var item_val = Number(orig_item_val);
 
-        if (isNaN(item_val) || item_val === 0)
+        if (isNaN(item_val) || item_val < 0 || orig_item_val === '')
         {
-            if ($(this).val() !== '')
+            if (orig_item_val !== '')
             {
                 $(this).val('');
                 changedItem = $(this);
@@ -199,13 +200,19 @@ function calculateLimits(e)
                 % for option in categoryChoices:
                 <td style="text-align: center;">
                 % inputName = "row_" + str(dependent.id) + "_col_" + str(option[0])
+                % thisVal = previousShoppingItems.get(inputName, '')
+                <!-- Set the value to 0 for the household if empty
+                     to trigger the colors -->
+                % if option[4] and thisVal == '' and depIndex == 0:
+                % thisVal = 0
+                % end
                 % if (option[5] is None or dependentAge >= option[5]) and (option[6] is None or dependentAge <= option[6]):
                 % if not option[4] or depIndex == 0:
-                <input type="text" name="{{inputName}}" onchange="calculateLimits()" maxlength="2" style="width:30px;" class="shopping_item category_{{option[0]}}" value="{{previousShoppingItems.get(inputName, '')}}"></input>
+                <input type="text" name="{{inputName}}" onchange="calculateLimits()" maxlength="2" style="width:30px;" class="shopping_item category_{{option[0]}}" value="{{thisVal}}"></input>
                 % end
                 % else:
-                {{previousShoppingItems.get(inputName, '')}}
-                <input type="hidden" name="{{inputName}}" value="{{previousShoppingItems.get(inputName, '')}}"></input>
+                {{thisVal}}
+                <input type="hidden" name="{{inputName}}" value="{{thisVal}}"></input>
                 % end
                 </td>
                 % end
