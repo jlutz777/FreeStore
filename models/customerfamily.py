@@ -27,7 +27,7 @@ class CustomerFamily(base.Base):
     comments = Column('comments', Unicode, default=unicode(''))
     depOrder = 'Dependent.isPrimary.desc()'
     dependents = relationship("Dependent", backref="family", order_by=depOrder)
-    visits = relationship("Visit", backref="family")
+    visits = relationship("Visit", backref="family", lazy="dynamic")
 
     def fromForm(self, id, form):
         if id is not None:

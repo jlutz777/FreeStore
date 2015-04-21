@@ -175,13 +175,12 @@ def customer(db, customer_id=None):
 
                 db.flush()
 
-                if customer_id is None:
+                activeVisits = family.visits.filter(Visit.checkout == None)
+                if len(activeVisits.all()) == 0:
                     visit = Visit()
                     visit.setStatus(status='checkin', family_id=family.id)
                     db.add(visit)
-                    next_url = get_redirect_url('checkin')
-                else:
-                    next_url = get_redirect_url('customer/' + str(family.id))
+                next_url = get_redirect_url('checkin')
 
                 db.commit()
 
