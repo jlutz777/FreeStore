@@ -16,6 +16,8 @@
   </head>
   <body>
     % get_menu()
+    <div id="title"></div>
+    <div id="info"></div>
     <div id="vis"></div>
   </body>
 <script type="text/javascript">
@@ -24,7 +26,9 @@ function parse(spec)
 {
     vg.parse.spec(spec, function(chart){ chart({el:"#vis"}).update(); });
 }
-$.ajax({ url: "/report/info/1", success: function() {
+$.ajax({ url: "/report/info/1", success: function(reportInfo) {
+    $("#title").text(reportInfo.title);
+    $("#info").html(reportInfo.html);
     parse("/report/graphdata/1", "line");  
 } });
 

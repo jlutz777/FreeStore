@@ -31,16 +31,18 @@ class Visit(base.Base):
     def fromPost(self, visit_id, posted, categories, db):
         self.id = visit_id
         self.checkin = posted["checkin"]
-        self.checkout = datetime.now()
 
         customerQuery = db.query(CustomerFamily)
         fam = customerQuery.filter(CustomerFamily.id == posted["family_id"])[0]
 
         self.family = fam
 
-        items = self.items
-        for item in items:
-            self.items.remove(item)
+        # Ensure the checkout stamp doesn't change for edits
+        if self.checkout is None:
+            self.checkout = datetime.now()
+
+        # Delete all existing items for edits
+        del self.items[:]
 
         for dependent in fam.dependents:
             for category in categories:

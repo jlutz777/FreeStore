@@ -5,6 +5,7 @@ from forms.customer import CustomerForm
 import models.base
 from models import CustomerFamily, Dependent, Visit
 from models import ShoppingCategory, ShoppingItem
+from reporting.reports import getReportInfoAndSaveQuery, getGraphJson
 
 from sqlalchemy import select
 from sqlalchemy.sql import func
@@ -91,6 +92,19 @@ def td_format(td_object):
         strings.append("Less than one minute")
 
     return ", ".join(strings)
+
+
+def get_first_of_next_month():
+    now = datetime.utcnow()
+
+    nextYear = now.year
+    nextMonth = now.month+1
+
+    if nextMonth == 13:
+        nextMonth = 1
+        nextYear += 1
+
+    return date(nextYear, nextMonth, 1)
 
 
 def get_redirect_url(relative_path=None):
@@ -277,6 +291,7 @@ def checkout(db, visit_id):
 
     now = datetime.utcnow()
     firstOfMonth = date(now.year, now.month, 1)
+    firstOfNextMonth = get_first_of_next_month()
 
     categoryTotals = select([ShoppingCategory.id, Dependent.id,
                              func.sum(ShoppingItem.quantity)])\
@@ -284,7 +299,8 @@ def checkout(db, visit_id):
                      .join(ShoppingCategory).join(Dependent)
                      .join(Visit))\
         .where(Dependent.family_id == visit.family_id)\
-        .where(Visit.checkout > firstOfMonth)\
+        .where(Visit.checkout >= firstOfMonth)\
+        .where(Visit.checkout < firstOfNextMonth)\
         .where(Visit.id != visit.id)\
         .group_by(ShoppingCategory.id, Dependent.id)
     reader = db.execute(categoryTotals)
@@ -477,40 +493,17 @@ def report_landing():
 
 @app.get('/report/info/<report_num>')
 def report_info(db, report_num):
-    families = select([func.DATE(CustomerFamily.datecreated), func.count()])\
-        .select_from(CustomerFamily.__table__)\
-        .group_by(func.DATE(CustomerFamily.datecreated))\
-        .order_by(func.DATE(CustomerFamily.datecreated))
+    authorize(fail_redirect='sorry_page', role='admin')
 
-    reader = db.execute(families)
-    categoryTotals = reader.fetchall()
-
-    bottle.request.session['report_info'] = categoryTotals
-    return {}
+    sess = bottle.request.session
+    reportInfo = getReportInfoAndSaveQuery(db, sess, report_num)
+    jsonInfo = json.dumps(reportInfo, default=json_util.default)
+    return HTTPResponse(jsonInfo, status=200,
+                        header={'Content-Type': 'application/json'})
 
 
 @app.get('/report/graphdata/<report_num>')
 def report_graph_data(db, report_num):
     authorize(fail_redirect='sorry_page', role='admin')
 
-    categoryTotals = bottle.request.session['report_info']
-    # Loop through and keep a running total to show the increase over time
-    columns = ["date", "count"]
-    results = []
-    prevVal = 0
-
-    for row in categoryTotals:
-        prevVal = prevVal + row[1]
-        results.append(dict(zip(columns, [row[0], prevVal])))
-
-    import pandas as pd
-    frame = pd.DataFrame().from_records(results, index="date",
-                                        columns=["date", "count"])
-
-    import vincent
-    vis = vincent.Line(frame)
-    vis.scales[0].type = 'time'
-    vis.axis_titles(x='Date', y='Customers')
-    vis.legend(title='Customer Count Over Time')
-
-    return vis.to_json()
+    return getGraphJson(db, bottle.request.session, report_num)
