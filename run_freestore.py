@@ -5,7 +5,7 @@ from forms.customer import CustomerForm
 import models.base
 from models import CustomerFamily, Dependent, Visit
 from models import ShoppingCategory, ShoppingItem
-from reporting.reports import getReportInfoAndSaveQuery, getGraphJson
+from reporting.utils import determineAndCreateReport
 
 from sqlalchemy import select
 from sqlalchemy.sql import func
@@ -496,7 +496,8 @@ def report_info(db, report_num):
     authorize(fail_redirect='sorry_page', role='admin')
 
     sess = bottle.request.session
-    reportInfo = getReportInfoAndSaveQuery(db, sess, report_num)
+    myReport = determineAndCreateReport(report_num)
+    reportInfo = myReport.getTitleAndHtml(db, sess)
     jsonInfo = json.dumps(reportInfo, default=json_util.default)
     return HTTPResponse(jsonInfo, status=200,
                         header={'Content-Type': 'application/json'})
@@ -506,4 +507,6 @@ def report_info(db, report_num):
 def report_graph_data(db, report_num):
     authorize(fail_redirect='sorry_page', role='admin')
 
-    return getGraphJson(db, bottle.request.session, report_num)
+    myReport = determineAndCreateReport(report_num)
+
+    return myReport.getGraph(bottle.request.session)

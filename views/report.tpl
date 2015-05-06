@@ -13,6 +13,28 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3-geo-projection/0.2.9/d3.geo.projection.min.js" charset="utf-8"></script>
     <script src="//wrobstory.github.io/vega/vega.v1.3.3.js"></script>
+    <style type="text/css">
+    td.date
+    {
+      width: 150px;
+    }
+
+    td.count
+    {
+      width: 50px;
+    }
+
+    #title
+    {
+      margin-bottom: 10px;
+    }
+
+    #info
+    {
+      margin-bottom: 10px;
+      float:left;
+    }
+    </style>
   </head>
   <body>
     % get_menu()

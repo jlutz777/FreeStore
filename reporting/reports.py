@@ -1,87 +1,125 @@
-from models import CustomerFamily
+"""
+Do all the work for reporting
+"""
 
-from sqlalchemy import select
-from sqlalchemy.sql import func
-
+import abc
+import utils
 import pandas as pd
-import vincent
 
 
 REPORT_SESSION_KEY = 'report_info'
 
 
-# Determine report
+class Report:
+    """Base class for reports"""
+    __metaclass__ = abc.ABCMeta
+    sqlQuery = ''
 
-def getReportInfoAndSaveQuery(db, bottle_session, report_num):
-    if report_num == '1':
-        return getFamilyCount(db, bottle_session)
-    elif report_num == '2':
-        return getDependentCount(db, bottle_session)
-    else:
-        raise Exception("Not implemented")
+    @abc.abstractmethod
+    def getTitleAndHtml(db, bottle_session):
+        pass
 
-
-def getGraphJson(db, bottle_session, report_num):
-    if report_num == '1':
-        return getFamilyGraphJson(bottle_session)
-    elif report_num == '2':
-        return getDependentGraphJson(bottle_session)
-    else:
-        return Exception("Not implemented")
+    @abc.abstractmethod
+    def getGraph(bottle_session):
+        pass
 
 
-# Family Count functions
+class CustomerFamilyReport(Report):
+    """Get the customer family count over time"""
+
+    def __init__(self):
+        self.sqlQuery = "select customerfamily.datecreated::date, count(*)"
+        self.sqlQuery += " from customerfamily inner join dependents on"
+        self.sqlQuery += " customerfamily.id=dependents.family"
+        self.sqlQuery += " where dependents.primary=True and"
+        self.sqlQuery += " dependents.last_name not in ('Lutz', 'Mitchell')"
+        self.sqlQuery += " group by datecreated::date"
+        self.sqlQuery += " order by datecreated::date"
+
+    def getTitleAndHtml(self, db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        categoryTotals = reader.fetchall()
+
+        bottle_session[REPORT_SESSION_KEY] = categoryTotals
+
+        totalFamilyCount = 0
+        familyCountsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
+        for row in categoryTotals:
+            totalFamilyCount += row[1]
+            familyCountsHtml += "<tr><td class=\"date\">"
+            familyCountsHtml += row[0].strftime("%m/%d/%Y") + "</td>"
+            familyCountsHtml += "<td class=\"count\">" + str(totalFamilyCount)
+            familyCountsHtml += "</td></tr>"
+        familyCountsHtml += "</table>"
+
+        reportInfo = {}
+        reportInfo['title'] = 'Total Families'
+        reportInfo['html'] = familyCountsHtml
+        return reportInfo
+
+    def getGraph(self, bottle_session):
+        categoryTotals = bottle_session[REPORT_SESSION_KEY]
+        # Loop through and keep a running total to show the increase over time
+        columns = ["date", "count"]
+        results = []
+        prevVal = 0
+
+        for row in categoryTotals:
+            prevVal = prevVal + row[1]
+            results.append(dict(zip(columns, [row[0], prevVal])))
+
+        frame = pd.DataFrame().from_records(results, index="date",
+                                            columns=["date", "count"])
+
+        title = 'Customer Count Over Time'
+        return utils.getLineGraph(frame, y='Customers', title=title)
 
 
-def getFamilyCount(db, bottle_session):
-    families = select([func.DATE(CustomerFamily.datecreated), func.count()])\
-        .select_from(CustomerFamily.__table__)\
-        .group_by(func.DATE(CustomerFamily.datecreated))\
-        .order_by(func.DATE(CustomerFamily.datecreated))
+class DependentsReport(Report):
+    """Get the dependents count over time"""
 
-    reader = db.execute(families)
-    categoryTotals = reader.fetchall()
+    def __init__(self):
+        self.sqlQuery = "select customerfamily.datecreated::date, count(*)"
+        self.sqlQuery += " from dependents inner join customerfamily on"
+        self.sqlQuery += " customerfamily.id=dependents.family"
+        self.sqlQuery += " where dependents.last_name not in ('Lutz', 'Mitchell')"
+        self.sqlQuery += " group by datecreated::date"
+        self.sqlQuery += " order by datecreated::date"
 
-    bottle_session[REPORT_SESSION_KEY] = categoryTotals
+    def getTitleAndHtml(db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        categoryTotals = reader.fetchall()
 
-    familyCount = 0
-    for row in categoryTotals:
-        familyCount += row[1]
+        bottle_session[REPORT_SESSION_KEY] = categoryTotals
 
-    reportInfo = {}
-    reportInfo['title'] = 'Total Families'
-    reportInfo['html'] = 'Current number of families: ' + str(familyCount)
-    return reportInfo
+        totalFamilyCount = 0
+        familyCountsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
+        for row in categoryTotals:
+            totalFamilyCount += row[1]
+            familyCountsHtml += "<tr><td class=\"date\">"
+            familyCountsHtml += row[0].strftime("%m/%d/%Y") + "</td>"
+            familyCountsHtml += "<td class=\"count\">" + str(totalFamilyCount)
+            familyCountsHtml += "</td></tr>"
+        familyCountsHtml += "</table>"
 
+        reportInfo = {}
+        reportInfo['title'] = 'Total Dependents'
+        reportInfo['html'] = familyCountsHtml
+        return reportInfo
 
-def getFamilyGraphJson(bottle_session):
-    categoryTotals = bottle_session[REPORT_SESSION_KEY]
-    # Loop through and keep a running total to show the increase over time
-    columns = ["date", "count"]
-    results = []
-    prevVal = 0
+    def getGraph(bottle_session):
+        categoryTotals = bottle_session[REPORT_SESSION_KEY]
+        # Loop through and keep a running total to show the increase over time
+        columns = ["date", "count"]
+        results = []
+        prevVal = 0
 
-    for row in categoryTotals:
-        prevVal = prevVal + row[1]
-        results.append(dict(zip(columns, [row[0], prevVal])))
+        for row in categoryTotals:
+            prevVal = prevVal + row[1]
+            results.append(dict(zip(columns, [row[0], prevVal])))
 
-    frame = pd.DataFrame().from_records(results, index="date",
-                                        columns=["date", "count"])
+        frame = pd.DataFrame().from_records(results, index="date",
+                                            columns=["date", "count"])
 
-    vis = vincent.Line(frame)
-    vis.scales[0].type = 'time'
-    vis.axis_titles(x='Date', y='Customers')
-    vis.legend(title='Customer Count Over Time')
-
-    return vis.to_json()
-
-
-# Dependent Count functions
-
-
-def getDependentCount(db, bottle_session):
-    raise Exception("Not implemented")
-
-
-def getDependentGraphJson(bottle_session):
-    raise Exception("Not implemented")
+        title = 'Dependents Count Over Time'
+        return utils.getLineGraph(frame, y='Dependents', title=title)
