@@ -5,7 +5,7 @@ from forms.customer import CustomerForm
 import models.base
 from models import CustomerFamily, Dependent, Visit
 from models import ShoppingCategory, ShoppingItem
-from reporting.utils import determineAndCreateReport
+from reporting.utils import availableReports, determineAndCreateReport
 
 from sqlalchemy import select
 from sqlalchemy.sql import func
@@ -488,7 +488,7 @@ def report_landing():
 
     bottle.BaseTemplate.defaults['page'] = '/report'
 
-    return {}
+    return {'report_options': availableReports}
 
 
 @app.get('/report/info/<report_num>')

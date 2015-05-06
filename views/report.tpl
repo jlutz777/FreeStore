@@ -38,6 +38,12 @@
   </head>
   <body>
     % get_menu()
+    <select id="reportSelect" onchange="runReport()">
+    % for key, value in report_options.iteritems():
+    <option value="{{key}}">{{value.description}}</option>
+    % end
+    </select>
+
     <div id="title"></div>
     <div id="info"></div>
     <div id="vis"></div>
@@ -48,11 +54,18 @@ function parse(spec)
 {
     vg.parse.spec(spec, function(chart){ chart({el:"#vis"}).update(); });
 }
-$.ajax({ url: "/report/info/1", success: function(reportInfo) {
-    $("#title").text(reportInfo.title);
-    $("#info").html(reportInfo.html);
-    parse("/report/graphdata/1", "line");  
-} });
 
+function runReport()
+{
+    var selectedReportNum = document.getElementById("reportSelect").value;
+    $.ajax({ url: "/report/info/"+selectedReportNum, success: function(reportInfo) {
+      $("#title").text(reportInfo.title);
+      $("#info").html(reportInfo.html);
+      parse("/report/graphdata/"+selectedReportNum, "line");  
+    } });
+}
+
+$("#reportSelect")[0].selectedIndex = 0;
+runReport();
 </script>
 </html>

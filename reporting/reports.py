@@ -13,7 +13,9 @@ REPORT_SESSION_KEY = 'report_info'
 class Report:
     """Base class for reports"""
     __metaclass__ = abc.ABCMeta
-    sqlQuery = ''
+
+    def __init__(self, sqlQuery):
+        self.sqlQuery = sqlQuery
 
     @abc.abstractmethod
     def getTitleAndHtml(db, bottle_session):
@@ -26,15 +28,18 @@ class Report:
 
 class CustomerFamilyReport(Report):
     """Get the customer family count over time"""
+    description = "Families over time"
 
     def __init__(self):
-        self.sqlQuery = "select customerfamily.datecreated::date, count(*)"
-        self.sqlQuery += " from customerfamily inner join dependents on"
-        self.sqlQuery += " customerfamily.id=dependents.family"
-        self.sqlQuery += " where dependents.primary=True and"
-        self.sqlQuery += " dependents.last_name not in ('Lutz', 'Mitchell')"
-        self.sqlQuery += " group by datecreated::date"
-        self.sqlQuery += " order by datecreated::date"
+        sqlQuery = "select customerfamily.datecreated::date, count(*)"
+        sqlQuery += " from customerfamily inner join dependents on"
+        sqlQuery += " customerfamily.id=dependents.family"
+        sqlQuery += " where dependents.primary=True and"
+        sqlQuery += " dependents.last_name not in ('Lutz', 'Mitchell')"
+        sqlQuery += " group by datecreated::date"
+        sqlQuery += " order by datecreated::date"
+
+        super(CustomerFamilyReport, self).__init__(sqlQuery)
 
     def getTitleAndHtml(self, db, bottle_session):
         reader = db.execute(self.sqlQuery)
@@ -77,16 +82,19 @@ class CustomerFamilyReport(Report):
 
 class DependentsReport(Report):
     """Get the dependents count over time"""
+    description = "Dependents over time"
 
     def __init__(self):
-        self.sqlQuery = "select customerfamily.datecreated::date, count(*)"
-        self.sqlQuery += " from dependents inner join customerfamily on"
-        self.sqlQuery += " customerfamily.id=dependents.family"
-        self.sqlQuery += " where dependents.last_name not in ('Lutz', 'Mitchell')"
-        self.sqlQuery += " group by datecreated::date"
-        self.sqlQuery += " order by datecreated::date"
+        sqlQuery = "select customerfamily.datecreated::date, count(*)"
+        sqlQuery += " from dependents inner join customerfamily on"
+        sqlQuery += " customerfamily.id=dependents.family"
+        sqlQuery += " where dependents.last_name not in ('Lutz', 'Mitchell')"
+        sqlQuery += " group by datecreated::date"
+        sqlQuery += " order by datecreated::date"
 
-    def getTitleAndHtml(db, bottle_session):
+        super(DependentsReport, self).__init__(sqlQuery)
+
+    def getTitleAndHtml(self, db, bottle_session):
         reader = db.execute(self.sqlQuery)
         categoryTotals = reader.fetchall()
 
@@ -107,7 +115,7 @@ class DependentsReport(Report):
         reportInfo['html'] = familyCountsHtml
         return reportInfo
 
-    def getGraph(bottle_session):
+    def getGraph(self, bottle_session):
         categoryTotals = bottle_session[REPORT_SESSION_KEY]
         # Loop through and keep a running total to show the increase over time
         columns = ["date", "count"]
