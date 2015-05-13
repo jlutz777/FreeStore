@@ -167,6 +167,14 @@ function calculateLimits(e)
     <h3>Checkout</h3>
     </div>
     <div class="row" style="margin-left:0px; margin-right:0px">
+    % if visit.family.checkoutComments is not None and visit.family.checkoutComments != '':
+    <div class="form-group ">
+        <label class="col-sm-2 control-label" style="color:red">COMMENTS</label>
+        <div class="col-sm-10">
+            <label style="color:red">{{visit.family.checkoutComments}}</label>
+        </div>
+    </div>
+    % end
     <div class="form-group ">
         <label class="col-sm-2 control-label">Checkin Time</label>
         <div class="col-sm-10">

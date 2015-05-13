@@ -25,6 +25,7 @@ class CustomerFamily(base.Base):
     zip = Column('zip', Unicode, default=unicode(''), nullable=False)
     datecreated = Column('datecreated', DateTime, nullable=False)
     comments = Column('comments', Unicode, default=unicode(''))
+    checkoutComments = Column('checkoutcomments', Unicode, default=unicode(''))
     depOrder = 'Dependent.isPrimary.desc()'
     dependents = relationship("Dependent", backref="family", order_by=depOrder)
     visits = relationship("Visit", backref="family", lazy="dynamic")
@@ -43,6 +44,7 @@ class CustomerFamily(base.Base):
         self.state = form.state.data
         self.zip = form.zip.data
         self.comments = form.comments.data
+        self.checkoutComments = form.checkoutComments.data
 
         for formDependent in form.dependents:
             if not formDependent['isPrimary'].data and \
