@@ -35,7 +35,7 @@ class CustomerFamilyReport(Report):
         sqlQuery += " from customerfamily inner join dependents on"
         sqlQuery += " customerfamily.id=dependents.family"
         sqlQuery += " where dependents.primary=True and"
-        sqlQuery += " dependents.last_name not in ('Lutz', 'Mitchell')"
+        sqlQuery += " dependents.last_name not in ('User')"
         sqlQuery += " group by datecreated::date"
         sqlQuery += " order by datecreated::date"
 
@@ -88,7 +88,7 @@ class DependentsReport(Report):
         sqlQuery = "select customerfamily.datecreated::date, count(*)"
         sqlQuery += " from dependents inner join customerfamily on"
         sqlQuery += " customerfamily.id=dependents.family"
-        sqlQuery += " where dependents.last_name not in ('Lutz', 'Mitchell')"
+        sqlQuery += " where dependents.last_name not in ('User')"
         sqlQuery += " group by datecreated::date"
         sqlQuery += " order by datecreated::date"
 
