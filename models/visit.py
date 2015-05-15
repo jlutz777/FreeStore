@@ -36,6 +36,7 @@ class Visit(base.Base):
         fam = customerQuery.filter(CustomerFamily.id == posted["family_id"])[0]
 
         self.family = fam
+        self.family.checkoutComments = posted["comments"]
 
         # Ensure the checkout stamp doesn't change for edits
         if self.checkout is None:
