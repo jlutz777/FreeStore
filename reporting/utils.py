@@ -6,8 +6,10 @@ from reports import *
 import vincent
 
 availableReports = {}
-availableReports["1"] = CustomerFamilyReport
-availableReports["2"] = DependentsReport
+availableReports["1"] = FamilyTotalOverTimeReport
+availableReports["2"] = DependentsTotalOverTimeReport
+availableReports["3"] = FamilyCheckoutsPerWeekReport
+availableReports["4"] = DependentCheckoutsPerWeekReport
 
 
 def determineAndCreateReport(report_num):

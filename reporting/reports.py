@@ -26,7 +26,7 @@ class Report:
         pass
 
 
-class CustomerFamilyReport(Report):
+class FamilyTotalOverTimeReport(Report):
     """Get the customer family count over time"""
     description = "Families over time"
 
@@ -39,7 +39,7 @@ class CustomerFamilyReport(Report):
         sqlQuery += " group by datecreated::date"
         sqlQuery += " order by datecreated::date"
 
-        super(CustomerFamilyReport, self).__init__(sqlQuery)
+        super(FamilyTotalOverTimeReport, self).__init__(sqlQuery)
 
     def getTitleAndHtml(self, db, bottle_session):
         reader = db.execute(self.sqlQuery)
@@ -80,7 +80,7 @@ class CustomerFamilyReport(Report):
         return utils.getLineGraph(frame, y='Customers', title=title)
 
 
-class DependentsReport(Report):
+class DependentsTotalOverTimeReport(Report):
     """Get the dependents count over time"""
     description = "Dependents over time"
 
@@ -92,7 +92,7 @@ class DependentsReport(Report):
         sqlQuery += " group by datecreated::date"
         sqlQuery += " order by datecreated::date"
 
-        super(DependentsReport, self).__init__(sqlQuery)
+        super(DependentsTotalOverTimeReport, self).__init__(sqlQuery)
 
     def getTitleAndHtml(self, db, bottle_session):
         reader = db.execute(self.sqlQuery)
@@ -130,4 +130,107 @@ class DependentsReport(Report):
                                             columns=["date", "count"])
 
         title = 'Dependents Count Over Time'
+        return utils.getLineGraph(frame, y='Dependents', title=title)
+
+class FamilyCheckoutsPerWeekReport(Report):
+    """Get the checkouts per week"""
+    description = "Family Checkouts each week"
+
+    def __init__(self):
+        sqlQuery = "select visits.checkout::date as checkout, count(*)"
+        sqlQuery += " from visits inner join customerfamily on"
+        sqlQuery += " customerfamily.id=visits.family"
+        sqlQuery += " inner join dependents on"
+        sqlQuery += " customerfamily.id=dependents.family"
+        sqlQuery += " where dependents.primary=True"
+        sqlQuery += " and dependents.last_name not in ('User')"
+        sqlQuery += " and checkout IS NOT NULL"
+        sqlQuery += " group by checkout::date"
+        sqlQuery += " order by checkout::date"
+
+        super(FamilyCheckoutsPerWeekReport, self).__init__(sqlQuery)
+
+    def getTitleAndHtml(self, db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        allCheckouts = reader.fetchall()
+
+        bottle_session[REPORT_SESSION_KEY] = allCheckouts
+
+        checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
+        for row in allCheckouts:
+            checkoutsHtml += "<tr><td class=\"date\">"
+            checkoutsHtml += row[0].strftime("%m/%d/%Y") + "</td>"
+            checkoutsHtml += "<td class=\"count\">" + str(row[1])
+            checkoutsHtml += "</td></tr>"
+        checkoutsHtml += "</table>"
+
+        reportInfo = {}
+        reportInfo['title'] = 'Family Checkouts'
+        reportInfo['html'] = checkoutsHtml
+        return reportInfo
+
+    def getGraph(self, bottle_session):
+        allCheckouts = bottle_session[REPORT_SESSION_KEY]
+        # Loop through and keep a running total to show the increase over time
+        columns = ["checkout", "count"]
+        results = []
+
+        for row in allCheckouts:
+            results.append(dict(zip(columns, [row[0], row[1]])))
+
+        frame = pd.DataFrame().from_records(results, index="checkout",
+                                            columns=["checkout", "count"])
+
+        title = 'Families Checked Out Per Day'
+        return utils.getLineGraph(frame, y='Families', title=title)
+
+class DependentCheckoutsPerWeekReport(Report):
+    """Get the checkouts per week"""
+    description = "Dependent Checkouts each week"
+
+    def __init__(self):
+        sqlQuery = "select visits.checkout::date as checkout, count(*)"
+        sqlQuery += " from visits inner join customerfamily on"
+        sqlQuery += " customerfamily.id=visits.family"
+        sqlQuery += " inner join dependents on"
+        sqlQuery += " customerfamily.id=dependents.family"
+        sqlQuery += " where dependents.last_name not in ('User')"
+        sqlQuery += " and checkout IS NOT NULL"
+        sqlQuery += " group by checkout::date"
+        sqlQuery += " order by checkout::date"
+
+        super(DependentCheckoutsPerWeekReport, self).__init__(sqlQuery)
+
+    def getTitleAndHtml(self, db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        allCheckouts = reader.fetchall()
+
+        bottle_session[REPORT_SESSION_KEY] = allCheckouts
+
+        checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
+        for row in allCheckouts:
+            checkoutsHtml += "<tr><td class=\"date\">"
+            checkoutsHtml += row[0].strftime("%m/%d/%Y") + "</td>"
+            checkoutsHtml += "<td class=\"count\">" + str(row[1])
+            checkoutsHtml += "</td></tr>"
+        checkoutsHtml += "</table>"
+
+        reportInfo = {}
+        reportInfo['title'] = 'Family Checkouts'
+        reportInfo['html'] = checkoutsHtml
+        return reportInfo
+
+    def getGraph(self, bottle_session):
+        allCheckouts = bottle_session[REPORT_SESSION_KEY]
+        # Loop through and keep a running total to show the increase over time
+        columns = ["checkout", "count"]
+        results = []
+
+        for row in allCheckouts:
+            results.append(dict(zip(columns, [row[0], row[1]])))
+
+        frame = pd.DataFrame().from_records(results, index="checkout",
+                                            columns=["checkout", "count"])
+
+        title = 'Dependents Checked Out Per Day'
         return utils.getLineGraph(frame, y='Dependents', title=title)
