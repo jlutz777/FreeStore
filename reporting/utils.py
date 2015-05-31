@@ -21,7 +21,10 @@ def getLineGraph(data, width=600, height=400,
                  x='Date', y='', xtype='time', title=''):
     """Convenience method for building up a line graph"""
     vis = vincent.Line(data=data, width=width, height=height)
-    vis.scales[0].type = xtype
+    vis.scales['x'] = vincent.Scale(name='x', type=xtype,
+                                    range='width', nice='week',
+                                    domain=vincent.DataRef(data='table',
+                                                           field="data.idx"))
     vis.axis_titles(x=x, y=y)
     vis.legend(title=title)
 

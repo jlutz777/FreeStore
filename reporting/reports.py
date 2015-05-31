@@ -132,21 +132,25 @@ class DependentsTotalOverTimeReport(Report):
         title = 'Dependents Count Over Time'
         return utils.getLineGraph(frame, y='Dependents', title=title)
 
+
 class FamilyCheckoutsPerWeekReport(Report):
     """Get the checkouts per week"""
     description = "Family Checkouts each week"
 
     def __init__(self):
-        sqlQuery = "select visits.checkout::date as checkout, count(*)"
+        # This groups the checkout dates by week, subtracting two to make
+        # the date be on Saturday instead of Monday
+        sqlQuery = "select date_trunc('week', visits.checkout::date)"
+        sqlQuery += "-interval '2 days' as checkout2, count(*) as count"
         sqlQuery += " from visits inner join customerfamily on"
         sqlQuery += " customerfamily.id=visits.family"
         sqlQuery += " inner join dependents on"
         sqlQuery += " customerfamily.id=dependents.family"
         sqlQuery += " where dependents.primary=True"
         sqlQuery += " and dependents.last_name not in ('User')"
-        sqlQuery += " and checkout IS NOT NULL"
-        sqlQuery += " group by checkout::date"
-        sqlQuery += " order by checkout::date"
+        sqlQuery += " and visits.checkout IS NOT NULL"
+        sqlQuery += " group by checkout2"
+        sqlQuery += " order by checkout2"
 
         super(FamilyCheckoutsPerWeekReport, self).__init__(sqlQuery)
 
@@ -184,20 +188,24 @@ class FamilyCheckoutsPerWeekReport(Report):
         title = 'Families Checked Out Per Day'
         return utils.getLineGraph(frame, y='Families', title=title)
 
+
 class DependentCheckoutsPerWeekReport(Report):
     """Get the checkouts per week"""
     description = "Dependent Checkouts each week"
 
     def __init__(self):
-        sqlQuery = "select visits.checkout::date as checkout, count(*)"
+        # This groups the checkout dates by week, subtracting two to make
+        # the date be on Saturday instead of Monday
+        sqlQuery = "select date_trunc('week', visits.checkout::date)"
+        sqlQuery += "-interval '2 days' as checkout2, count(*) as count"
         sqlQuery += " from visits inner join customerfamily on"
         sqlQuery += " customerfamily.id=visits.family"
         sqlQuery += " inner join dependents on"
         sqlQuery += " customerfamily.id=dependents.family"
         sqlQuery += " where dependents.last_name not in ('User')"
-        sqlQuery += " and checkout IS NOT NULL"
-        sqlQuery += " group by checkout::date"
-        sqlQuery += " order by checkout::date"
+        sqlQuery += " and visits.checkout IS NOT NULL"
+        sqlQuery += " group by checkout2"
+        sqlQuery += " order by checkout2"
 
         super(DependentCheckoutsPerWeekReport, self).__init__(sqlQuery)
 
