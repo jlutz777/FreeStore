@@ -267,6 +267,7 @@ class ItemsPerCategoryPerMonthReport(Report):
         sqlQuery += " inner join shopping_category on"
         sqlQuery += " shopping_category.id = shopping_item.category"
         sqlQuery += " where dependents.last_name not in ('User')"
+        sqlQuery += " and dependents.primary = True"
         sqlQuery += " and visits.checkout IS NOT NULL"
         sqlQuery += " group by checkout2, name"
         sqlQuery += " order by checkout2"
