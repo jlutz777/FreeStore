@@ -16,6 +16,11 @@
     <style type="text/css">
     td.date
     {
+      width: 125px;
+    }
+
+    td.category
+    {
       width: 150px;
     }
 

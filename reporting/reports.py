@@ -5,6 +5,11 @@ Do all the work for reporting
 import abc
 import utils
 import pandas as pd
+import logging
+
+logging.basicConfig(format='localhost - - [%(asctime)s] %(message)s',
+                    level=logging.DEBUG)
+log = logging.getLogger(__name__)
 
 
 REPORT_SESSION_KEY = 'report_info'
@@ -242,3 +247,100 @@ class DependentCheckoutsPerWeekReport(Report):
 
         title = 'Dependents Checked Out Per Day'
         return utils.getLineGraph(frame, y='Dependents', title=title)
+
+
+class ItemsPerCategoryPerMonthReport(Report):
+    """Get the number of checked out items per category per month"""
+    description = "Items Per Category Checked Out Per Month"
+
+    def __init__(self):
+        # This groups the checkout dates by month
+        sqlQuery = "select date_trunc('month', visits.checkout::date)"
+        sqlQuery += " as checkout2, shopping_category.name as name,"
+        sqlQuery += " sum(shopping_item.quantity) as count"
+        sqlQuery += " from visits inner join customerfamily on"
+        sqlQuery += " customerfamily.id=visits.family"
+        sqlQuery += " inner join dependents on"
+        sqlQuery += " customerfamily.id=dependents.family"
+        sqlQuery += " inner join shopping_item on"
+        sqlQuery += " shopping_item.visit = visits.id"
+        sqlQuery += " inner join shopping_category on"
+        sqlQuery += " shopping_category.id = shopping_item.category"
+        sqlQuery += " where dependents.last_name not in ('User')"
+        sqlQuery += " and visits.checkout IS NOT NULL"
+        sqlQuery += " group by checkout2, name"
+        sqlQuery += " order by checkout2"
+
+        super(ItemsPerCategoryPerMonthReport, self).__init__(sqlQuery)
+
+    def getTitleAndHtml(self, db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        allCheckouts = reader.fetchall()
+
+        # Loop through and keep a running total to show the increase over time
+        results = {}
+
+        # Create an index of all dates
+        # Create a list for each item
+        results['index'] = []
+        for row in allCheckouts:
+            if row[1] not in results:
+                results[row[1]] = []
+            if row[0] not in results['index']:
+                results['index'].append(row[0])
+
+        # Create a list of all categories
+        cats = []
+        for row in results:
+            if row != 'index':
+                cats.append(row)
+
+        # Get the number of dates
+        dateLen = len(results['index'])
+
+        # Zero out the lists for all dates
+        for row in cats:
+            for i in range(0, dateLen):
+                results[row].append(0)
+
+        # Put in the counts where applicable
+        for row in allCheckouts:
+            results[row[1]][results['index'].index(row[0])] = row[2]
+
+        bottle_session[REPORT_SESSION_KEY] = results
+
+        checkoutsHtml = '<table style="width:800px;"><tr><th>Date</th>'
+        for row in cats:
+            checkoutsHtml += '<th>' + row + '</th>'
+        checkoutsHtml += '</tr>'
+
+        for i in range(0, dateLen):
+            checkoutsHtml += '<tr><td>'
+            checkoutsHtml += results['index'][i].strftime("%m/%d/%Y")
+            checkoutsHtml += '</td>'
+            for row in cats:
+                checkoutsHtml += '<td>' + str(results[row][i]) + '</td>'
+            checkoutsHtml += '</tr>'
+        checkoutsHtml += '</table>'
+
+        reportInfo = {}
+        reportInfo['title'] = 'Items Per Category'
+        reportInfo['html'] = checkoutsHtml
+        return reportInfo
+
+    def getGraph(self, bottle_session):
+        itemsPerCat = bottle_session[REPORT_SESSION_KEY]
+
+        # Hack because apparently dates on the x axis aren't allowed here
+        itemsPerCat['index'] = range(0, len(itemsPerCat['index']))
+
+        #log.debug(results)
+
+        title = 'Items Per Category'
+        import vincent
+        graph = vincent.Line(itemsPerCat, width=800, height=400, iter_idx='index')
+        #graph.scales[0].type = 'time'
+        graph.axis_titles(x='Date', y=title)
+        graph.legend(title="Categories")
+        #log.debug(graph.grammar)
+        return graph.to_json()
