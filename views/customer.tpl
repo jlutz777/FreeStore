@@ -46,6 +46,12 @@ $(document).ready(function () {
         e.preventDefault();
     });
 
+    $('#noCheckin').click(function()
+    {
+        $('#checkinCust').val('false');
+        $('#thisForm').submit();
+    });
+
     $('#phone').mask('(000) 000-0000', {clearIfNotMatch: true, placeholder: "(XXX) XXX-XXXX"});
     $('#zip').mask('00000', {clearIfNotMatch: true, placeholder: "XXXXX"});
     $('.dependent-birthdate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
@@ -102,7 +108,7 @@ function clone_field_list(selector) {
     </div>
     % end
     % #end
-    <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
+    <form id="thisForm" method="POST" action="{{post_url}}" role="form" class="form_horizontal">
     % if customer_id:
     <div class="row" style="margin-top:10px">
         <div class="form-group"> 
@@ -314,6 +320,14 @@ function clone_field_list(selector) {
             </div>
         </div>
     </div>
+    <div class="row" style="margin-top:10px">
+        <div class="form-group"> 
+            <div class="col-sm-10">
+                <button type="button" id="noCheckin" class="btn btn-info">Save With NO Check In</button>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="checkinCust" name="checkinCust" value="true" />
     </form>
 </div>
 % if customer_id:

@@ -191,9 +191,10 @@ def customer(db, customer_id=None):
 
                 activeVisits = family.visits.filter(Visit.checkout == None)
                 if len(activeVisits.all()) == 0:
-                    visit = Visit()
-                    visit.setStatus(status='checkin', family_id=family.id)
-                    db.add(visit)
+                    if bottle.request.POST["checkinCust"] == "true":
+                        visit = Visit()
+                        visit.setStatus(status='checkin', family_id=family.id)
+                        db.add(visit)
                 next_url = get_redirect_url('checkin')
 
                 db.commit()
