@@ -31,6 +31,39 @@ class CustomerFamily(base.Base):
     dependents = relationship("Dependent", backref="family", order_by=depOrder)
     visits = relationship("Visit", backref="family", lazy="dynamic")
 
+    def __checkFirstName__(self, formDependent, form):
+        hasError = False
+        if formDependent['firstName'].data == '':
+            formError = 'First name is required'
+            formDependent['firstName'].errors.append(formError)
+            form.errors['dependent_firstname'] = 'required'
+            hasError = True
+        return hasError
+
+    def __checkLastName__(self, formDependent, form):
+        hasError = False
+        if formDependent['lastName'].data == '':
+            formError = 'Last name is required'
+            formDependent['lastName'].errors.append(formError)
+            form.errors['dependent_lastname'] = 'required'
+            hasError = True
+        return hasError
+
+    def __checkBirthDate__(self, formDependent, form):
+        hasError = False
+        if formDependent['birthdate'].data is None:
+            formError = 'Birthday is required'
+            formDependent['birthdate'].errors.append(formError)
+            form.errors['dependent_birthdate'] = 'required'
+            hasError = True
+        elif formDependent['birthdate'].data < datetime(1900, 1, 1):
+            formError = 'Birthday must be after 1900'
+            formDependent['birthdate'].errors.append(formError)
+            form.errors['dependent_birthdate'] = 'required'
+            formDependent['birthdate'].data = None
+            hasError = True
+        return hasError
+
     def fromForm(self, id, form):
         if id is not None:
             self.id = id
@@ -53,36 +86,22 @@ class CustomerFamily(base.Base):
                  formDependent['lastName'].data == ''):
                 continue
 
-            formError = ''
-
             dependent = Dependent()
             dependent.id = formDependent['id'].data
             dependent.isPrimary = formDependent['isPrimary'].data
 
-            if formDependent['firstName'].data == '':
-                formError = 'First name is required'
-                formDependent['firstName'].errors.append(formError)
-                form.errors['dependent_firstname'] = 'required'
+            hasError = self.__checkFirstName__(formDependent, form)
             dependent.firstName = formDependent['firstName'].data
 
-            if formDependent['lastName'].data == '':
-                formError = 'Last name is required'
-                formDependent['lastName'].errors.append(formError)
-                form.errors['dependent_lastname'] = 'required'
+            if self.__checkLastName__(formDependent, form):
+                hasError = True
             dependent.lastName = formDependent['lastName'].data
 
-            if formDependent['birthdate'].data is None:
-                formError = 'Birthday is required'
-                formDependent['birthdate'].errors.append(formError)
-                form.errors['dependent_birthdate'] = 'required'
-            if formDependent['birthdate'].data < datetime(1900, 1, 1):
-                formError = 'Birthday must be after 1900'
-                formDependent['birthdate'].errors.append(formError)
-                form.errors['dependent_birthdate'] = 'required'
-                formDependent['birthdate'].data = None
+            if self.__checkBirthDate__(formDependent, form):
+                hasError = True
             dependent.birthdate = formDependent['birthdate'].data
 
-            if formError != '':
+            if hasError:
                 raise Exception('Dependent data needed')
 
             self.dependents.append(dependent)

@@ -337,13 +337,13 @@ class ItemsPerCategoryPerMonthReport(Report):
         # Hack because apparently dates on the x axis aren't allowed here
         itemsPerCat['index'] = range(0, len(itemsPerCat['index']))
 
-        #log.debug(results)
+        # log.debug(results)
 
         title = 'Items Per Category'
         import vincent
         graph = vincent.Line(itemsPerCat, width=800, height=400, iter_idx='index')
-        #graph.scales[0].type = 'time'
+        # graph.scales[0].type = 'time'
         graph.axis_titles(x='Date', y=title)
         graph.legend(title="Categories")
-        #log.debug(graph.grammar)
+        # log.debug(graph.grammar)
         return graph.to_json()

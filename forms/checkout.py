@@ -34,7 +34,6 @@ class ShoppingItemForm(ModelForm):
             }
         }
 
-    #category = FormField(CategoryForm)
     category = SelectField(u'Category', coerce=int)
 
 

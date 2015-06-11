@@ -1,6 +1,3 @@
-from gevent import monkey
-monkey.patch_all()
-
 from forms.customer import CustomerForm
 import models.base
 from models import CustomerFamily, Dependent, Visit
@@ -20,11 +17,14 @@ from cork import Cork
 from cork.backends import SqlAlchemyBackend
 
 from bson import json_util
-from datetime import datetime, timedelta, date
+from datetime import datetime, date
 import json
 import logging
 from operator import itemgetter
 import os
+
+from gevent import monkey
+monkey.patch_all()
 
 MODULEPATH = os.path.dirname(__file__)
 TEMPLATE_PATH.insert(0, os.path.join(MODULEPATH, "views"))
@@ -143,7 +143,7 @@ def checkout_search(db):
 def currentVisits(db):
     authorize()
 
-    currentVisits = db.query(Visit).filter(Visit.checkout == None)
+    currentVisits = db.query(Visit).filter(Visit.checkout == None) # noqa
 
     currentVisitsArray = []
     for visit in currentVisits:
@@ -174,7 +174,8 @@ def customer(db, customer_id=None):
 
     bottle.BaseTemplate.defaults['page'] = '/customer'
 
-    form = CustomerForm(bottle.request.POST)
+    postData = bottle.request.POST
+    form = CustomerForm(postData)
     post_url = get_redirect_url()
     visit_url_root = get_redirect_url('checkout')
     checkin_url = get_redirect_url('checkin')
@@ -189,12 +190,13 @@ def customer(db, customer_id=None):
 
                 db.flush()
 
-                activeVisits = family.visits.filter(Visit.checkout == None)
-                if len(activeVisits.all()) == 0:
-                    if bottle.request.POST["checkinCust"] == "true":
-                        visit = Visit()
-                        visit.setStatus(status='checkin', family_id=family.id)
-                        db.add(visit)
+                activeVisits = family.visits.filter(Visit.checkout == None)  # noqa
+                hasNoActiveVisit = len(activeVisits.all()) == 0
+                shouldCreateVisit = postData["checkinCust"] == "true"
+                if hasNoActiveVisit and shouldCreateVisit:
+                    visit = Visit()
+                    visit.setStatus(status='checkin', family_id=family.id)
+                    db.add(visit)
                 next_url = get_redirect_url('checkin')
 
                 db.commit()
@@ -310,7 +312,7 @@ def checkout(db, visit_id):
     if bottle.request.method == 'POST':
         visit.fromPost(visit_id, bottle.request.POST, categoryChoices, db)
 
-        #TODO: need to validate the posted data somehow
+        # TODO: need to validate the posted data somehow
         if True:
             # Why do I have to filter above instead of doing a merge here?
             db.commit()
