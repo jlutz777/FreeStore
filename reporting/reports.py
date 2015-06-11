@@ -145,7 +145,8 @@ class FamilyCheckoutsPerWeekReport(Report):
     def __init__(self):
         # This groups the checkout dates by week, subtracting two to make
         # the date be on Saturday instead of Monday
-        sqlQuery = "select date_trunc('week', visits.checkout::date)"
+        sqlQuery = "select date_trunc('week', visits.checkout::date+"
+        sqlQuery += "interval '2 days')"
         sqlQuery += "-interval '2 days' as checkout2, count(*) as count"
         sqlQuery += " from visits inner join customerfamily on"
         sqlQuery += " customerfamily.id=visits.family"
@@ -201,7 +202,8 @@ class DependentCheckoutsPerWeekReport(Report):
     def __init__(self):
         # This groups the checkout dates by week, subtracting two to make
         # the date be on Saturday instead of Monday
-        sqlQuery = "select date_trunc('week', visits.checkout::date)"
+        sqlQuery = "select date_trunc('week', visits.checkout::date+"
+        sqlQuery += "interval '2 days')"
         sqlQuery += "-interval '2 days' as checkout2, count(*) as count"
         sqlQuery += " from visits inner join customerfamily on"
         sqlQuery += " customerfamily.id=visits.family"
