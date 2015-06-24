@@ -66,7 +66,14 @@ function runReport()
     $.ajax({ url: "/report/info/"+selectedReportNum, success: function(reportInfo) {
       $("#title").text(reportInfo.title);
       $("#info").html(reportInfo.html);
-      parse("/report/graphdata/"+selectedReportNum, "line");  
+      if (!reportInfo.nograph)
+      {
+         parse("/report/graphdata/"+selectedReportNum, "line");
+      }
+      else
+      {
+         $("#vis").text('');
+      }
     } });
 }
 

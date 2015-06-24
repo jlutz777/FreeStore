@@ -11,6 +11,7 @@ availableReports["2"] = DependentsTotalOverTimeReport
 availableReports["3"] = FamilyCheckoutsPerWeekReport
 availableReports["4"] = DependentCheckoutsPerWeekReport
 availableReports["5"] = ItemsPerCategoryPerMonthReport
+availableReports["6"] = IndividualsByAgeReport
 
 
 def determineAndCreateReport(report_num):

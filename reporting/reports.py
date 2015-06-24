@@ -347,3 +347,50 @@ class ItemsPerCategoryPerMonthReport(Report):
         graph.legend(title="Categories")
         # log.debug(graph.grammar)
         return graph.to_json()
+
+
+class IndividualsByAgeReport(Report):
+    """Get the dependents by age"""
+    description = "Individuals By Age"
+
+    def __init__(self):
+        sqlQuery = "select count(*) as count, CASE"
+        sqlQuery += " when birth_year between 0 AND 2 THEN '0-2'"
+        sqlQuery += " WHEN birth_year BETWEEN 3 AND 5 THEN '3-5'"
+        sqlQuery += " WHEN birth_year BETWEEN 6 AND 12 THEN '6-12'"
+        sqlQuery += " WHEN birth_year BETWEEN 13 AND 18  THEN '13-18'"
+        sqlQuery += " WHEN birth_year BETWEEN 19 AND 29  THEN '19-29'"
+        sqlQuery += " WHEN birth_year BETWEEN 30 AND 39  THEN '30-39'"
+        sqlQuery += " WHEN birth_year BETWEEN 40 AND 59  THEN '40-59'"
+        sqlQuery += " WHEN birth_year BETWEEN 60 AND 150  THEN '60+' END"
+        sqlQuery += " as age from (select extract(year from"
+        sqlQuery += " age(birthdate::date)) as birth_year from dependents"
+        sqlQuery += " inner join customerfamily on"
+        sqlQuery += " customerfamily.id=dependents.family"
+        sqlQuery += " where last_name not in ('User')) as deps group by age"
+        sqlQuery += " order by count desc"
+        
+        super(IndividualsByAgeReport, self).__init__(sqlQuery)
+
+    def getTitleAndHtml(self, db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        allAgeRanges = reader.fetchall()
+
+        #bottle_session[REPORT_SESSION_KEY] = allAgeRanges
+        
+        checkoutsHtml = '<table><tr><th>Age Range</th><th>Total</th></tr>'
+        for row in allAgeRanges:
+            checkoutsHtml += "<tr><td class=\"date\">"
+            checkoutsHtml += str(row[1]) + "</td>"
+            checkoutsHtml += "<td class=\"count\">" + str(row[0])
+            checkoutsHtml += "</td></tr>"
+        checkoutsHtml += "</table>"
+
+        reportInfo = {}
+        reportInfo['title'] = 'Individuals by Age'
+        reportInfo['html'] = checkoutsHtml
+        reportInfo['nograph'] = 'true'
+        return reportInfo
+ 
+    def getGraph(self, bottle_session):
+        raise NotImplementedError("")
