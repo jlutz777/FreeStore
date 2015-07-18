@@ -125,9 +125,6 @@ label {
   margin-right: 0.5em;
   display: block
 }
-button {
-    margin-left: 13em;
-}
 button.close {
     margin-left: .1em;
 }
