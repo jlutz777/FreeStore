@@ -3,7 +3,7 @@ Do all the work for reporting
 """
 
 import abc
-import utils
+import reporting
 import pandas as pd
 import logging
 
@@ -82,7 +82,7 @@ class FamilyTotalOverTimeReport(Report):
                                             columns=["date", "count"])
 
         title = 'Customer Count Over Time'
-        return utils.getLineGraph(frame, y='Customers', title=title)
+        return reporting.utils.getLineGraph(frame, y='Customers', title=title)
 
 
 class DependentsTotalOverTimeReport(Report):
@@ -135,7 +135,7 @@ class DependentsTotalOverTimeReport(Report):
                                             columns=["date", "count"])
 
         title = 'Dependents Count Over Time'
-        return utils.getLineGraph(frame, y='Dependents', title=title)
+        return reporting.utils.getLineGraph(frame, y='Dependents', title=title)
 
 
 class FamilyCheckoutsPerWeekReport(Report):
@@ -192,7 +192,7 @@ class FamilyCheckoutsPerWeekReport(Report):
                                             columns=["checkout", "count"])
 
         title = 'Families Checked Out Per Day'
-        return utils.getLineGraph(frame, y='Families', title=title)
+        return reporting.utils.getLineGraph(frame, y='Families', title=title)
 
 
 class DependentCheckoutsPerWeekReport(Report):
@@ -248,7 +248,7 @@ class DependentCheckoutsPerWeekReport(Report):
                                             columns=["checkout", "count"])
 
         title = 'Dependents Checked Out Per Day'
-        return utils.getLineGraph(frame, y='Dependents', title=title)
+        return reporting.utils.getLineGraph(frame, y='Dependents', title=title)
 
 
 class ItemsPerCategoryPerMonthReport(Report):
@@ -368,7 +368,7 @@ class IndividualsByAgeReport(Report):
         sqlQuery += " inner join customerfamily on"
         sqlQuery += " customerfamily.id=dependents.family"
         sqlQuery += " where last_name not in ('User')) as deps"
-        sqlQuery += " and age is not None group by age"
+        sqlQuery += " group by age"
         sqlQuery += " order by count desc"
         
         super(IndividualsByAgeReport, self).__init__(sqlQuery)

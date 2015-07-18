@@ -202,11 +202,11 @@ def customer(db, customer_id=None):
                 db.commit()
 
                 return bottle.redirect(next_url)
-        except HTTPResponse, hres:
+        except HTTPResponse as hres:
             raise hres
-        except HTTPError, herr:
+        except HTTPError as herr:
             raise herr
-        except Exception, ex:
+        except Exception as ex:
             log.debug(ex)
             db.rollback()
             visits = family.visits
@@ -430,7 +430,7 @@ def create_user():
     try:
         aaa.create_user(postd().username, postd().role, postd().password)
         return dict(ok=True, msg='')
-    except Exception, e:
+    except Exception as e:
         return dict(ok=False, msg=e.message)
 
 
@@ -441,7 +441,7 @@ def delete_user():
     try:
         aaa.delete_user(post_get('username'))
         return dict(ok=True, msg='')
-    except Exception, e:
+    except Exception as e:
         print repr(e)
         return dict(ok=False, msg=e.message)
 
@@ -453,7 +453,7 @@ def create_role():
     try:
         aaa.create_role(post_get('role'), post_get('level'))
         return dict(ok=True, msg='')
-    except Exception, e:
+    except Exception as e:
         return dict(ok=False, msg=e.message)
 
 
@@ -464,7 +464,7 @@ def delete_role():
     try:
         aaa.delete_role(post_get('role'))
         return dict(ok=True, msg='')
-    except Exception, e:
+    except Exception as e:
         return dict(ok=False, msg=e.message)
 
 
@@ -478,7 +478,7 @@ def delete_customer(db, customer_id):
         db.delete(customer)
         db.commit()
         return dict(ok=True, msg='')
-    except Exception, e:
+    except Exception as e:
         return dict(ok=False, msg=e.message)
 
 # Section: Report pages

@@ -2,7 +2,7 @@
 Utility functions for reports
 """
 
-from reports import *
+from .reports import *
 import vincent
 
 availableReports = {}
