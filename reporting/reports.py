@@ -367,7 +367,8 @@ class IndividualsByAgeReport(Report):
         sqlQuery += " age(birthdate::date)) as birth_year from dependents"
         sqlQuery += " inner join customerfamily on"
         sqlQuery += " customerfamily.id=dependents.family"
-        sqlQuery += " where last_name not in ('User')) as deps group by age"
+        sqlQuery += " where last_name not in ('User')) as deps"
+        sqlQuery += " and age is not None group by age"
         sqlQuery += " order by count desc"
         
         super(IndividualsByAgeReport, self).__init__(sqlQuery)
