@@ -1,3 +1,6 @@
+from gevent import monkey
+monkey.patch_all(socket=False)
+
 from forms.customer import CustomerForm
 import models.base
 from models import CustomerFamily, Dependent, Visit
@@ -22,9 +25,6 @@ import json
 import logging
 from operator import itemgetter
 import os
-
-from gevent import monkey
-monkey.patch_all()
 
 MODULEPATH = os.path.dirname(__file__)
 TEMPLATE_PATH.insert(0, os.path.join(MODULEPATH, "views"))
