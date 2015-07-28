@@ -513,3 +513,5 @@ def report_graph_data(db, report_num):
     myReport = determineAndCreateReport(report_num)
 
     return myReport.getGraph(bottle.request.session)
+
+# nothing
