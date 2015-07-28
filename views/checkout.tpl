@@ -32,14 +32,23 @@
 <body>
 % get_menu()
 <script type="text/javascript">
+// Categories are a hash of each category and its associated information
+// (id, name, daily limit, monthly limit, if it is family-wide or individual, etc.)
 var categories = {};
+// Previous totals are how many items have been purchased for each family member
+// in the time allotted (currently since the beginning of the month)
+// previousTotals is a hash of a hash in the form of:
+// previousTotals[category id][family member's id] = total previously purchased
 var previousTotals = {};
 
+% # Loop through all the categories and get the data, also set up an empty object for
+% # the previous totals
 % for cat in categoryChoices:
 categories[{{cat[0]}}] = { id: '{{cat[0]}}', name: '{{cat[1]}}', dailyLimit: {{cat[2]}}, monthlyLimit: {{cat[3]}}, isFamilyWide: {{str(cat[4]).lower()}}};
 previousTotals[{{cat[0]}}] = {};
 % end
 
+% # Loop through and set up the previous categories
 % for cat in categoryTotals:
 previousTotals[{{cat[0]}}][{{cat[1]}}] = {{cat[2]}};
 % end
@@ -56,6 +65,8 @@ function alertLimitReached()
     return reached;
 }
 
+// On submit, we have to make sure no limits have been reached.
+// If no limits are reached, then show a confirmation before submitting
 $(document).ready(function () {
     $('form').submit(function() {
         var continueSubmit = !alertLimitReached();
@@ -67,8 +78,12 @@ $(document).ready(function () {
     });
 
     calculateLimits();
+    
+    showPrevTotals();
 });
 
+// This is pretty complicated, but basically you are setting CSS to indicate
+// if you are close to or at limits for each person and each category
 function calculateLimits(e)
 {
     var changedItem = null;
@@ -84,6 +99,7 @@ function calculateLimits(e)
         var orig_item_val = $(this).val();
         var item_val = Number(orig_item_val);
 
+        // Make sure only valid numbers can be typed in the inputs
         if (isNaN(item_val) || item_val < 0 || orig_item_val === '')
         {
             if (orig_item_val !== '')
@@ -101,6 +117,9 @@ function calculateLimits(e)
         var isFamilyWide = curr_cat.isFamilyWide;
         var latestTotal = 0;
 
+        // If a category is not family-wide (so it is per individual), then
+        // calculate the new total for this time period by adding the current value
+        // to the previous totals from the db
         if (!isFamilyWide)
         {
             latestTotal = item_val;
@@ -110,6 +129,8 @@ function calculateLimits(e)
                 latestTotal += previousTotals[cat_id][dep_id];
             }
         }
+        // If it is family-wide, then you need to add up the values in the inputs and
+        // add it to the previous totals of all family members
         else
         {
             item_val = 0;
@@ -133,8 +154,11 @@ function calculateLimits(e)
             }
         }
 
+        // Remove all classes so you can selectively add any needed below
         $(this).removeClass("item_warning item_over_limit item_limit_reached");
 
+        // If you are over the limit, clear out the current input so you cannot submit
+        // this value
         if (latestTotal > curr_cat.monthlyLimit || item_val > curr_cat.dailyLimit)
         {
             $(this).val('');
@@ -153,12 +177,44 @@ function calculateLimits(e)
 
     alertLimitReached();
 
+    // Browser bug requires a set timeout for the focus
     setTimeout(function () {
         if (changedItem != null)
         {
             changedItem.focus();
         }    
     }, 10);
+}
+
+// Show a nice message for the previous totals so during checkout you
+// can easily see previous totals
+function showPrevTotals()
+{
+    var prevText = '';
+    var deps = {};
+
+    for (var cat_id in previousTotals)
+    {
+        for (var dep_id in previousTotals[cat_id])
+        {
+            if (dep_id in deps)
+            {
+                deps[dep_id] += ", " + previousTotals[cat_id][dep_id];
+            }
+            else
+            {
+                deps[dep_id] = previousTotals[cat_id][dep_id];
+            }            
+            deps[dep_id] += " " + categories[cat_id].name;
+        }
+    }
+    
+    for (var dep_id in deps)
+    {
+        var dep_name = $(".dep-" + dep_id + "-name").text();
+        prevText += deps[dep_id] + " for " + dep_name + "<br />";
+    }
+    $("#month_prev_totals").html(prevText);
 }
 </script>
 <div class="your-form">
@@ -193,6 +249,12 @@ function calculateLimits(e)
             <input type="hidden" id="family_id" name="family_id" value="{{visit.family.id}}" />
         </div>
     </div>
+    <div class="form-group ">
+        <label class="col-sm-2 control-label">This Month Previous Totals:</label>
+        <div class="col-sm-10" id="month_prev_totals">
+            (None)
+        </div>
+    </div>
     </div>
     <div class="row" style="margin-top:20px; margin-left:0px; margin-right:0px">
         <table>
@@ -213,10 +275,12 @@ function calculateLimits(e)
             % depIndex += 1
             <tr>
                 % dependentAge = calculateAge(dependent.birthdate)
-                <td>{{dependent.firstName}}</td>
+                <td class="dep-{{dependent.id}}-name">{{dependent.firstName}}</td>
                 <td style="text-align: center;">{{dependentAge}}</td>
                 % for option in categoryChoices:
                 <td style="text-align: center;">
+                % # This is a convention used elsewhere to more easily figure out
+                % # which dependent and category this input is for 
                 % inputName = "row_" + str(dependent.id) + "_col_" + str(option[0])
                 % thisVal = previousShoppingItems.get(inputName, '')
                 <!-- Set the value to 0 for the household if empty
@@ -224,6 +288,7 @@ function calculateLimits(e)
                 % if option[4] and thisVal == '' and depIndex == 0:
                 % thisVal = 0
                 % end
+                % # Some categories are limited to a specific age range, so check it
                 % if (option[5] is None or dependentAge >= option[5]) and (option[6] is None or dependentAge <= option[6]):
                 % if not option[4] or depIndex == 0:
                 <input type="text" name="{{inputName}}" onchange="calculateLimits()" maxlength="2" style="width:30px;" class="shopping_item category_{{option[0]}}" value="{{thisVal}}"></input>

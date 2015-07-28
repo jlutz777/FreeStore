@@ -46,6 +46,9 @@ $(document).ready(function () {
         e.preventDefault();
     });
 
+    // By default we want to check in the customer when changing them, but
+    // this extra hidden input is checked on the server side when you don't want
+    // the customer checked in
     $('#noCheckin').click(function()
     {
         $('#checkinCust').val('false');
@@ -57,6 +60,8 @@ $(document).ready(function () {
     $('.dependent-birthdate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
 });
 
+// This function duplicates the current dependent structure and creates a new one
+// This keeps the customer simple unless we need extra dependents
 function clone_field_list(selector) {
     var new_element = $(selector).parent().clone(true);
     var elem_id = new_element.find(':input')[0].id;

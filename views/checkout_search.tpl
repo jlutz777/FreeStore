@@ -45,6 +45,7 @@ $(window).load(function()
   }
 
   getCurrentVisits();
+  // Every 10 seconds, get the currently shopping customers
   setInterval(getCurrentVisits, 10000);
 });
 </script>
