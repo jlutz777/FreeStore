@@ -29,6 +29,11 @@
       width: 50px;
     }
 
+    #report_chooser
+    {
+       height: 100px;
+    }
+    
     #title
     {
       margin-bottom: 10px;
@@ -43,12 +48,14 @@
   </head>
   <body>
     % get_menu()
+    <div id="report_chooser">
+    <span>Choose a report:</span>
     <select id="reportSelect" onchange="runReport()">
     % for key, value in report_options.items():
     <option value="{{key}}">{{value.description}}</option>
     % end
     </select>
-
+    </div>
     <div id="title"></div>
     <div id="info"></div>
     <div id="vis"></div>

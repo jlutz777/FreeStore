@@ -5,6 +5,7 @@ Utility functions for reports
 from .reports import FamilyTotalOverTimeReport, DependentsTotalOverTimeReport
 from .reports import FamilyCheckoutsPerWeekReport, DependentCheckoutsPerWeekReport
 from .reports import ItemsPerCategoryPerMonthReport, IndividualsByAgeReport
+from .reports import FamiliesPerZipReport
 import vincent
 
 availableReports = {}
@@ -14,6 +15,7 @@ availableReports["3"] = FamilyCheckoutsPerWeekReport
 availableReports["4"] = DependentCheckoutsPerWeekReport
 availableReports["5"] = ItemsPerCategoryPerMonthReport
 availableReports["6"] = IndividualsByAgeReport
+availableReports["7"] = FamiliesPerZipReport
 
 
 def determineAndCreateReport(report_num):

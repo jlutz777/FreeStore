@@ -395,3 +395,44 @@ class IndividualsByAgeReport(Report):
  
     def getGraph(self, bottle_session):
         raise NotImplementedError("")
+
+
+class FamiliesPerZipReport(Report):
+    """Get the number of families in each zip code"""
+    description = "Familes by zip code"
+
+    def __init__(self):
+        # This groups the checkout dates by week, subtracting two to make
+        # the date be on Saturday instead of Monday
+        sqlQuery = "select zip, count(*) as total"
+        sqlQuery += " from customerfamily inner join"
+        sqlQuery += " dependents on"
+        sqlQuery += " customerfamily.id=dependents.family"
+        sqlQuery += " where dependents.last_name not in ('User')"
+        sqlQuery += " group by zip"
+        sqlQuery += " order by zip"
+
+        super(FamiliesPerZipReport, self).__init__(sqlQuery)
+
+    def getTitleAndHtml(self, db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        allFamilies = reader.fetchall()
+
+        bottle_session[REPORT_SESSION_KEY] = allFamilies
+
+        familiesHtml = '<table><tr><th>Zip</th><th>Total</th></tr>'
+        for row in allFamilies:
+            familiesHtml += "<tr><td class=\"category\">"
+            familiesHtml += str(row[0]) + "</td>"
+            familiesHtml += "<td class=\"count\">" + str(row[1])
+            familiesHtml += "</td></tr>"
+        familiesHtml += "</table>"
+
+        reportInfo = {}
+        reportInfo['title'] = 'Familes by Zip Code'
+        reportInfo['html'] = familiesHtml
+        reportInfo['nograph'] = 'true'
+        return reportInfo
+
+    def getGraph(self, bottle_session):
+        raise NotImplementedError("")
