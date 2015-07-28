@@ -4,7 +4,7 @@ This is the sqlalchemy class for communicating with the shopping item table
 """
 
 from sqlalchemy import Column, Integer, ForeignKey
-import base
+import models.base as base
 
 
 class ShoppingItem(base.Base):

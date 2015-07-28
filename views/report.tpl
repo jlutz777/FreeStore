@@ -44,7 +44,7 @@
   <body>
     % get_menu()
     <select id="reportSelect" onchange="runReport()">
-    % for key, value in report_options.iteritems():
+    % for key, value in report_options.items():
     <option value="{{key}}">{{value.description}}</option>
     % end
     </select>

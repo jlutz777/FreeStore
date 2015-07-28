@@ -7,7 +7,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
-import base
+import models.base as base
 
 from models.shopping_item import ShoppingItem
 from models.customerfamily import CustomerFamily

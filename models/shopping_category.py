@@ -5,7 +5,7 @@ This is the sqlalchemy class for communicating with the shopping category table
 
 from sqlalchemy import Column, Integer, Unicode, Boolean
 from sqlalchemy.orm import relationship
-import base
+import models.base as base
 
 
 class ShoppingCategory(base.Base):

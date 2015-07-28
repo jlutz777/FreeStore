@@ -6,14 +6,14 @@ This is the sqlalchemy class for communicating with the dependents table
 from sqlalchemy import Column, Integer, Unicode, DateTime, Boolean, ForeignKey
 from wtforms import widgets
 
-import base
+import models.base as base
 
 
 class Dependent(base.Base):
     """Sqlalchemy deals model"""
     __tablename__ = "dependents"
 
-    defVal = unicode('')
+    defVal = ''
     idInfo = {}
     idInfo['widget'] = widgets.HiddenInput()
     birthDateInfo = {}

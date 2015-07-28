@@ -442,7 +442,7 @@ def delete_user():
         aaa.delete_user(post_get('username'))
         return dict(ok=True, msg='')
     except Exception as e:
-        print repr(e)
+        log.debug(e)
         return dict(ok=False, msg=e.message)
 
 
@@ -513,5 +513,3 @@ def report_graph_data(db, report_num):
     myReport = determineAndCreateReport(report_num)
 
     return myReport.getGraph(bottle.request.session)
-
-# nothing

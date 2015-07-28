@@ -7,7 +7,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, Integer, Unicode, DateTime
 from sqlalchemy.orm import relationship
-import base
+import models.base as base
 
 from models.dependent import Dependent
 
@@ -17,16 +17,16 @@ class CustomerFamily(base.Base):
     __tablename__ = "customerfamily"
 
     id = Column(Integer, primary_key=True)
-    email = Column('email', Unicode, default=unicode(''))
-    phone = Column('phone', Unicode, default=unicode(''))
-    address = Column('address', Unicode, default=unicode(''))
-    city = Column('city', Unicode, default=unicode(''), nullable=False)
-    state = Column('state', Unicode, default=unicode(''), nullable=False)
-    zip = Column('zip', Unicode, default=unicode(''), nullable=False)
+    email = Column('email', Unicode, default='')
+    phone = Column('phone', Unicode, default='')
+    address = Column('address', Unicode, default='')
+    city = Column('city', Unicode, default='', nullable=False)
+    state = Column('state', Unicode, default='', nullable=False)
+    zip = Column('zip', Unicode, default='', nullable=False)
     datecreated = Column('datecreated', DateTime, nullable=False)
-    comments = Column('comments', Unicode, default=unicode(''))
-    checkoutComments = Column('checkoutcomments', Unicode, default=unicode(''))
-    adminComments = Column('admincomments', Unicode, default=unicode(''))
+    comments = Column('comments', Unicode, default='')
+    checkoutComments = Column('checkoutcomments', Unicode, default='')
+    adminComments = Column('admincomments', Unicode, default='')
     depOrder = 'Dependent.isPrimary.desc()'
     dependents = relationship("Dependent", backref="family", order_by=depOrder)
     visits = relationship("Visit", backref="family", lazy="dynamic")
