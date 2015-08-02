@@ -39,6 +39,7 @@ corkBackend = SqlAlchemyBackend(postgresConn, initialize=False)
 aaa = Cork(backend=corkBackend, email_sender='', smtp_url='')
 
 app = bottle.default_app()
+#app.catchall = False
 dbPlugin = sqlalchemy.Plugin(models.base.engine, keyword='db')
 app.install(dbPlugin)
 
@@ -67,6 +68,10 @@ def postd():
 
 def post_get(name, default=''):
     return bottle.request.POST.get(name, default).strip()
+
+
+def get_get(name, default=''):
+    return bottle.request.GET.get(name, default).strip()
 
 
 def td_format(td_object):
@@ -180,6 +185,8 @@ def customer(db, customer_id=None):
     visit_url_root = get_redirect_url('checkout')
     checkin_url = get_redirect_url('checkin')
     visits = None
+    failedValidation = False
+
     if bottle.request.method == 'POST':
         family = None
         try:
@@ -202,6 +209,8 @@ def customer(db, customer_id=None):
                 db.commit()
 
                 return bottle.redirect(next_url)
+            else:
+                failedValidation = True
         except HTTPResponse as hres:
             raise hres
         except HTTPError as herr:
@@ -210,14 +219,16 @@ def customer(db, customer_id=None):
             log.debug(ex)
             db.rollback()
             visits = family.visits
-    elif customer_id is not None:
+    if customer_id is not None and \
+       (failedValidation or bottle.request.method == 'GET'):
         customerQuery = db.query(CustomerFamily)
         fams = customerQuery.filter(CustomerFamily.id == customer_id)
         if len(fams.all()) != 1:
             return "Customer request bad"
-        form = CustomerForm(obj=fams[0])
+        if not failedValidation:
+            form = CustomerForm(obj=fams[0])
         visits = fams[0].visits
-    else:
+    elif bottle.request.method == 'GET':
         # Mark one of the two dependents as primary
         form.dependents[0].isPrimary.data = True
 
@@ -499,7 +510,9 @@ def report_info(db, report_num):
     authorize(fail_redirect='sorry_page', role='admin')
 
     sess = bottle.request.session
-    myReport = determineAndCreateReport(report_num)
+    startDate = get_get("startDate", "01/01/1901")
+    endDate = get_get("endDate", "01/01/2100")
+    myReport = determineAndCreateReport(report_num, startDate, endDate)
     reportInfo = myReport.getTitleAndHtml(db, sess)
     jsonInfo = json.dumps(reportInfo, default=json_util.default)
     return HTTPResponse(jsonInfo, status=200,

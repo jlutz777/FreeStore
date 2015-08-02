@@ -29,7 +29,7 @@
       width: 50px;
     }
 
-    #report_chooser
+    #report_filter
     {
        height: 100px;
     }
@@ -48,13 +48,34 @@
   </head>
   <body>
     % get_menu()
-    <div id="report_chooser">
-    <span>Choose a report:</span>
-    <select id="reportSelect" onchange="runReport()">
-    % for key, value in report_options.items():
-    <option value="{{key}}">{{value.description}}</option>
-    % end
-    </select>
+    <script src="/js/jquery.mask.min.js"></script>
+    <div class="row">
+    <div class="form-group ">
+        <label for="reportselect" class="col-sm-2 control-label">Choose a report:</label>
+        <div class="col-sm-8">
+            <select id="reportselect" onchange="runReport()">
+            % for key, value in report_options.items():
+                <option value="{{key}}">{{value.description}}</option>
+            % end
+            </select>
+        </div>
+    </div>
+    </div>
+    <div class="row">
+    <div class="form-group ">
+        <label for="startdate" class="col-sm-2 control-label">Start Date:</label>
+        <div class="col-sm-8">
+            <input class="form-control" id="startdate" name="startdate">
+        </div>
+    </div>
+    </div>
+    <div class="row">
+    <div class="form-group ">
+        <label for="enddate" class="col-sm-2 control-label">End Date:</label>
+        <div class="col-sm-8">
+            <input class="form-control" id="enddate" name="enddate">
+        </div>
+    </div>
     </div>
     <div id="title"></div>
     <div id="info"></div>
@@ -69,8 +90,21 @@ function parse(spec)
 
 function runReport()
 {
-    var selectedReportNum = document.getElementById("reportSelect").value;
-    $.ajax({ url: "/report/info/"+selectedReportNum, success: function(reportInfo) {
+    var selectedReportNum = $("#reportselect").val();
+    var startDate = $("#startdate").val();
+    var endDate = $("#enddate").val();
+    var reportUrl = "/report/info/" + selectedReportNum + "?";
+    if (startDate !== "")
+    {
+        reportUrl += "startDate=" + startDate + "&";
+    }
+    if (endDate !== "")
+    {
+        reportUrl += "endDate=" + endDate;
+    }
+    
+    
+    $.ajax({ url: reportUrl, success: function(reportInfo) {
       $("#title").text(reportInfo.title);
       $("#info").html(reportInfo.html);
       if (!reportInfo.nograph)
@@ -84,7 +118,11 @@ function runReport()
     } });
 }
 
-$("#reportSelect")[0].selectedIndex = 0;
-runReport();
+$(document).ready(function () {
+    $('#startdate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
+    $('#enddate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
+    $("#reportSelect")[0].selectedIndex = 0;
+    runReport();
+});
 </script>
 </html>

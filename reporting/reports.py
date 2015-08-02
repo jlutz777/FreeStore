@@ -35,12 +35,16 @@ class FamilyTotalOverTimeReport(Report):
     """Get the customer family count over time"""
     description = "Families over time"
 
-    def __init__(self):
+    def __init__(self, start_date='', end_date=''):
+        
+        # Convert start_date and end_date into dates!
         sqlQuery = "select customerfamily.datecreated::date, count(*)"
         sqlQuery += " from customerfamily inner join dependents on"
         sqlQuery += " customerfamily.id=dependents.family"
         sqlQuery += " where dependents.primary=True and"
-        sqlQuery += " dependents.last_name not in ('User')"
+        sqlQuery += " dependents.last_name not in ('User') and"
+        sqlQuery += " datecreated > '" + start_date + "' and "
+        sqlQuery += " datecreated < '" + end_date + "'"
         sqlQuery += " group by datecreated::date"
         sqlQuery += " order by datecreated::date"
 
@@ -89,11 +93,13 @@ class DependentsTotalOverTimeReport(Report):
     """Get the dependents count over time"""
     description = "Dependents over time"
 
-    def __init__(self):
+    def __init__(self, start_date='', end_date=''):
         sqlQuery = "select customerfamily.datecreated::date, count(*)"
         sqlQuery += " from dependents inner join customerfamily on"
         sqlQuery += " customerfamily.id=dependents.family"
-        sqlQuery += " where dependents.last_name not in ('User')"
+        sqlQuery += " where dependents.last_name not in ('User') and"
+        sqlQuery += " datecreated > '" + start_date + "' and "
+        sqlQuery += " datecreated < '" + end_date + "'"
         sqlQuery += " group by datecreated::date"
         sqlQuery += " order by datecreated::date"
 
@@ -142,7 +148,7 @@ class FamilyCheckoutsPerWeekReport(Report):
     """Get the checkouts per week"""
     description = "Family Checkouts each week"
 
-    def __init__(self):
+    def __init__(self, start_date='', end_date=''):
         # This groups the checkout dates by week, subtracting two to make
         # the date be on Saturday instead of Monday
         sqlQuery = "select date_trunc('week', visits.checkout::date+"
@@ -154,7 +160,9 @@ class FamilyCheckoutsPerWeekReport(Report):
         sqlQuery += " customerfamily.id=dependents.family"
         sqlQuery += " where dependents.primary=True"
         sqlQuery += " and dependents.last_name not in ('User')"
-        sqlQuery += " and visits.checkout IS NOT NULL"
+        sqlQuery += " and visits.checkout IS NOT NULL and"
+        sqlQuery += " visits.checkout > '" + start_date + "' and "
+        sqlQuery += " visits.checkout < '" + end_date + "'"
         sqlQuery += " group by checkout2"
         sqlQuery += " order by checkout2"
 
@@ -199,7 +207,7 @@ class DependentCheckoutsPerWeekReport(Report):
     """Get the checkouts per week"""
     description = "Dependent Checkouts each week"
 
-    def __init__(self):
+    def __init__(self, start_date='', end_date=''):
         # This groups the checkout dates by week, subtracting two to make
         # the date be on Saturday instead of Monday
         sqlQuery = "select date_trunc('week', visits.checkout::date+"
@@ -210,7 +218,9 @@ class DependentCheckoutsPerWeekReport(Report):
         sqlQuery += " inner join dependents on"
         sqlQuery += " customerfamily.id=dependents.family"
         sqlQuery += " where dependents.last_name not in ('User')"
-        sqlQuery += " and visits.checkout IS NOT NULL"
+        sqlQuery += " and visits.checkout IS NOT NULL and"
+        sqlQuery += " visits.checkout > '" + start_date + "' and "
+        sqlQuery += " visits.checkout < '" + end_date + "'"
         sqlQuery += " group by checkout2"
         sqlQuery += " order by checkout2"
 
@@ -255,7 +265,7 @@ class ItemsPerCategoryPerMonthReport(Report):
     """Get the number of checked out items per category per month"""
     description = "Items Per Category Checked Out Per Month"
 
-    def __init__(self):
+    def __init__(self, start_date='', end_date=''):
         # This groups the checkout dates by month
         sqlQuery = "select date_trunc('month', visits.checkout::date)"
         sqlQuery += " as checkout2, shopping_category.name as name,"
@@ -270,7 +280,9 @@ class ItemsPerCategoryPerMonthReport(Report):
         sqlQuery += " shopping_category.id = shopping_item.category"
         sqlQuery += " where dependents.last_name not in ('User')"
         sqlQuery += " and dependents.primary = True"
-        sqlQuery += " and visits.checkout IS NOT NULL"
+        sqlQuery += " and visits.checkout IS NOT NULL and"
+        sqlQuery += " visits.checkout > '" + start_date + "' and "
+        sqlQuery += " visits.checkout < '" + end_date + "'"
         sqlQuery += " group by checkout2, name"
         sqlQuery += " order by checkout2"
 
@@ -353,7 +365,7 @@ class IndividualsByAgeReport(Report):
     """Get the dependents by age"""
     description = "Individuals By Age"
 
-    def __init__(self):
+    def __init__(self, start_date='', end_date=''):
         sqlQuery = "select count(*) as count, CASE"
         sqlQuery += " when birth_year between 0 AND 2 THEN '0-2'"
         sqlQuery += " WHEN birth_year BETWEEN 3 AND 5 THEN '3-5'"
@@ -367,7 +379,10 @@ class IndividualsByAgeReport(Report):
         sqlQuery += " age(birthdate::date)) as birth_year from dependents"
         sqlQuery += " inner join customerfamily on"
         sqlQuery += " customerfamily.id=dependents.family"
-        sqlQuery += " where last_name not in ('User')) as deps"
+        sqlQuery += " where last_name not in ('User') and"
+        sqlQuery += " customerfamily.datecreated > '" + start_date + "' and "
+        sqlQuery += " customerfamily.datecreated < '" + end_date + "'"
+        sqlQuery += ") as deps"
         sqlQuery += " group by age"
         sqlQuery += " order by count desc"
         
@@ -401,14 +416,16 @@ class FamiliesPerZipReport(Report):
     """Get the number of families in each zip code"""
     description = "Familes by zip code"
 
-    def __init__(self):
+    def __init__(self, start_date='', end_date=''):
         # This groups the checkout dates by week, subtracting two to make
         # the date be on Saturday instead of Monday
         sqlQuery = "select zip, count(*) as total"
         sqlQuery += " from customerfamily inner join"
         sqlQuery += " dependents on"
         sqlQuery += " customerfamily.id=dependents.family"
-        sqlQuery += " where dependents.last_name not in ('User')"
+        sqlQuery += " where dependents.last_name not in ('User') and"
+        sqlQuery += " customerfamily.datecreated > '" + start_date + "' and "
+        sqlQuery += " customerfamily.datecreated < '" + end_date + "'"
         sqlQuery += " group by zip"
         sqlQuery += " order by zip"
 

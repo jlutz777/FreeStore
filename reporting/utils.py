@@ -18,9 +18,9 @@ availableReports["6"] = IndividualsByAgeReport
 availableReports["7"] = FamiliesPerZipReport
 
 
-def determineAndCreateReport(report_num):
+def determineAndCreateReport(report_num, startDate='', endDate=''):
     """Determine the report"""
-    return availableReports[report_num]()
+    return availableReports[report_num](startDate, endDate)
 
 
 def getLineGraph(data, width=600, height=400,

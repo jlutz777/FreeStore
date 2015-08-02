@@ -67,7 +67,7 @@
 % def get_field_errors(field):
     % if field.errors:
         % for e in field.errors:
-            <p class="help-block" style="margin-left:20px; color:red;">{{ e }}</p>
+            <span class="help-block">{{ e }}</p>
         % end
     % end
 % end
