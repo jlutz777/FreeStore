@@ -1,32 +1,40 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="content-type">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<link rel="stylesheet" href="/css/bootstrap.min.css">
-<link rel="stylesheet" href="/css/bootstrap-theme.min.css">
-<script src="/js/bootstrap.min.js"></script>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta content="text/html; charset=utf-8" http-equiv="content-type">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+    <script src="/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <form action="login" method="post" name="Login" class="form-signin">
-            <div class="header">
-                <h2 class="form-signin-heading">Free Store Customer Application</h2>
+    <div class="container" style="width:600px">
+        <form action="login" method="POST" name="Login" role="form">
+            <h2 class="h2 text-center">Free Store Customer Application</h2>
+            <div class="form-group" style="margin-top:30px">
+                <div class="row">
+                <label for="username" class="col-sm-4 control-label">User name</label>
+                <div class="col-sm-8">
+                    <input autofocus class="form-control" id="username" name="username" type="text" />
+                </div>
+                </div>
             </div>
-            <div class="row">
-                <input name="username" type="text" class="input-block-level" placeholder="User name">
+            <div class="form-group">
+                <div class="row">
+                <label for="password" class="col-sm-4 control-label">Password</label>
+                <div class="col-sm-8">
+                    <input autofocus class="form-control" id="password" name="password" type="password" />
+                </div>
+                </div>
             </div>
+            % if defined('error_message'):
             <div class="row">
-                <input name="password" type="password" class="input-block-level" placeholder="Password">
+                <span>* {{ error_message }}</span>
             </div>
-            <div class="row">
-                <button class="btn btn-large btn-primary" type="submit">Sign in</button>
-            </div>
-            <div class="row">
-            % if defined('errMessage'):
-                <span>* {{ errMessage }}</span>
             % end
+            <div class="row text-center">
+                <button class="btn btn-large btn-primary" type="submit">Sign in</button>
             </div>
         </form>
     </div>

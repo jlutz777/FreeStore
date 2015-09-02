@@ -375,12 +375,21 @@ def login():
     username = post_get('username')
     password = post_get('password')
     success_url = get_redirect_url('')
-    fail_url = get_redirect_url('login')
+    error_message = ''
 
-    loginDict = {}
-    loginDict["success_redirect"] = success_url
-    loginDict["fail_redirect"] = fail_url
-    aaa.login(username, password, **loginDict)
+    try:
+        loginDict = {}
+        loginDict["success_redirect"] = success_url
+        success = aaa.login(username, password, **loginDict)
+        if not success:
+            error_message = 'User name and/or password were incorrect.'
+    # redirects throw an exception, so ignore
+    except HTTPResponse:
+        raise
+    except Exception:
+        error_message = 'Login had an unknown error.'
+        log.exception(error_message)
+    return template('login', error_message=error_message)
 
 
 @app.route('/logout')
