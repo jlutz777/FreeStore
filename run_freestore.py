@@ -173,7 +173,7 @@ def currentVisits(db):
 
 
 @app.route('/customer', method=['GET', 'POST'])
-@app.route('/customer/<customer_id>', method=['GET', 'POST'])
+@app.route('/customer/<customer_id:int>', method=['GET', 'POST'])
 def customer(db, customer_id=None):
     authorize()
 
@@ -223,8 +223,13 @@ def customer(db, customer_id=None):
        (failedValidation or bottle.request.method == 'GET'):
         customerQuery = db.query(CustomerFamily)
         fams = customerQuery.filter(CustomerFamily.id == customer_id)
-        if len(fams.all()) != 1:
-            return "Customer request bad"
+        
+        famCount = len(fams.all())
+        if famCount == 0:
+            return "No customers were found with this id"
+        elif famCount > 1:
+            return "There were multiple customers with the same id"
+        
         if not failedValidation:
             form = CustomerForm(obj=fams[0])
         visits = fams[0].visits
@@ -286,7 +291,7 @@ def visit(db):
     return bottle.redirect(checkout_url)
 
 
-@app.route('/checkout/<visit_id>', method=['GET', 'POST'])
+@app.route('/checkout/<visit_id:int>', method=['GET', 'POST'])
 def checkout(db, visit_id):
     authorize()
 
@@ -301,8 +306,13 @@ def checkout(db, visit_id):
     post_url = get_redirect_url()
 
     visits = db.query(Visit).filter(Visit.id == visit_id)
-    if len(visits.all()) != 1:
-        return "Visit request bad"
+    
+    visitCount = len(visits.all())
+    if visitCount == 0:
+        return "No customer visits were found with this id"
+    elif visitCount > 1:
+        return "There were multiple customer visits with the same id"
+
     visit = visits[0]
 
     now = datetime.utcnow()
@@ -467,6 +477,7 @@ def create_role():
         aaa.create_role(post_get('role'), post_get('level'))
         return dict(ok=True, msg='')
     except Exception as e:
+        log.debug(e)
         return dict(ok=False, msg=e.message)
 
 
@@ -478,10 +489,11 @@ def delete_role():
         aaa.delete_role(post_get('role'))
         return dict(ok=True, msg='')
     except Exception as e:
+        log.debug(e)
         return dict(ok=False, msg=e.message)
 
 
-@app.route('/customer/<customer_id>', method=['DELETE'])
+@app.route('/customer/<customer_id:int>', method=['DELETE'])
 def delete_customer(db, customer_id):
     authorize(fail_redirect='sorry_page', role='admin')
 
@@ -492,6 +504,7 @@ def delete_customer(db, customer_id):
         db.commit()
         return dict(ok=True, msg='')
     except Exception as e:
+        log.debug(e)
         return dict(ok=False, msg=e.message)
 
 # Section: Report pages
@@ -507,7 +520,7 @@ def report_landing():
     return {'report_options': availableReports}
 
 
-@app.get('/report/info/<report_num>')
+@app.get('/report/info/<report_num:int>')
 def report_info(db, report_num):
     authorize(fail_redirect='sorry_page', role='admin')
 
@@ -531,7 +544,7 @@ def report_info(db, report_num):
 
 
 
-@app.get('/report/graphdata/<report_num>')
+@app.get('/report/graphdata/<report_num:int>')
 def report_graph_data(db, report_num):
     authorize(fail_redirect='sorry_page', role='admin')
 
