@@ -167,9 +167,9 @@ def currentVisits(db):
 
     currentVisitsArray = sorted(currentVisitsArray, key=itemgetter("lastName"))
 
+    bottle.response.content_type = 'application/json'
     jsonInfo = json.dumps(currentVisitsArray, default=json_util.default)
-    return HTTPResponse(jsonInfo, status=200,
-                        header={'Content-Type': 'application/json'})
+    return jsonInfo
 
 
 @app.route('/customer', method=['GET', 'POST'])
@@ -256,9 +256,11 @@ def customersearch(db):
     for dep in deps:
         if dep.family_id is not None:
             depDict.append(dep.getDict())
+
+    bottle.response.content_type = 'application/json'
     jsonInfo = json.dumps(depDict, default=json_util.default)
-    return HTTPResponse(jsonInfo, status=200,
-                        header={'Content-Type': 'application/json'})
+
+    return jsonInfo
 
 
 @app.route('/checkin', method=['GET'])
@@ -510,19 +512,37 @@ def report_info(db, report_num):
     authorize(fail_redirect='sorry_page', role='admin')
 
     sess = bottle.request.session
+    
+    # Really simple date checking to avoid sql injection
     startDate = get_get("startDate", "01/01/1901")
     endDate = get_get("endDate", "01/01/2100")
+    startDate = datetime.strptime(startDate, "%m/%d/%Y")
+    endDate = datetime.strptime(endDate, "%m/%d/%Y")
+    startDate = startDate.strftime("%m/%d/%Y")
+    endDate = endDate.strftime("%m/%d/%Y")
+
     myReport = determineAndCreateReport(report_num, startDate, endDate)
     reportInfo = myReport.getTitleAndHtml(db, sess)
+
+    bottle.response.content_type = 'application/json'
     jsonInfo = json.dumps(reportInfo, default=json_util.default)
-    return HTTPResponse(jsonInfo, status=200,
-                        header={'Content-Type': 'application/json'})
+
+    return jsonInfo
+
 
 
 @app.get('/report/graphdata/<report_num>')
 def report_graph_data(db, report_num):
     authorize(fail_redirect='sorry_page', role='admin')
 
-    myReport = determineAndCreateReport(report_num)
+    # Really simple date checking to avoid sql injection
+    startDate = get_get("startDate", "01/01/1901")
+    endDate = get_get("endDate", "01/01/2100")
+    startDate = datetime.strptime(startDate, "%m/%d/%Y")
+    endDate = datetime.strptime(endDate, "%m/%d/%Y")
+    startDate = startDate.strftime("%m/%d/%Y")
+    endDate = endDate.strftime("%m/%d/%Y")
+
+    myReport = determineAndCreateReport(report_num, startDate, endDate)
 
     return myReport.getGraph(bottle.request.session)

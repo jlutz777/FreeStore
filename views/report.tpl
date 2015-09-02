@@ -121,7 +121,7 @@ function runReport()
 $(document).ready(function () {
     $('#startdate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
     $('#enddate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
-    $("#reportSelect")[0].selectedIndex = 0;
+    $("#reportselect")[0].selectedIndex = 0;
     runReport();
 });
 </script>
