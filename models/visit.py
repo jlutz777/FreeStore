@@ -52,7 +52,6 @@ class Visit(base.Base):
                 thisShoppingItem = posted.get(itemKey, "")
                 if thisShoppingItem != "" and thisShoppingItem != "0":
                     item = ShoppingItem()
-                    # for editing:  item.id = ???
                     item.category_id = category[0]
                     item.dependent_id = dependent.id
                     item.quantity = thisShoppingItem
