@@ -74,6 +74,11 @@ $(document).ready(function () {
         {
             continueSubmit = confirm("Are you sure you want to check out?");
         }
+        // Clear the onload so you don't get the message
+        if (continueSubmit)
+        {
+            window.onbeforeunload = null;
+        }
         return continueSubmit;
     });
 
@@ -216,6 +221,34 @@ function showPrevTotals()
     }
     $("#month_prev_totals").html(prevText);
 }
+
+window.onbeforeunload = function ()
+{
+    var somethingIsNotZero = false;
+    $('.shopping_item').each(function()
+    {
+        var item_name = $(this)[0].name;
+        var temp = item_name.split("row_")[1];
+        temp = temp.split("_col_");
+        var dep_id = parseInt(temp[0], 10);
+        var cat_id = parseInt(temp[1], 10);
+        
+        var orig_item_val = $(this).val();
+        var item_val = Number(orig_item_val);
+
+        // Make sure only valid numbers can be typed in the inputs
+        if (!isNaN(item_val) && orig_item_val !== '' && item_val > 0)
+        {
+            somethingIsNotZero = true;
+            return;
+        }
+    });
+    
+    if (somethingIsNotZero)
+    {
+       return "You didn't check out yet!  Click Stay On Page to actually check out below.";
+    }
+};
 </script>
 <div class="your-form">
     <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
