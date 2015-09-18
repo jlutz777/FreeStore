@@ -50,7 +50,7 @@ $(window).load(function()
 });
 </script>
 <div class="page-header">
-    <h3>Check Out Customer</h3>
+    <h3>Current Shoppers</h3>
 </div>
 <div id="hbox">
   <div id="currentVisits">

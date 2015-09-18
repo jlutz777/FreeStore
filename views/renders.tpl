@@ -50,7 +50,7 @@
         % end
         <li class="{{isCheckin}}"><a href="/checkin">Check In</a>
         <li class="{{isCustomer}}"><a href="/customer">Registration</a></li>
-        <li class="{{isCheckoutSearch}}"><a href="/">Check Out</a>
+        <li class="{{isCheckoutSearch}}"><a href="/">Current Shoppers</a>
         % if aaa.current_user.role == 'admin':
         <li class="{{isAdmin}}"><a href="/admin">Admin</a></li>
         <li class="{{isReport}}"><a href="/report">Reports</a></li>
