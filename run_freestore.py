@@ -39,7 +39,7 @@ corkBackend = SqlAlchemyBackend(postgresConn, initialize=False)
 aaa = Cork(backend=corkBackend, email_sender='', smtp_url='')
 
 app = bottle.default_app()
-#app.catchall = False
+#app.catchall = False 
 dbPlugin = sqlalchemy.Plugin(models.base.engine, keyword='db')
 app.install(dbPlugin)
 
