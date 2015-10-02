@@ -453,3 +453,49 @@ class FamiliesPerZipReport(Report):
 
     def getGraph(self, bottle_session):
         raise NotImplementedError("")
+
+
+class CheckoutFrequencyPerMonthReport(Report):
+    """Get the frequency of visits per family per month"""
+    description = "Visit Frequency Per Month"
+
+    def __init__(self, start_date='', end_date=''):
+        # I am only counting visits that have a shopping item on them, otherwise I'm not counting it
+        sqlQuery = "select checkout2 as checkout_date, count as frequency, count(count) as families"
+        sqlQuery += " from (select checkout2, id, count(count)"
+        sqlQuery += " from (select date_trunc('month', visits.checkout::date) as checkout2, customerfamily.id"
+        sqlQuery += ", count(visits.id) as count from visits inner join customerfamily"
+        sqlQuery += " on customerfamily.id=visits.family inner join dependents on"
+        sqlQuery += " customerfamily.id=dependents.family inner join shopping_item on"
+        sqlQuery += " shopping_item.visit=visits.id where dependents.primary=True and"
+        sqlQuery += " dependents.last_name not in ('User') and visits.checkout IS NOT NULL and"
+        sqlQuery += " visits.checkout >= '" + start_date + "' and visits.checkout <= '" + end_date + "'"
+        sqlQuery += " group by checkout2, customerfamily.id,visits.id order by checkout2"
+        sqlQuery += ") as foo group by checkout2, id) as foo2"
+        sqlQuery += " group by checkout2, count order by checkout2, count"
+
+        super(CheckoutFrequencyPerMonthReport, self).__init__(sqlQuery)
+
+    def getTitleAndHtml(self, db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        allFrequencies = reader.fetchall()
+
+        bottle_session[REPORT_SESSION_KEY] = allFrequencies
+
+        frequencyHtml = '<table><tr><th>Date</th><th>Frequency</th><th>Family Count</th></tr>'
+        for row in allFrequencies:
+            frequencyHtml += "<tr><td class=\"date\">"
+            frequencyHtml += row[0].strftime("%m/%d/%Y") + "</td>"
+            frequencyHtml += "<td class=\"category\">" + str(row[1])
+            frequencyHtml += "</td><td class=\"category\">" + str(row[2])
+            frequencyHtml += "</td></tr>"
+        frequencyHtml += "</table>"
+
+        reportInfo = {}
+        reportInfo['title'] = 'Visit Frequency Per Month'
+        reportInfo['html'] = frequencyHtml
+        reportInfo['nograph'] = 'true'
+        return reportInfo
+
+    def getGraph(self, bottle_session):
+        raise NotImplementedError("")
