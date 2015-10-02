@@ -17,30 +17,33 @@
       font-weight: bold;
   }
 </style>
+<script src='/js/ractive.min.js'></script>
+<script id='template' type='text/ractive'>
+    [[#visits]]
+    <p>
+      <a class="customer" href="/customer/[[familyId]]">[[lastName]], [[firstName]]</a>: [[timeInStore]]
+    </p>
+    <p style="margin-bottom:15px">
+      <a href="/checkout/[[visitId]]" role="button" class="btn btn-default">Checkout [[lastName]]</a>
+    </p>
+    [[/visits]]
+</script>
 <script type="text/javascript">
-var currentVisitsElem;
-
 $(window).load(function()
 {
-  currentVisitsElem = document.getElementById('currentVisits');
+    Ractive.DEBUG = false;
+    Ractive.defaults.delimiters = [ '[[', ']]' ];
+    var ractive = new Ractive({
+      el: '#currentVisits',
+      template: '#template',
+      data: { visits: [] }
+    });
 
   function getCurrentVisits()
   {
      $.get('/currentVisits', function(data)
       {
-          var currVisitsHTML = '';
-          var i;
-          for (i=0; i<data.length; i++)
-          {
-            currVisitsHTML += '<p><a class="customer" href="/customer/' + data[i].familyId + '">';
-            currVisitsHTML += data[i].lastName + ", " + data[i].firstName;
-            currVisitsHTML += "</a>: " + data[i].timeInStore;
-            currVisitsHTML += '</p><p style="margin-bottom:15px"><a href="/checkout/' + data[i].visitId;
-            currVisitsHTML += '" role="button" class="btn btn-default">Checkout ';
-            currVisitsHTML += data[i].lastName + '</a>';
-            currVisitsHTML += '</p>';
-          }
-          currentVisitsElem.innerHTML = currVisitsHTML;
+          ractive.set('visits', data);
       });
   }
 
