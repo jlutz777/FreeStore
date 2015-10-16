@@ -300,7 +300,9 @@ window.onbeforeunload = function ()
                 % end
                 <th style="text-align:center; width:30px;">&nbsp;&nbsp;Age&nbsp;&nbsp;</th>
                 % for option in categoryChoices:
+                % if not option[7]:
                 <th style="text-align:center; width:75px;">{{option[1]}}</th>
+                % end
                 % end
             </tr>
             % depIndex = -1
@@ -311,6 +313,7 @@ window.onbeforeunload = function ()
                 <td class="dep-{{dependent.id}}-name">{{dependent.firstName}}</td>
                 <td style="text-align: center;">{{dependentAge}}</td>
                 % for option in categoryChoices:
+                % if not option[7]:
                 <td style="text-align: center;">
                 % # This is a convention used elsewhere to more easily figure out
                 % # which dependent and category this input is for 
@@ -331,6 +334,7 @@ window.onbeforeunload = function ()
                 <input type="hidden" name="{{inputName}}" value="{{thisVal}}"></input>
                 % end
                 </td>
+                % end
                 % end
             </tr>
             % end

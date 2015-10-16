@@ -299,9 +299,8 @@ def checkout(db, visit_id):
     previousShoppingItems = {}
 
     categoryChoices = [(s.id, s.name, s.dailyLimit, s.monthlyLimit,
-                       s.familyWideLimit, s.minAge, s.maxAge) for s
+                       s.familyWideLimit, s.minAge, s.maxAge, s.disabled) for s
                        in db.query(ShoppingCategory)
-                       .filter(ShoppingCategory.disabled == false())
                        .order_by('"order"')]
     post_url = get_redirect_url()
 
@@ -441,6 +440,22 @@ def sorry_page():
 
 @app.get('/admin')
 @bottle.view('admin')
+def admin():
+    """Only admin users can see this"""
+    authorize(fail_redirect='sorry_page', role='admin')
+
+    bottle.BaseTemplate.defaults['page'] = '/admin'
+
+    adminDict = {}
+    adminDict["current_user"] = aaa.current_user
+    adminDict["users"] = aaa.list_users()
+    adminDict["roles"] = aaa.list_roles()
+
+    return adminDict
+
+
+@app.get('/admin_new')
+@bottle.view('admin_new')
 def admin():
     """Only admin users can see this"""
     authorize(fail_redirect='sorry_page', role='admin')
