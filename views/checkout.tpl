@@ -79,7 +79,11 @@ $(document).ready(function ()
             
         if (!alertLimitReached())
         {
-            $('#confirm_modal').modal({show:true});
+            // Only check out if the alert wasn't shown
+            if (!($("#alert_modal").data('bs.modal') || {}).isShown)
+            {
+                $('#confirm_modal').modal({show:true});
+            }
         }
         
         return false;
@@ -232,7 +236,7 @@ function showPrevTotals()
     $("#month_prev_totals").html(prevText);
 }
 
-window.onbeforeunload = function ()
+function warnBeforeNavigate()
 {
     var somethingIsNotZero = false;
     $('.shopping_item').each(function()
@@ -259,6 +263,8 @@ window.onbeforeunload = function ()
        return "You didn't check out yet!  Click Stay On Page to actually check out below.";
     }
 };
+
+window.onbeforeunload = warnBeforeNavigate;
 </script>
 <div id="confirm_modal" class="modal fade">
   <div class="modal-dialog">
