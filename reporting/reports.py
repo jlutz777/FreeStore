@@ -3,9 +3,12 @@ Do all the work for reporting
 """
 
 import abc
-import reporting
-import pandas as pd
 import logging
+import os
+import pandas as pd
+import pickle
+import reporting
+import tempfile
 
 logging.basicConfig(format='localhost - - [%(asctime)s] %(message)s',
                     level=logging.DEBUG)
@@ -13,6 +16,27 @@ log = logging.getLogger(__name__)
 
 
 REPORT_SESSION_KEY = 'report_info'
+
+
+def storeCookieInfo(sess, data):
+    fd, temp_path = tempfile.mkstemp()
+    pickled = pickle.dumps(data, 2)
+    os.write(fd, pickled)
+    os.close(fd)
+    sess[REPORT_SESSION_KEY] = temp_path
+
+
+def retrieveCookieInfo(sess):
+    fileName = sess[REPORT_SESSION_KEY]
+    with open(fileName, 'rb') as f:
+        data = pickle.loads(f.read())
+    
+    if fileName.startswith('/tmp/'):
+        os.remove(fileName)
+    else:
+        log.debug("Couldn't delete: " + fileName)
+    
+    return data
 
 
 class Report:
@@ -53,8 +77,8 @@ class FamilyTotalOverTimeReport(Report):
     def getTitleAndHtml(self, db, bottle_session):
         reader = db.execute(self.sqlQuery)
         categoryTotals = reader.fetchall()
-
-        bottle_session[REPORT_SESSION_KEY] = categoryTotals
+        
+        storeCookieInfo(bottle_session, categoryTotals)
 
         totalFamilyCount = 0
         familyCountsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
@@ -72,7 +96,8 @@ class FamilyTotalOverTimeReport(Report):
         return reportInfo
 
     def getGraph(self, bottle_session):
-        categoryTotals = bottle_session[REPORT_SESSION_KEY]
+        categoryTotals = retrieveCookieInfo(bottle_session)
+        
         # Loop through and keep a running total to show the increase over time
         columns = ["date", "count"]
         results = []
@@ -109,7 +134,7 @@ class DependentsTotalOverTimeReport(Report):
         reader = db.execute(self.sqlQuery)
         categoryTotals = reader.fetchall()
 
-        bottle_session[REPORT_SESSION_KEY] = categoryTotals
+        storeCookieInfo(bottle_session, categoryTotals)
 
         totalFamilyCount = 0
         familyCountsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
@@ -127,7 +152,7 @@ class DependentsTotalOverTimeReport(Report):
         return reportInfo
 
     def getGraph(self, bottle_session):
-        categoryTotals = bottle_session[REPORT_SESSION_KEY]
+        categoryTotals = retrieveCookieInfo(bottle_session)
         # Loop through and keep a running total to show the increase over time
         columns = ["date", "count"]
         results = []
