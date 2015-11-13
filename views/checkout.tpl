@@ -291,23 +291,25 @@ window.onbeforeunload = function ()
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-<div class="your-form">
+<div class="your-form container-fluid">
     <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
     <div class="page-header">
     <h3>Checkout</h3>
     </div>
-    <div class="row" style="margin-left:0px; margin-right:0px">
     % if visit.family.adminComments is not None and visit.family.adminComments != '':
+    <div class="row">
     <div class="form-group ">
-        <label class="col-sm-2 control-label" style="color:red">ADDITIONAL COMMENTS</label>
-        <div class="col-sm-10">
+        <label class="col-sm-4 control-label" style="color:red">ADDITIONAL COMMENTS</label>
+        <div class="col-sm-8">
             <label style="color:red">{{visit.family.adminComments}}</label>
         </div>
     </div>
+    </div>
     % end
+    <div class="row">
     <div class="form-group ">
-        <label for="comments" class="col-sm-2 control-label">Checkout Comments</label>
-        <div class="col-sm-10">
+        <label for="comments" class="col-sm-4 control-label">Checkout Comments</label>
+        <div class="col-sm-8">
             % if visit.family.checkoutComments is not None and visit.family.checkoutComments != '':
             <input class="form-control" id="comments" name="comments" type="text" value="{{visit.family.checkoutComments}}">
             % else:
@@ -315,23 +317,27 @@ window.onbeforeunload = function ()
             % end
         </div>
     </div>
+    </div>
+    <div class="row">
     <div class="form-group ">
-        <label class="col-sm-2 control-label">Checkin Time</label>
-        <div class="col-sm-10">
+        <label class="col-sm-4 control-label">Checkin Time</label>
+        <div class="col-sm-8">
             <label>{{visit.checkin.strftime("%I:%M:%S %p")}} ({{timeInStore}} in store)</label>
             <input type="hidden" id="checkin" name="checkin" type="text" value="{{visit.checkin.strftime("%m/%d/%Y %H:%M:%S")}}" />
             <input type="hidden" id="family_id" name="family_id" value="{{visit.family.id}}" />
         </div>
     </div>
+    </div>
+    <div class="row">
     <div class="form-group ">
-        <label class="col-sm-2 control-label">This Month Previous Totals:</label>
-        <div class="col-sm-10" id="month_prev_totals">
+        <label class="col-sm-4 control-label">This Month Previous Totals:</label>
+        <div class="col-sm-8" id="month_prev_totals">
             (None)
         </div>
     </div>
     </div>
-    <div class="row" style="margin-top:20px; margin-left:0px; margin-right:0px">
-        <table>
+    <div class="row" style="margin-top:20px;">
+        <table class="col-sm-12">
             <tr>
                 % for dependent in visit.family.dependents:
                     % if dependent.isPrimary:
@@ -339,10 +345,10 @@ window.onbeforeunload = function ()
                         % break
                     % end
                 % end
-                <th style="text-align:center; width:30px;">&nbsp;&nbsp;Age&nbsp;&nbsp;</th>
+                <th style="text-align:center;">&nbsp;&nbsp;Age&nbsp;&nbsp;</th>
                 % for option in categoryChoices:
                 % if not option[7]:
-                <th style="text-align:center; width:75px;">{{option[1]}}</th>
+                <th style="text-align:center;">{{option[1]}}</th>
                 % end
                 % end
             </tr>
@@ -381,10 +387,12 @@ window.onbeforeunload = function ()
             % end
         </table>
     </div>
+    <div class="row">
     <div class="form-group" style="margin-top: 20px;"> 
-        <div class="col-sm-10">
+        <div class="col-sm-12">
             <button type="submit" class="btn btn-default">Checkout</button>
         </div>
+    </div>
     </div>
     </form>
 </div>
