@@ -438,9 +438,9 @@ def sorry_page():
 # Section: Admin pages
 
 
-@app.get('/admin')
-@bottle.view('admin')
-def admin():
+'''@app.get('/admin_old')
+@bottle.view('admin_old')
+def admin_old():
     """Only admin users can see this"""
     authorize(fail_redirect='sorry_page', role='admin')
 
@@ -451,11 +451,11 @@ def admin():
     adminDict["users"] = aaa.list_users()
     adminDict["roles"] = aaa.list_roles()
 
-    return adminDict
+    return adminDict'''
 
 
-@app.get('/admin_new')
-@bottle.view('admin_new')
+@app.get('/admin')
+@bottle.view('admin')
 def admin():
     """Only admin users can see this"""
     authorize(fail_redirect='sorry_page', role='admin')
@@ -475,10 +475,57 @@ def create_user():
     authorize(fail_redirect='sorry_page', role='admin')
 
     try:
-        aaa.create_user(postd().username, postd().role, postd().password)
-        return dict(ok=True, msg='')
+        username = postd().username
+        role = postd().role
+        password = postd().password
+        email_addr = postd().email
+        description = postd().description
+        aaa.create_user(username, role, password, email_addr, description)
+        user = aaa.user(username)
+
+        created_info = dict()
+        created_info["name"] = user.username
+        created_info["role"] = user.role
+        created_info["email"] = user.email_addr
+        created_info["description"] = user.description
+        # You don't want to send the password back to the end user
+        created_info["password"] = ""
+
+        return dict(ok=True, msg='', user=created_info)
     except Exception as e:
-        return dict(ok=False, msg=e.message)
+        return dict(ok=False, msg=str(e))
+
+
+@app.post('/edit_user')
+def edit_user(db):
+    authorize(fail_redirect='sorry_page', role='admin')
+
+    try:
+        username = postd().username
+        role = postd().role
+        password = postd().password
+        email = postd().email
+        
+        if password == '':
+            password = None
+        
+        user = aaa.user(username)
+        if user:
+            user.update(role=role, pwd=password, email_addr=email)
+            user = aaa.user(username)
+        
+        edited_info = dict()
+        edited_info["name"] = user.username
+        edited_info["role"] = user.role
+        edited_info["email"] = user.email_addr
+        edited_info["description"] = user.description
+        # You don't want to send the password back to the end user
+        edited_info["password"] = ""
+            
+        return dict(ok=True, msg='', user=edited_info)
+    except Exception as e:
+        log.debug(e)
+        return dict(ok=False, msg=str(e))
 
 
 @app.post('/delete_user')
@@ -490,10 +537,10 @@ def delete_user():
         return dict(ok=True, msg='')
     except Exception as e:
         log.debug(e)
-        return dict(ok=False, msg=e.message)
+        return dict(ok=False, msg=str(e))
 
 
-@app.post('/create_role')
+'''@app.post('/create_role')
 def create_role():
     authorize(fail_redirect='sorry_page', role='admin')
 
@@ -514,7 +561,7 @@ def delete_role():
         return dict(ok=True, msg='')
     except Exception as e:
         log.debug(e)
-        return dict(ok=False, msg=e.message)
+        return dict(ok=False, msg=e.message)'''
 
 
 @app.route('/customer/<customer_id:int>', method=['DELETE'])

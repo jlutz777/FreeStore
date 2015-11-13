@@ -67,19 +67,28 @@ function alertLimitReached()
 
 // On submit, we have to make sure no limits have been reached.
 // If no limits are reached, then show a confirmation before submitting
-$(document).ready(function () {
-    $('form').submit(function() {
-        var continueSubmit = !alertLimitReached();
-        if (continueSubmit)
+$(document).ready(function ()
+{
+    $('form').submit(function()
+    {
+        if (window.onbeforeunload === null)
         {
-            continueSubmit = confirm("Are you sure you want to check out?");
+            return true;
         }
-        // Clear the onload so you don't get the message
-        if (continueSubmit)
+            
+        if (!alertLimitReached())
         {
-            window.onbeforeunload = null;
+            $('#confirm_modal').modal({show:true});
         }
-        return continueSubmit;
+        
+        return false;
+    });
+    
+    $('#continue_checkout').click(function()
+    {
+        // Clear the onload so you don't get the message and can submit
+        window.onbeforeunload = null;
+        $('form').submit();
     });
 
     calculateLimits();
@@ -250,6 +259,22 @@ window.onbeforeunload = function ()
     }
 };
 </script>
+<div id="confirm_modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Confirm</h4>
+      </div>
+      <div class="modal-body">Are you sure you want to checkout?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+        <button id="continue_checkout" type="button" class="btn btn-primary">Yes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 <div class="your-form">
     <form method="POST" action="{{post_url}}" role="form" class="form_horizontal">
     <div class="page-header">

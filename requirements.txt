@@ -10,7 +10,8 @@ WTForms-Components==0.9.6
 alembic==0.6.7
 argparse==1.2.1
 bottle==0.12.8
-bottle-cork==0.12.0a2
+#bottle-cork==0.12.0a2
+-e git+https://github.com/jlutz777/bottle-cork.git/#egg=bottle-cork
 bottle-pgsql==0.2
 bottle-sqlalchemy==0.4.1
 colorama==0.3.2
