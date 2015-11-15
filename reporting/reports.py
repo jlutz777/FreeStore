@@ -197,7 +197,7 @@ class FamilyCheckoutsPerWeekReport(Report):
         reader = db.execute(self.sqlQuery)
         allCheckouts = reader.fetchall()
 
-        bottle_session[REPORT_SESSION_KEY] = allCheckouts
+        storeCookieInfo(bottle_session, allCheckouts)
 
         checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
         for row in allCheckouts:
@@ -213,7 +213,7 @@ class FamilyCheckoutsPerWeekReport(Report):
         return reportInfo
 
     def getGraph(self, bottle_session):
-        allCheckouts = bottle_session[REPORT_SESSION_KEY]
+        allCheckouts = retrieveCookieInfo(bottle_session)
         # Loop through and keep a running total to show the increase over time
         columns = ["checkout", "count"]
         results = []
@@ -255,7 +255,7 @@ class DependentCheckoutsPerWeekReport(Report):
         reader = db.execute(self.sqlQuery)
         allCheckouts = reader.fetchall()
 
-        bottle_session[REPORT_SESSION_KEY] = allCheckouts
+        storeCookieInfo(bottle_session, allCheckouts)
 
         checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
         for row in allCheckouts:
@@ -271,7 +271,7 @@ class DependentCheckoutsPerWeekReport(Report):
         return reportInfo
 
     def getGraph(self, bottle_session):
-        allCheckouts = bottle_session[REPORT_SESSION_KEY]
+        allCheckouts = retrieveCookieInfo(bottle_session)
         # Loop through and keep a running total to show the increase over time
         columns = ["checkout", "count"]
         results = []
@@ -347,7 +347,7 @@ class ItemsPerCategoryPerMonthReport(Report):
         for row in allCheckouts:
             results[row[1]][results['index'].index(row[0])] = row[2]
 
-        bottle_session[REPORT_SESSION_KEY] = results
+        storeCookieInfo(bottle_session, results)
 
         checkoutsHtml = '<table style="width:800px;"><tr><th>Date</th>'
         for row in cats:
@@ -369,7 +369,7 @@ class ItemsPerCategoryPerMonthReport(Report):
         return reportInfo
 
     def getGraph(self, bottle_session):
-        itemsPerCat = bottle_session[REPORT_SESSION_KEY]
+        itemsPerCat = retrieveCookieInfo(bottle_session)
 
         # Hack because apparently dates on the x axis aren't allowed here
         itemsPerCat['index'] = range(0, len(itemsPerCat['index']))
@@ -417,7 +417,7 @@ class IndividualsByAgeReport(Report):
         reader = db.execute(self.sqlQuery)
         allAgeRanges = reader.fetchall()
 
-        #bottle_session[REPORT_SESSION_KEY] = allAgeRanges
+        #storeCookieInfo(bottle_session, allAgeRanges)
         
         checkoutsHtml = '<table><tr><th>Age Range</th><th>Total</th></tr>'
         for row in allAgeRanges:
@@ -459,8 +459,8 @@ class FamiliesPerZipReport(Report):
     def getTitleAndHtml(self, db, bottle_session):
         reader = db.execute(self.sqlQuery)
         allFamilies = reader.fetchall()
-
-        bottle_session[REPORT_SESSION_KEY] = allFamilies
+        
+        #storeCookieInfo(bottle_session, allFamilies)
 
         familiesHtml = '<table><tr><th>Zip</th><th>Total</th></tr>'
         for row in allFamilies:
@@ -505,7 +505,7 @@ class CheckoutFrequencyPerMonthReport(Report):
         reader = db.execute(self.sqlQuery)
         allFrequencies = reader.fetchall()
 
-        bottle_session[REPORT_SESSION_KEY] = allFrequencies
+        #storeCookieInfo(bottle_session, allFrequencies)
 
         frequencyHtml = '<table><tr><th>Date</th><th>Frequency</th><th>Family Count</th></tr>'
         for row in allFrequencies:
