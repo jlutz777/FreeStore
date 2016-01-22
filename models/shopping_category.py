@@ -22,3 +22,33 @@ class ShoppingCategory(base.Base):
     maxAge = Column('max_age', Integer, nullable=True)
     disabled = Column('disabled', Boolean)
     items = relationship("ShoppingItem", backref="category")
+    
+    def fromForm(self, posted):
+        self.name = posted.name
+        self.dailyLimit = posted.dailyLimit
+        self.monthlyLimit = posted.monthlyLimit
+        self.familyWideLimit = posted.familyWideLimit != ""
+        self.order = posted.order
+        minAge = posted.minAge
+        if minAge == "":
+            minAge = 0
+        self.minAge = minAge
+        maxAge = posted.maxAge
+        if maxAge == "":
+            maxAge = 150
+        self.maxAge = maxAge
+        self.disabled = posted.catDisabled != ""
+        
+        
+    def getDict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'dailyLimit': self.dailyLimit,
+            'monthlyLimit': self.monthlyLimit,
+            'familyWideLimit': self.familyWideLimit,
+            'order': self.order,
+            'minAge': self.minAge,
+            'maxAge': self.maxAge,
+            'disabled': self.disabled
+        }

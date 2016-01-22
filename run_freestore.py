@@ -455,8 +455,7 @@ def admin_old():
 
 
 @app.get('/admin')
-@bottle.view('admin')
-def admin():
+def admin(db):
     """Only admin users can see this"""
     authorize(fail_redirect='sorry_page', role='admin')
 
@@ -467,7 +466,18 @@ def admin():
     adminDict["users"] = aaa.list_users()
     adminDict["roles"] = aaa.list_roles()
 
-    return adminDict
+    categoryChoices = {s.id: {"id": s.id, "name": s.name,
+                       "dailyLimit": s.dailyLimit, "monthlyLimit": s.monthlyLimit,
+                       "familyWideLimit": s.familyWideLimit,
+                       "minAge": s.minAge, "maxAge": s.maxAge,
+                       "disabled": s.disabled, "order": s.order,
+                       "existing": True} for s
+                       in db.query(ShoppingCategory)
+                       .order_by('"order"')}
+    
+    adminDict["categories"] = json.dumps(categoryChoices, default=json_util.default)
+
+    return template('admin', adminDict)
 
 
 @app.post('/create_user')
@@ -528,19 +538,69 @@ def edit_user(db):
         return dict(ok=False, msg=str(e))
 
 
-@app.post('/delete_user')
-def delete_user():
+@app.post('/delete_user/<username>', method=['DELETE'])
+def delete_user(username):
     authorize(fail_redirect='sorry_page', role='admin')
 
     try:
-        aaa.delete_user(post_get('username'))
+        aaa.delete_user(username)
         return dict(ok=True, msg='')
     except Exception as e:
         log.debug(e)
         return dict(ok=False, msg=str(e))
 
 
-'''@app.post('/create_role')
+@app.post('/create_category')
+def create_category(db):
+    authorize(fail_redirect='sorry_page', role='admin')
+
+    try:
+        cat = ShoppingCategory()
+        cat.fromForm(postd())
+        
+        cat = db.merge(cat)
+        db.flush()
+
+        return dict(ok=True, msg='', category=cat.getDict())
+    except Exception as e:
+        log.debug(e)
+        return dict(ok=False, msg=str(e))
+
+
+@app.post('/edit_category')
+def edit_category(db):
+    authorize(fail_redirect='sorry_page', role='admin')
+
+    try:
+        cat = db.query(ShoppingCategory).filter(ShoppingCategory.id == postd().id)[0]
+        cat.fromForm(postd())
+        
+        cat = db.merge(cat)
+        db.flush()
+
+        return dict(ok=True, msg='', category=cat.getDict())
+    except Exception as e:
+        log.debug(e)
+        return dict(ok=False, msg=str(e))
+
+
+'''
+@app.post('/delete_category/<category_id:int>', method=['DELETE'])
+def delete_category(db, category_id):
+    authorize(fail_redirect='sorry_page', role='admin')
+
+    try:
+        cat = db.query(ShoppingCategory).\
+            filter(ShoppingCategory.id == category_id)[0]
+        db.delete(cat)
+        db.commit()
+        return dict(ok=True, msg='', id=category_id)
+    except Exception as e:
+        log.debug(e)
+        return dict(ok=False, msg=str(e))
+
+
+@app.post('/create_role')
 def create_role():
     authorize(fail_redirect='sorry_page', role='admin')
 
