@@ -15,119 +15,14 @@
 <div class="page-header">
     <h3>Administration</h3>
 </div>
-<!-- Ractive practice -->
+
 <script src='/js/ractive.min.js'></script>
-<script src='/js/admin.js'></script>
-<script id="user_li_template" type="text/ractive">
-[[#users:name]]
-    <li class="list-group-item" data-toggle="modal" data-user-id="[[name]]" data-target="#user_modal"><span>[[name]]</span></li>
-[[/users]]
-</script>
-<script id="user_template" type="text/ractive">
-    <form id="user_form" action="[[#if existing]]edit_user[[else]]create_user[[/if]]" data-target="#user_modal" method="post">
-        <div class="form-horizontal">
-        <div class="form-group">
-            <label for="username" class="col-sm-4 control-label">User name</label>
-            <div class="col-sm-8">
-                <input class="form-control" [[#if existing]]readonly[[/if]] id="username" type="text" name="username" value="[[name]]" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="description" class="col-sm-4 control-label">Description</label>
-            <div class="col-sm-8">
-                <input class="form-control" [[#if existing]]readonly[[/if]] id="description" type="text" name="description" value="[[description]]" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="role" class="col-sm-4 control-label">Role</label>
-            <div class="col-sm-8">
-                <select id="role" name="role" class="form-control" value='[[role]]'>
-                  [[#roles:name]]
-                    <option value='[[name]]'>[[name]]</option>
-                  [[/roles]]
-                </select>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="email" class="col-sm-4 control-label">Email</label>
-            <div class="col-sm-8">
-                <input class="form-control" id="email" type="text" name="email" value="[[email]]" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="password" class="col-sm-4 control-label">Password</label>
-            <div class="col-sm-8">
-                <input class="form-control" id="password" type="password" name="password" value="[[password]]" />
-            </div>
-        </div>
-        </div>
-      </form>
-</script>
-<script id="category_li_template" type="text/ractive">
-[[#categories:id]]
-    <li class="list-group-item" data-toggle="modal" data-category-id="[[id]]" data-target="#category_modal">
-        <span>[[name]] ([[order]])</span>
-        [[#if disabled]]
-        <span> - DISABLED</span>
-        [[/if]]
-    </li>
-[[/categories]]
-</script>
-<script id="category_template" type="text/ractive">
-    <form id="category_form" action="[[#if existing]]edit_category[[else]]create_category[[/if]]" data-target="#category_modal" method="post">
-        <input type="hidden" id="id" name="id" value="[[id]]" />
-        <div class="form-horizontal">
-        <div class="form-group">
-            <label for="name" class="col-sm-4 control-label">Name</label>
-            <div class="col-sm-8">
-                <input class="form-control" id="name" type="text" name="name" value="[[name]]" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="dailyLimit" class="col-sm-4 control-label">Daily Limit</label>
-            <div class="col-sm-8">
-                <input class="form-control" id="dailyLimit" type="text" name="dailyLimit" value="[[dailyLimit]]" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="monthlyLimit" class="col-sm-4 control-label">Monthly Limit</label>
-            <div class="col-sm-8">
-                <input class="form-control" id="monthlyLimit" type="text" name="monthlyLimit" value="[[monthlyLimit]]" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="familyWideLimit" class="col-sm-4 control-label">Family Wide Limit</label>
-            <div class="col-sm-8">
-                <input class="form-control" id="familyWideLimit" type="checkbox" name="familyWideLimit" value="familyWideLimit" checked="[[familyWideLimit]]" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="order" class="col-sm-4 control-label">Order</label>
-            <div class="col-sm-8">
-                <input class="form-control" id="order" type="text" name="order" value="[[order]]" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="minAge" class="col-sm-4 control-label">Minimum Age</label>
-            <div class="col-sm-8">
-                <input class="form-control" id="minAge" type="text" name="minAge" value="[[minAge]]" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="maxAge" class="col-sm-4 control-label">Maximum Age</label>
-            <div class="col-sm-8">
-                <input class="form-control" id="maxAge" type="text" name="maxAge" value="[[maxAge]]" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="catDisabled" class="col-sm-4 control-label">Disabled</label>
-            <div class="col-sm-8">
-                <input class="form-control" id="catDisabled" type="checkbox" value="catDisabled" name="catDisabled" checked="[[disabled]]" />
-            </div>
-        </div>
-        </div>
-    </form>        
-</script>
+<script src='/js/ractive-load.min.js'></script>
+<script src='/js/admin.js?v=2'></script>
+<script src='/components/admin/user_list.js'></script>
+<script src='/components/admin/user.js'></script>
+<script src='/components/admin/category_list.js'></script>
+<script src='/components/admin/category.js'></script>
 
 <script type="text/javascript">
     var users = {};
@@ -163,6 +58,8 @@
     }
     
 </script>
+
+<!-- Modal structure for user component -->
 <div id="user_modal" class="modal fade">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -177,9 +74,11 @@
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button id="save_user" type="button" class="btn btn-primary">Save changes</button>
       </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+    </div>
+  </div>
+</div>
+
+<!-- Modal structure for category component -->
 <div id="category_modal" class="modal fade">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -193,15 +92,16 @@
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button id="save_category" type="button" class="btn btn-primary">Save changes</button>
       </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+    </div>
+  </div>
+</div>
+
 <div class="container-fluid" style="width:90%">
     <div class="panel panel-default">
         <div class="panel-heading">Users</div>
         <div class="panel-body">
-            <ul id="user_list" class="list-group">
-            </ul>
+            <!-- Placeholder for user_list component -->
+            <ul id="user_list" class="list-group"></ul>
         </div>
         <div class="panel-footer">
             <button id="add_user" type="button" class="btn btn-primary">Add</button>
@@ -210,8 +110,8 @@
     <div class="panel panel-default">
         <div class="panel-heading">Categories</div>
         <div class="panel-body">
-            <ul id="category_list" class="list-group">
-            </ul>
+            <!-- Placeholder for category_list component -->
+            <ul id="category_list" class="list-group"></ul>
         </div>
         <div class="panel-footer">
             <button id="add_category" type="button" class="btn btn-primary">Add</button>

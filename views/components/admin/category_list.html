@@ -1,0 +1,8 @@
+{{#categories:id}}
+    <li class="list-group-item" data-toggle="modal" data-category-id="{{id}}" data-target="#category_modal">
+        <span>{{name}} ({{order}})</span>
+        {{#if disabled}}
+        <span> - DISABLED</span>
+        {{/if}}
+    </li>
+{{/categories}}

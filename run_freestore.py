@@ -427,6 +427,20 @@ def css_static(filename):
     return static_file(filename, root=os.path.join(MODULEPATH, 'static/css'))
 
 
+@app.route('/components/<folder>/<filename>', 'GET')
+def components_static(folder, filename):
+    """Get static component files for ractive templates and scripts.
+
+    :param filename: the name of the css file
+    :type filename: str
+    :returns: The given css file
+    :rtype: file
+
+    """
+
+    return static_file(filename, root=os.path.join(MODULEPATH, 'views/components', folder))
+
+
 @app.route('/sorry_page')
 def sorry_page():
     """Serve sorry page"""
