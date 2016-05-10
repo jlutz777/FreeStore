@@ -5,7 +5,6 @@ Do all the work for reporting
 import abc
 import logging
 import os
-import pandas as pd
 import pickle
 import reporting
 import tempfile
@@ -54,10 +53,6 @@ class Report:
     def getData(db, bottle_session):
         pass
 
-    '''@abc.abstractmethod
-    def getGraph(bottle_session):
-        pass'''
-
 
 class FamilyTotalOverTimeReport(Report):
     """Get the customer family count over time"""
@@ -95,7 +90,7 @@ class FamilyTotalOverTimeReport(Report):
         familyCountsHtml += "</table>"
 
         reportInfo = {}
-        reportInfo['title'] = 'Total Families Over Time'
+        reportInfo['title'] = 'Family Count Over Time'
         reportInfo['html'] = familyCountsHtml
         return reportInfo
 
@@ -146,7 +141,7 @@ class DependentsTotalOverTimeReport(Report):
         familyCountsHtml += "</table>"
 
         reportInfo = {}
-        reportInfo['title'] = 'Total Dependents'
+        reportInfo['title'] = 'Dependents Count Over Time'
         reportInfo['html'] = familyCountsHtml
         return reportInfo
 
@@ -164,23 +159,6 @@ class DependentsTotalOverTimeReport(Report):
             arr.append(keyVal)
 
         return arr
-
-    '''def getGraph(self, bottle_session):
-        categoryTotals = retrieveCookieInfo(bottle_session)
-        # Loop through and keep a running total to show the increase over time
-        columns = ["date", "count"]
-        results = []
-        prevVal = 0
-
-        for row in categoryTotals:
-            prevVal = prevVal + row[1]
-            results.append(dict(zip(columns, [row[0], prevVal])))
-
-        frame = pd.DataFrame().from_records(results, index="date",
-                                            columns=["date", "count"])
-
-        title = 'Dependents Count Over Time'
-        return reporting.utils.getLineGraph(frame, y='Dependents', title=title)'''
 
 
 class FamilyCheckoutsPerWeekReport(Report):
@@ -222,7 +200,7 @@ class FamilyCheckoutsPerWeekReport(Report):
         checkoutsHtml += "</table>"
 
         reportInfo = {}
-        reportInfo['title'] = 'Family Checkouts'
+        reportInfo['title'] = 'Families Checked Out Per Day'
         reportInfo['html'] = checkoutsHtml
         return reportInfo
 
@@ -238,21 +216,6 @@ class FamilyCheckoutsPerWeekReport(Report):
             arr.append(keyVal)
 
         return arr
-
-    '''def getGraph(self, bottle_session):
-        allCheckouts = retrieveCookieInfo(bottle_session)
-        # Loop through and keep a running total to show the increase over time
-        columns = ["checkout", "count"]
-        results = []
-
-        for row in allCheckouts:
-            results.append(dict(zip(columns, [row[0], row[1]])))
-
-        frame = pd.DataFrame().from_records(results, index="checkout",
-                                            columns=["checkout", "count"])
-
-        title = 'Families Checked Out Per Day'
-        return reporting.utils.getLineGraph(frame, y='Families', title=title)'''
 
 
 class DependentCheckoutsPerWeekReport(Report):
@@ -293,7 +256,7 @@ class DependentCheckoutsPerWeekReport(Report):
         checkoutsHtml += "</table>"
 
         reportInfo = {}
-        reportInfo['title'] = 'Family Checkouts'
+        reportInfo['title'] = 'Dependents Checked Out Per Day'
         reportInfo['html'] = checkoutsHtml
         return reportInfo
 
@@ -309,21 +272,6 @@ class DependentCheckoutsPerWeekReport(Report):
             arr.append(keyVal)
 
         return arr
-
-    '''def getGraph(self, bottle_session):
-        allCheckouts = retrieveCookieInfo(bottle_session)
-        # Loop through and keep a running total to show the increase over time
-        columns = ["checkout", "count"]
-        results = []
-
-        for row in allCheckouts:
-            results.append(dict(zip(columns, [row[0], row[1]])))
-
-        frame = pd.DataFrame().from_records(results, index="checkout",
-                                            columns=["checkout", "count"])
-
-        title = 'Dependents Checked Out Per Day'
-        return reporting.utils.getLineGraph(frame, y='Dependents', title=title)'''
 
 
 class ItemsPerCategoryPerMonthReport(Report):
@@ -429,23 +377,6 @@ class ItemsPerCategoryPerMonthReport(Report):
         
         return arr
 
-    '''def getGraph(self, bottle_session):
-        itemsPerCat = retrieveCookieInfo(bottle_session)
-
-        # Hack because apparently dates on the x axis aren't allowed here
-        itemsPerCat['index'] = range(0, len(itemsPerCat['index']))
-
-        # log.debug(results)
-
-        title = 'Items Per Category'
-        import vincent
-        graph = vincent.Line(itemsPerCat, width=800, height=400, iter_idx='index')
-        # graph.scales[0].type = 'time'
-        graph.axis_titles(x='Date', y=title)
-        graph.legend(title="Categories")
-        # log.debug(graph.grammar)
-        return graph.to_json()'''
-
 
 class IndividualsByAgeReport(Report):
     """Get the dependents by age"""
@@ -478,8 +409,6 @@ class IndividualsByAgeReport(Report):
         reader = db.execute(self.sqlQuery)
         allAgeRanges = reader.fetchall()
 
-        #storeCookieInfo(bottle_session, allAgeRanges)
-        
         checkoutsHtml = '<table><tr><th>Age Range</th><th>Total</th></tr>'
         for row in allAgeRanges:
             checkoutsHtml += "<tr><td class=\"date\">"
@@ -493,9 +422,6 @@ class IndividualsByAgeReport(Report):
         reportInfo['html'] = checkoutsHtml
         reportInfo['nograph'] = 'true'
         return reportInfo
- 
-    def getGraph(self, bottle_session):
-        raise NotImplementedError("")
 
 
 class FamiliesPerZipReport(Report):
@@ -520,8 +446,6 @@ class FamiliesPerZipReport(Report):
     def getTitleAndHtml(self, db, bottle_session):
         reader = db.execute(self.sqlQuery)
         allFamilies = reader.fetchall()
-        
-        #storeCookieInfo(bottle_session, allFamilies)
 
         familiesHtml = '<table><tr><th>Zip</th><th>Total</th></tr>'
         for row in allFamilies:
@@ -536,9 +460,6 @@ class FamiliesPerZipReport(Report):
         reportInfo['html'] = familiesHtml
         reportInfo['nograph'] = 'true'
         return reportInfo
-
-    def getGraph(self, bottle_session):
-        raise NotImplementedError("")
 
 
 class CheckoutFrequencyPerMonthReport(Report):
@@ -566,8 +487,6 @@ class CheckoutFrequencyPerMonthReport(Report):
         reader = db.execute(self.sqlQuery)
         allFrequencies = reader.fetchall()
 
-        #storeCookieInfo(bottle_session, allFrequencies)
-
         frequencyHtml = '<table><tr><th>Date</th><th>Frequency</th><th>Family Count</th></tr>'
         for row in allFrequencies:
             frequencyHtml += "<tr><td class=\"date\">"
@@ -582,6 +501,3 @@ class CheckoutFrequencyPerMonthReport(Report):
         reportInfo['html'] = frequencyHtml
         reportInfo['nograph'] = 'true'
         return reportInfo
-
-    def getGraph(self, bottle_session):
-        raise NotImplementedError("")
