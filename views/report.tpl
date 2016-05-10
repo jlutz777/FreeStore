@@ -120,6 +120,7 @@ var margin = {top: 30, right: 20, bottom: 30, left: 50},
 
 // Parse the date / time
 var parseDate = d3.time.format("%m/%d/%Y").parse;
+var MAndD = d3.time.format("%M/%d").parse;
 
 // Set the ranges
 var x = d3.time.scale().range([0, width]);
@@ -140,7 +141,7 @@ var valueline = d3.svg.line()
 // Adds the svg canvas
 var svg = d3.select("#vis")
     .append("svg")
-        .attr("width", width + margin.left + margin.right+20)
+        .attr("width", width + margin.left + margin.right+40)
         .attr("height", height + margin.top + margin.bottom)
     .append("g")
         .attr("transform", 
@@ -205,7 +206,7 @@ var focus = svg.append("g")
         d1 = data[i],
         d = x0 - d0.date > d1.date - x0 ? d1 : d0;
     focus.attr("transform", "translate(" + x(d.date) + "," + y(d.count) + ")");
-    focus.select("text").text(d.count);
+    focus.select("text").html(d.count + " - " + (d.date.getMonth()+1) + "/" + d.date.getDate());
   }
 
 }});
