@@ -74,24 +74,6 @@ class FamilyTotalOverTimeReport(Report):
 
         super(FamilyTotalOverTimeReport, self).__init__(sqlQuery)
 
-    def getData(self, db, bottle_session):
-        reader = db.execute(self.sqlQuery)
-        categoryTotals = reader.fetchall()
-        totalFamilyCount = 0
-        arr = []
-        for row in categoryTotals:
-            totalFamilyCount += row[1]
-            keyVal = {}
-            keyVal["date"] = row[0].strftime("%m/%d/%Y")
-            keyVal["count"] = str(totalFamilyCount)
-            arr.append(keyVal)
-            #familyCountsHtml += "<tr><td class=\"date\">"
-            #familyCountsHtml += row[0].strftime("%m/%d/%Y") + "</td>"
-            #familyCountsHtml += "<td class=\"count\">" + str(totalFamilyCount)
-            #familyCountsHtml += "</td></tr>"
-        #familyCountsHtml += "</table>"
-        return arr
-
     def getTitleAndHtml(self, db, bottle_session):
         reader = db.execute(self.sqlQuery)
         categoryTotals = reader.fetchall()
@@ -113,23 +95,18 @@ class FamilyTotalOverTimeReport(Report):
         reportInfo['html'] = familyCountsHtml
         return reportInfo
 
-    def getGraph(self, bottle_session):
+    def getData(self, db, bottle_session):
         categoryTotals = retrieveCookieInfo(bottle_session)
-        
-        # Loop through and keep a running total to show the increase over time
-        columns = ["date", "count"]
-        results = []
-        prevVal = 0
 
+        totalFamilyCount = 0
+        arr = []
         for row in categoryTotals:
-            prevVal = prevVal + row[1]
-            results.append(dict(zip(columns, [row[0], prevVal])))
-
-        frame = pd.DataFrame().from_records(results, index="date",
-                                            columns=["date", "count"])
-
-        title = 'Customer Count Over Time'
-        return reporting.utils.getLineGraph(frame, y='Customers', title=title)
+            totalFamilyCount += row[1]
+            keyVal = {}
+            keyVal["date"] = row[0].strftime("%m/%d/%Y")
+            keyVal["count"] = str(totalFamilyCount)
+            arr.append(keyVal)
+        return arr
 
 
 class DependentsTotalOverTimeReport(Report):
@@ -169,7 +146,22 @@ class DependentsTotalOverTimeReport(Report):
         reportInfo['html'] = familyCountsHtml
         return reportInfo
 
-    def getGraph(self, bottle_session):
+    def getData(self, db, bottle_session):
+        categoryTotals = retrieveCookieInfo(bottle_session)
+
+        prevVal = 0
+        arr = []
+
+        for row in categoryTotals:
+            prevVal = prevVal + row[1]
+            keyVal = {}
+            keyVal["date"] = row[0].strftime("%m/%d/%Y")
+            keyVal["count"] = prevVal
+            arr.append(keyVal)
+
+        return arr
+
+    '''def getGraph(self, bottle_session):
         categoryTotals = retrieveCookieInfo(bottle_session)
         # Loop through and keep a running total to show the increase over time
         columns = ["date", "count"]
@@ -184,7 +176,7 @@ class DependentsTotalOverTimeReport(Report):
                                             columns=["date", "count"])
 
         title = 'Dependents Count Over Time'
-        return reporting.utils.getLineGraph(frame, y='Dependents', title=title)
+        return reporting.utils.getLineGraph(frame, y='Dependents', title=title)'''
 
 
 class FamilyCheckoutsPerWeekReport(Report):
@@ -230,7 +222,20 @@ class FamilyCheckoutsPerWeekReport(Report):
         reportInfo['html'] = checkoutsHtml
         return reportInfo
 
-    def getGraph(self, bottle_session):
+    def getData(self, db, bottle_session):
+        allCheckouts = retrieveCookieInfo(bottle_session)
+
+        arr = []
+
+        for row in allCheckouts:
+            keyVal = {}
+            keyVal["date"] = row[0].strftime("%m/%d/%Y")
+            keyVal["count"] = row[1]
+            arr.append(keyVal)
+
+        return arr
+
+    '''def getGraph(self, bottle_session):
         allCheckouts = retrieveCookieInfo(bottle_session)
         # Loop through and keep a running total to show the increase over time
         columns = ["checkout", "count"]
@@ -243,7 +248,7 @@ class FamilyCheckoutsPerWeekReport(Report):
                                             columns=["checkout", "count"])
 
         title = 'Families Checked Out Per Day'
-        return reporting.utils.getLineGraph(frame, y='Families', title=title)
+        return reporting.utils.getLineGraph(frame, y='Families', title=title)'''
 
 
 class DependentCheckoutsPerWeekReport(Report):
@@ -288,7 +293,20 @@ class DependentCheckoutsPerWeekReport(Report):
         reportInfo['html'] = checkoutsHtml
         return reportInfo
 
-    def getGraph(self, bottle_session):
+    def getData(self, db, bottle_session):
+        allCheckouts = retrieveCookieInfo(bottle_session)
+
+        arr = []
+
+        for row in allCheckouts:
+            keyVal = {}
+            keyVal["date"] = row[0].strftime("%m/%d/%Y")
+            keyVal["count"] = row[1]
+            arr.append(keyVal)
+
+        return arr
+
+    '''def getGraph(self, bottle_session):
         allCheckouts = retrieveCookieInfo(bottle_session)
         # Loop through and keep a running total to show the increase over time
         columns = ["checkout", "count"]
@@ -301,7 +319,7 @@ class DependentCheckoutsPerWeekReport(Report):
                                             columns=["checkout", "count"])
 
         title = 'Dependents Checked Out Per Day'
-        return reporting.utils.getLineGraph(frame, y='Dependents', title=title)
+        return reporting.utils.getLineGraph(frame, y='Dependents', title=title)'''
 
 
 class ItemsPerCategoryPerMonthReport(Report):

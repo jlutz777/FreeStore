@@ -128,10 +128,10 @@ var y = d3.scale.linear().range([height, 0]);
 
 // Define the axes
 var xAxis = d3.svg.axis().scale(x)
-    .orient("bottom").ticks(7);
+    .orient("bottom").ticks(5);
 
 var yAxis = d3.svg.axis().scale(y)
-    .orient("left").ticks(10);
+    .orient("left").ticks(5);
 
 // Define the line
 var valueline = d3.svg.line()
@@ -141,7 +141,7 @@ var valueline = d3.svg.line()
 // Adds the svg canvas
 var svg = d3.select("#vis")
     .append("svg")
-        .attr("width", width + margin.left + margin.right+40)
+        .attr("width", width + margin.left + margin.right+60)
         .attr("height", height + margin.top + margin.bottom)
     .append("g")
         .attr("transform", 
@@ -238,7 +238,8 @@ function runReport()
       $("#vis").text('');
       if (!reportInfo.nograph)
       {
-         if (selectedReportNum == 1)
+         if (selectedReportNum == 1 || selectedReportNum == 2
+             || selectedReportNum == 3 || selectedReportNum == 4)
          {
              newParse(selectedReportNum);
          }
