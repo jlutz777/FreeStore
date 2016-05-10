@@ -234,14 +234,15 @@ function newParse(reportNum)
         x.domain(d3.extent(data, function(d) { return d.date; }));
         y.domain([
             d3.min(categories, function(c) { return d3.min(c.values, function(v) { return v.count; }); }),
-            d3.max(categories, function(c) { return d3.max(c.values, function(v) { return v.count; }); })
+            800
+            //d3.max(categories, function(c) { return d3.max(c.values, function(v) { return v.count; }); })
         ]);
     
         // Add the valueline path.
-        var city = svg.selectAll(".city")
+        var city = svg.selectAll(".category")
                       .data(categories)
                       .enter().append("g")
-                      .attr("class", "city");
+                      .attr("class", "category");
 
         city.append("path")
             .attr("class", "line")
