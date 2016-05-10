@@ -149,21 +149,25 @@ def currentVisits(db):
     authorize()
 
     currentVisits = db.query(Visit).filter(Visit.checkout == None) # noqa
+    searchTerm = get_get('searchTerm')
 
     currentVisitsArray = []
     for visit in currentVisits:
         if visit.family is not None:
             for dependent in visit.family.dependents:
                 if dependent.isPrimary:
-                    thisVisit = {}
-                    timeInStore = td_format(datetime.now()-visit.checkin)
-                    thisVisit["familyId"] = visit.family.id
-                    thisVisit["visitId"] = visit.id
-                    thisVisit["lastName"] = dependent.lastName
-                    thisVisit["firstName"] = dependent.firstName
-                    thisVisit["timeInStore"] = timeInStore
-                    currentVisitsArray.append(thisVisit)
-                    break
+                    fullName = dependent.getDict()["fullName"]
+                    if searchTerm == '' or searchTerm.lower() in fullName.lower():
+                        thisVisit = {}
+                        timeInStore = td_format(datetime.now()-visit.checkin)
+                        thisVisit["familyId"] = visit.family.id
+                        thisVisit["visitId"] = visit.id
+                        thisVisit["lastName"] = dependent.lastName
+                        thisVisit["firstName"] = dependent.firstName
+                        thisVisit["fullName"] = fullName
+                        thisVisit["timeInStore"] = timeInStore
+                        currentVisitsArray.append(thisVisit)
+                        break
 
     currentVisitsArray = sorted(currentVisitsArray, key=itemgetter("lastName"))
 
