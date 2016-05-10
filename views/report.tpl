@@ -59,6 +59,16 @@ path {
     stroke-width: 1;
     shape-rendering: crispEdges;
 }
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.focus circle {
+  fill: none;
+  stroke: steelblue;
+}
     /* end new styles */
     </style>
   </head>
@@ -117,10 +127,10 @@ var y = d3.scale.linear().range([height, 0]);
 
 // Define the axes
 var xAxis = d3.svg.axis().scale(x)
-    .orient("bottom").ticks(5);
+    .orient("bottom").ticks(7);
 
 var yAxis = d3.svg.axis().scale(y)
-    .orient("left").ticks(5);
+    .orient("left").ticks(10);
 
 // Define the line
 var valueline = d3.svg.line()
@@ -150,6 +160,12 @@ $.ajax({ url: 'report/data/' + reportNum, success: function(data) {
     svg.append("path")
         .attr("class", "line")
         .attr("d", valueline(data));
+        
+    /*svg.append("svg:title")
+   .text(function(d) {
+       debugger;
+       return d.x; });*/
+
 
     // Add the X Axis
     svg.append("g")
@@ -161,6 +177,36 @@ $.ajax({ url: 'report/data/' + reportNum, success: function(data) {
     svg.append("g")
         .attr("class", "y axis")
         .call(yAxis);
+
+var focus = svg.append("g")
+      .attr("class", "focus")
+      .style("display", "none");
+
+  focus.append("circle")
+      .attr("r", 4.5);
+
+  focus.append("text")
+      .attr("x", 9)
+      .attr("dy", ".35em");
+
+    svg.append("rect")
+      .attr("class", "overlay")
+      .attr("width", width)
+      .attr("height", height)
+      .on("mouseover", function() { focus.style("display", null); })
+      .on("mouseout", function() { focus.style("display", "none"); })
+      .on("mousemove", mousemove);
+
+    bisectDate = d3.bisector(function(d) { return d.date; }).left;
+    function mousemove() {
+    var x0 = x.invert(d3.mouse(this)[0]),
+        i = bisectDate(data, x0, 1),
+        d0 = data[i - 1],
+        d1 = data[i],
+        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.count) + ")");
+    focus.select("text").text(d.count);
+  }
 
 }});
 }
