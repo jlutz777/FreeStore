@@ -49,10 +49,14 @@ class Report:
     @abc.abstractmethod
     def getTitleAndHtml(db, bottle_session):
         pass
-
+    
     @abc.abstractmethod
-    def getGraph(bottle_session):
+    def getData(db, bottle_session):
         pass
+
+    '''@abc.abstractmethod
+    def getGraph(bottle_session):
+        pass'''
 
 
 class FamilyTotalOverTimeReport(Report):
@@ -403,8 +407,29 @@ class ItemsPerCategoryPerMonthReport(Report):
         reportInfo['title'] = 'Items Per Category'
         reportInfo['html'] = checkoutsHtml
         return reportInfo
+        
+    def getData(self, db, bottle_session):
+        itemsPerCat = retrieveCookieInfo(bottle_session)
+        
+        arr = []
+        dateLen = len(itemsPerCat['index'])
 
-    def getGraph(self, bottle_session):
+        # Create a list of all categories
+        cats = []
+        for row in itemsPerCat:
+            if row != 'index':
+                cats.append(row)
+
+        for i in range(0, dateLen):
+            keyVal = {}
+            keyVal["date"] = itemsPerCat['index'][i].strftime("%m/%d/%Y")
+            for row in cats:
+                keyVal[row] = itemsPerCat[row][i]
+            arr.append(keyVal)
+        
+        return arr
+
+    '''def getGraph(self, bottle_session):
         itemsPerCat = retrieveCookieInfo(bottle_session)
 
         # Hack because apparently dates on the x axis aren't allowed here
@@ -419,7 +444,7 @@ class ItemsPerCategoryPerMonthReport(Report):
         graph.axis_titles(x='Date', y=title)
         graph.legend(title="Categories")
         # log.debug(graph.grammar)
-        return graph.to_json()
+        return graph.to_json()'''
 
 
 class IndividualsByAgeReport(Report):

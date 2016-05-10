@@ -108,108 +108,183 @@ path {
     <div id="vis"></div>
   </body>
 <script type="text/javascript">
-/*
-https://leanpub.com/D3-Tips-and-Tricks/read#leanpub-auto-starting-with-a-basic-graph
-*/
 function newParse(reportNum)
 {
-// Set the dimensions of the canvas / graph
-var margin = {top: 30, right: 20, bottom: 30, left: 50},
-    width = 600 - margin.left - margin.right,
-    height = 270 - margin.top - margin.bottom;
+    // Set the dimensions of the canvas / graph
+    var margin = {top: 30, right: 20, bottom: 30, left: 50},
+        width = 600 - margin.left - margin.right,
+        height = 270 - margin.top - margin.bottom;
 
-// Parse the date / time
-var parseDate = d3.time.format("%m/%d/%Y").parse;
-var MAndD = d3.time.format("%M/%d").parse;
-
-// Set the ranges
-var x = d3.time.scale().range([0, width]);
-var y = d3.scale.linear().range([height, 0]);
-
-// Define the axes
-var xAxis = d3.svg.axis().scale(x)
-    .orient("bottom").ticks(5);
-
-var yAxis = d3.svg.axis().scale(y)
-    .orient("left").ticks(5);
-
-// Define the line
-var valueline = d3.svg.line()
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.count); });
+    // Parse the date / time
+    var parseDate = d3.time.format("%m/%d/%Y").parse;
     
-// Adds the svg canvas
-var svg = d3.select("#vis")
-    .append("svg")
-        .attr("width", width + margin.left + margin.right+60)
-        .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-        .attr("transform", 
-              "translate(" + margin.left + "," + margin.top + ")");
+    // Set the ranges
+    var x = d3.time.scale().range([0, width]);
+    var y = d3.scale.linear().range([height, 0]);
 
-$.ajax({ url: 'report/data/' + reportNum, success: function(data) {
-    data.forEach(function(d) {
-        d.date = parseDate(d.date);
-        d.count = +d.count;
-    });
-
-    // Scale the range of the data
-    x.domain(d3.extent(data, function(d) { return d.date; }));
-    y.domain([0, d3.max(data, function(d) { return d.count; })]);
-
-    // Add the valueline path.
-    svg.append("path")
-        .attr("class", "line")
-        .attr("d", valueline(data));
+    // For multiple lines
+    var color = d3.scale.category10();
+    var line = d3.svg.line()
+        .interpolate("basis")
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.count); });
+    
+    // Define the axes
+    var xAxis = d3.svg.axis().scale(x)
+        .orient("bottom").ticks(5);
+    
+    var yAxis = d3.svg.axis().scale(y)
+        .orient("left").ticks(5);
+    
+    // Define the line
+    var valueline = d3.svg.line()
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.count); });
         
-    /*svg.append("svg:title")
-   .text(function(d) {
-       debugger;
-       return d.x; });*/
+    // Adds the svg canvas
+    var svg = d3.select("#vis")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right+60)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform", 
+                  "translate(" + margin.left + "," + margin.top + ")");
 
+    function singleLineGraph(data)
+    {
+        data.forEach(function(d)
+        {
+            d.date = parseDate(d.date);
+            d.count = +d.count;
+        });
+    
+        // Scale the range of the data
+        x.domain(d3.extent(data, function(d) { return d.date; }));
+        y.domain([0, d3.max(data, function(d) { return d.count; })]);
+    
+        // Add the valueline path.
+        svg.append("path")
+            .attr("class", "line")
+            .attr("d", valueline(data));
 
-    // Add the X Axis
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
+        // Add the X Axis
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+    
+        // Add the Y Axis
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+    
+        var focus = svg.append("g")
+            .attr("class", "focus")
+            .style("display", "none");
+    
+        focus.append("circle")
+            .attr("r", 4.5);
+    
+        focus.append("text")
+            .attr("x", 9)
+            .attr("dy", ".35em");
+    
+        svg.append("rect")
+            .attr("class", "overlay")
+            .attr("width", width)
+            .attr("height", height)
+            .on("mouseover", function() { focus.style("display", null); })
+            .on("mouseout", function() { focus.style("display", "none"); })
+            .on("mousemove", mousemove);
+    
+        bisectDate = d3.bisector(function(d) { return d.date; }).left;
+        
+        function mousemove() {
+            var x0 = x.invert(d3.mouse(this)[0]);
+            var i = bisectDate(data, x0, 1);
+            var d0 = data[i - 1];
+            var d1 = data[i];
+            var d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+            focus.attr("transform", "translate(" + x(d.date) + "," + y(d.count) + ")");
+            focus.select("text").html(d.count + " - " + (d.date.getMonth()+1) + "/" + d.date.getDate());
+        }
+    }
+    
+    function multiLineGraph(data)
+    {
+        data.forEach(function(d)
+        {
+            d.date = parseDate(d.date);
+            //d.count = +d.count;
+        });
+        
+        color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
+        
+        var categories = color.domain().map(function(name) {
+            return {
+                name: name,
+                values: data.map(function(d)
+                {
+                    return {date: d.date, count: +d[name]};
+                })
+            };
+        });
+    
+        // Scale the range of the data
+        x.domain(d3.extent(data, function(d) { return d.date; }));
+        y.domain([
+            d3.min(categories, function(c) { return d3.min(c.values, function(v) { return v.count; }); }),
+            d3.max(categories, function(c) { return d3.max(c.values, function(v) { return v.count; }); })
+        ]);
+    
+        // Add the valueline path.
+        var city = svg.selectAll(".city")
+                      .data(categories)
+                      .enter().append("g")
+                      .attr("class", "city");
 
-    // Add the Y Axis
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
+        city.append("path")
+            .attr("class", "line")
+            .attr("d", function(d) { return line(d.values); })
+            .style("stroke", function(d) { return color(d.name); });
+    
+        city.append("text")
+            .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
+            .attr("transform", function(d)
+                               {
+                                   return "translate(" + x(d.value.date) + "," + y(d.value.count) + ")";
+                               })
+            .attr("x", 3)
+            .attr("dy", ".35em")
+            .text(function(d) { return d.name; });
 
-var focus = svg.append("g")
-      .attr("class", "focus")
-      .style("display", "none");
-
-  focus.append("circle")
-      .attr("r", 4.5);
-
-  focus.append("text")
-      .attr("x", 9)
-      .attr("dy", ".35em");
-
-    svg.append("rect")
-      .attr("class", "overlay")
-      .attr("width", width)
-      .attr("height", height)
-      .on("mouseover", function() { focus.style("display", null); })
-      .on("mouseout", function() { focus.style("display", "none"); })
-      .on("mousemove", mousemove);
-
-    bisectDate = d3.bisector(function(d) { return d.date; }).left;
-    function mousemove() {
-    var x0 = x.invert(d3.mouse(this)[0]),
-        i = bisectDate(data, x0, 1),
-        d0 = data[i - 1],
-        d1 = data[i],
-        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.count) + ")");
-    focus.select("text").html(d.count + " - " + (d.date.getMonth()+1) + "/" + d.date.getDate());
-  }
-
-}});
+        // Add the X Axis
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+    
+        // Add the Y Axis
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+    }
+    
+    $.ajax({
+        url: 'report/data/' + reportNum,
+        success: function(data)
+        {
+            var keys = d3.keys(data[0]);
+            if (keys.length == 2)
+            {
+                singleLineGraph(data);
+            }
+            else
+            {
+                multiLineGraph(data);
+            }
+        }
+    });
 }
 // parse a spec and create a visualization view
 function parse(spec)
@@ -238,15 +313,15 @@ function runReport()
       $("#vis").text('');
       if (!reportInfo.nograph)
       {
-         if (selectedReportNum == 1 || selectedReportNum == 2
+         /*if (selectedReportNum == 1 || selectedReportNum == 2
              || selectedReportNum == 3 || selectedReportNum == 4)
-         {
+         {*/
              newParse(selectedReportNum);
-         }
+         /*}
          else
          {
              parse("/report/graphdata/"+selectedReportNum, "line");
-         }
+         }*/
       }
     } });
 }
