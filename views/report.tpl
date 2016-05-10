@@ -140,7 +140,7 @@ var valueline = d3.svg.line()
 // Adds the svg canvas
 var svg = d3.select("#vis")
     .append("svg")
-        .attr("width", width + margin.left + margin.right)
+        .attr("width", width + margin.left + margin.right+20)
         .attr("height", height + margin.top + margin.bottom)
     .append("g")
         .attr("transform", 
