@@ -669,6 +669,29 @@ def report_landing():
     return {'report_options': availableReports}
 
 
+@app.get('/report/data/<report_num:int>')
+def report_data(db, report_num):
+    authorize(fail_redirect='sorry_page', role='admin')
+
+    sess = bottle.request.session
+
+    # Really simple date checking to avoid sql injection
+    startDate = get_get("startDate", "01/01/1901")
+    endDate = get_get("endDate", "01/01/2100")
+    startDate = datetime.strptime(startDate, "%m/%d/%Y")
+    endDate = datetime.strptime(endDate, "%m/%d/%Y")
+    startDate = startDate.strftime("%m/%d/%Y")
+    endDate = endDate.strftime("%m/%d/%Y")
+
+    myReport = determineAndCreateReport(report_num, startDate, endDate)
+    reportInfo = myReport.getData(db, sess)
+
+    bottle.response.content_type = 'application/json'
+    jsonInfo = json.dumps(reportInfo, default=json_util.default)
+
+    return jsonInfo
+
+
 @app.get('/report/info/<report_num:int>')
 def report_info(db, report_num):
     authorize(fail_redirect='sorry_page', role='admin')

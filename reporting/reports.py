@@ -74,6 +74,24 @@ class FamilyTotalOverTimeReport(Report):
 
         super(FamilyTotalOverTimeReport, self).__init__(sqlQuery)
 
+    def getData(self, db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        categoryTotals = reader.fetchall()
+        totalFamilyCount = 0
+        arr = []
+        for row in categoryTotals:
+            totalFamilyCount += row[1]
+            keyVal = {}
+            keyVal["date"] = row[0].strftime("%m/%d/%Y")
+            keyVal["count"] = str(totalFamilyCount)
+            arr.append(keyVal)
+            #familyCountsHtml += "<tr><td class=\"date\">"
+            #familyCountsHtml += row[0].strftime("%m/%d/%Y") + "</td>"
+            #familyCountsHtml += "<td class=\"count\">" + str(totalFamilyCount)
+            #familyCountsHtml += "</td></tr>"
+        #familyCountsHtml += "</table>"
+        return arr
+
     def getTitleAndHtml(self, db, bottle_session):
         reader = db.execute(self.sqlQuery)
         categoryTotals = reader.fetchall()
@@ -91,7 +109,7 @@ class FamilyTotalOverTimeReport(Report):
         familyCountsHtml += "</table>"
 
         reportInfo = {}
-        reportInfo['title'] = 'Total Families'
+        reportInfo['title'] = 'Total Families Over Time'
         reportInfo['html'] = familyCountsHtml
         return reportInfo
 
