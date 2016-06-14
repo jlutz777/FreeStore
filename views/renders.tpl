@@ -37,6 +37,7 @@
         % isCheckoutSearch = ""
         % isAdmin = ""
         % isReport = ""
+        % isCurrentVolunteers = ""
         % if page == "/":
         % isCheckoutSearch = "active"
         % elif page == "/checkin":
@@ -47,10 +48,13 @@
         % isAdmin = "active"
         % elif page == "/report":
         % isReport = "active"
+        % elif page == "/current_volunteers":
+        % isCurrentVolunteers = "active"
         % end
-        <li class="{{isCheckin}}"><a href="/checkin">Check In</a>
+        <li class="{{isCheckin}}"><a href="/checkin">Check In</a></li>
         <li class="{{isCustomer}}"><a href="/customer">Registration</a></li>
-        <li class="{{isCheckoutSearch}}"><a href="/">Current Shoppers</a>
+        <li class="{{isCheckoutSearch}}"><a href="/">Current Shoppers</a></li>
+        <li class="{{isCurrentVolunteers}}"><a href="/current_volunteers">Current Volunteers</a></li>
         % if aaa.current_user.role == 'admin':
         <li class="{{isAdmin}}"><a href="/admin">Admin</a></li>
         <li class="{{isReport}}"><a href="/report">Reports</a></li>

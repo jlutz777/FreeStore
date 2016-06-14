@@ -5,7 +5,8 @@ This is the sqlalchemy class for communicating with the database.
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, Unicode, DateTime
+from sqlalchemy import Integer, Unicode, DateTime, Boolean
+from sqlalchemy import Column as col
 from sqlalchemy.orm import relationship
 import models.base as base
 
@@ -16,20 +17,24 @@ class CustomerFamily(base.Base):
     """Sqlalchemy deals model"""
     __tablename__ = "customerfamily"
 
-    id = Column(Integer, primary_key=True)
-    email = Column('email', Unicode, default='')
-    phone = Column('phone', Unicode, default='')
-    address = Column('address', Unicode, default='')
-    city = Column('city', Unicode, default='', nullable=False)
-    state = Column('state', Unicode, default='', nullable=False)
-    zip = Column('zip', Unicode, default='', nullable=False)
-    datecreated = Column('datecreated', DateTime, nullable=False)
-    comments = Column('comments', Unicode, default='')
-    checkoutComments = Column('checkoutcomments', Unicode, default='')
-    adminComments = Column('admincomments', Unicode, default='')
+    id = col(Integer, primary_key=True)
+    email = col('email', Unicode, default='')
+    phone = col('phone', Unicode, default='')
+    address = col('address', Unicode, default='')
+    city = col('city', Unicode, default='', nullable=False)
+    state = col('state', Unicode, default='', nullable=False)
+    zip = col('zip', Unicode, default='', nullable=False)
+    datecreated = col('datecreated', DateTime, nullable=False)
+    comments = col('comments', Unicode, default='')
+    checkoutComments = col('checkoutcomments', Unicode, default='')
+    adminComments = col('admincomments', Unicode, default='')
+    isCustomer = col('is_customer', Boolean, default=True, nullable=False)
+    isVolunteer = col('is_volunteer', Boolean, default=False, nullable=False)
     depOrder = 'Dependent.isPrimary.desc()'
     dependents = relationship("Dependent", backref="family", order_by=depOrder)
     visits = relationship("Visit", backref="family", lazy="dynamic")
+    vTable = "VolunteerVisit"
+    volunteerVisits = relationship(vTable, backref="family", lazy="dynamic")
 
     def __checkFirstName__(self, formDependent, form):
         hasError = False
@@ -43,8 +48,8 @@ class CustomerFamily(base.Base):
     def __checkLastName__(self, formDependent, form):
         hasError = False
         if formDependent['lastName'].data == '':
-            formError = 'Last name is required'
-            formDependent['lastName'].errors.append(formError)
+            formErr = 'Last name is required'
+            formDependent['lastName'].errors.append(formErr)
             form.errors['dependent_lastname'] = 'required'
             hasError = True
         return hasError
@@ -79,6 +84,8 @@ class CustomerFamily(base.Base):
         self.zip = form.zip.data
         self.comments = form.comments.data
         self.adminComments = form.adminComments.data
+        self.isVolunteer = form.isVolunteer.data
+        self.isCustomer = form.isCustomer.data
 
         for formDependent in form.dependents:
             if not formDependent['isPrimary'].data and \

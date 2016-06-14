@@ -2,8 +2,9 @@ from gevent import monkey
 monkey.patch_all(socket=False)
 
 from forms.customer import CustomerForm
+from forms.volunteervisit import VisitForm
 import models.base
-from models import CustomerFamily, Dependent, Visit
+from models import CustomerFamily, Dependent, Visit, VolunteerVisit
 from models import ShoppingCategory, ShoppingItem
 from reporting.utils import availableReports, determineAndCreateReport
 
@@ -39,7 +40,7 @@ corkBackend = SqlAlchemyBackend(postgresConn, initialize=False)
 aaa = Cork(backend=corkBackend, email_sender='', smtp_url='')
 
 app = bottle.default_app()
-#app.catchall = False 
+#app.catchall = False
 dbPlugin = sqlalchemy.Plugin(models.base.engine, keyword='db')
 app.install(dbPlugin)
 
@@ -135,20 +136,20 @@ def setup_request():
 # Section: App Pages
 
 
-@app.route('/')
+@app.get('/')
 def checkout_search(db):
     authorize()
 
     bottle.BaseTemplate.defaults['page'] = '/'
 
-    return template('checkout_search', currentVisits=currentVisits)
+    return template('checkout_search')
 
 
-@app.route('/currentVisits')
+@app.get('/currentVisits')
 def currentVisits(db):
     authorize()
 
-    currentVisits = db.query(Visit).filter(Visit.checkout == None) # noqa
+    currentVisits = db.query(Visit).filter(Visit.checkout == None)  # noqa
     searchTerm = get_get('searchTerm')
 
     currentVisitsArray = []
@@ -157,7 +158,8 @@ def currentVisits(db):
             for dependent in visit.family.dependents:
                 if dependent.isPrimary:
                     fullName = dependent.getDict()["fullName"]
-                    if searchTerm == '' or searchTerm.lower() in fullName.lower():
+                    if searchTerm == '' or \
+                            searchTerm.lower() in fullName.lower():
                         thisVisit = {}
                         timeInStore = td_format(datetime.now()-visit.checkin)
                         thisVisit["familyId"] = visit.family.id
@@ -168,6 +170,43 @@ def currentVisits(db):
                         thisVisit["timeInStore"] = timeInStore
                         currentVisitsArray.append(thisVisit)
                         break
+
+    currentVisitsArray = sorted(currentVisitsArray, key=itemgetter("lastName"))
+
+    bottle.response.content_type = 'application/json'
+    jsonInfo = json.dumps(currentVisitsArray, default=json_util.default)
+    return jsonInfo
+
+
+@app.get('/current_volunteers')
+def current_volunteers(db):
+    authorize()
+
+    bottle.BaseTemplate.defaults['page'] = '/current_volunteers'
+
+    return template('current_volunteers')
+
+
+@app.get('/current_volunteers_data')
+def current_volunteers_data(db):
+    authorize()
+
+    currentVisits = db.query(VolunteerVisit).filter(VolunteerVisit.checkout == None)  # noqa
+
+    currentVisitsArray = []
+    for visit in currentVisits:
+        if visit.family is not None:
+            for dependent in visit.family.dependents:
+                if dependent.isPrimary:
+                    thisVisit = {}
+                    thisVisit["familyId"] = visit.family.id
+                    thisVisit["visitId"] = visit.id
+                    thisVisit["lastName"] = dependent.lastName
+                    thisVisit["firstName"] = dependent.firstName
+                    checkinStr = visit.checkin.strftime("%m/%d/%Y %H:%M")
+                    thisVisit["checkin"] = checkinStr
+                    currentVisitsArray.append(thisVisit)
+                    break
 
     currentVisitsArray = sorted(currentVisitsArray, key=itemgetter("lastName"))
 
@@ -187,8 +226,10 @@ def customer(db, customer_id=None):
     form = CustomerForm(postData)
     post_url = get_redirect_url()
     visit_url_root = get_redirect_url('checkout')
+    volunteer_url_root = get_redirect_url('volunteer_visit')
     checkin_url = get_redirect_url('checkin')
     visits = None
+    volunteerVisits = None
     failedValidation = False
 
     if bottle.request.method == 'POST':
@@ -204,7 +245,10 @@ def customer(db, customer_id=None):
                 activeVisits = family.visits.filter(Visit.checkout == None)  # noqa
                 hasNoActiveVisit = len(activeVisits.all()) == 0
                 shouldCreateVisit = postData["checkinCust"] == "true"
-                if hasNoActiveVisit and shouldCreateVisit:
+                isCustomer = "isCustomer" in postData
+                isVolunteer = "isVolunteer" in postData
+
+                if hasNoActiveVisit and shouldCreateVisit and isCustomer:
                     visit = Visit()
                     visit.setStatus(status='checkin', family_id=family.id)
                     db.add(visit)
@@ -212,31 +256,36 @@ def customer(db, customer_id=None):
 
                 db.commit()
 
+                if isVolunteer:
+                    next_url = get_redirect_url('customer/'+str(family.id))
                 return bottle.redirect(next_url)
             else:
                 failedValidation = True
-        except HTTPResponse as hres:
-            raise hres
         except HTTPError as herr:
             raise herr
+        except HTTPResponse as hres:
+            raise hres
         except Exception as ex:
             log.debug(ex)
             db.rollback()
             visits = family.visits
+            volunteerVisits = family.volunteerVisits
+
     if customer_id is not None and \
        (failedValidation or bottle.request.method == 'GET'):
         customerQuery = db.query(CustomerFamily)
         fams = customerQuery.filter(CustomerFamily.id == customer_id)
-        
+
         famCount = len(fams.all())
         if famCount == 0:
             return "No customers were found with this id"
         elif famCount > 1:
             return "There were multiple customers with the same id"
-        
+
         if not failedValidation:
             form = CustomerForm(obj=fams[0])
         visits = fams[0].visits
+        volunteerVisits = fams[0].volunteerVisits
     elif bottle.request.method == 'GET':
         # Mark one of the two dependents as primary
         form.dependents[0].isPrimary.data = True
@@ -245,9 +294,11 @@ def customer(db, customer_id=None):
     customerDict['form'] = form
     customerDict['customer_id'] = customer_id
     customerDict['visits'] = visits
+    customerDict['volunteers'] = volunteerVisits
     customerDict['post_url'] = post_url
     customerDict['checkin_url'] = checkin_url
     customerDict['visit_url_root'] = visit_url_root
+    customerDict['volunteer_url_root'] = volunteer_url_root
 
     return template('customer', **customerDict)
 
@@ -309,7 +360,7 @@ def checkout(db, visit_id):
     post_url = get_redirect_url()
 
     visits = db.query(Visit).filter(Visit.id == visit_id)
-    
+
     visitCount = len(visits.all())
     if visitCount == 0:
         return "No customer visits were found with this id"
@@ -360,6 +411,75 @@ def checkout(db, visit_id):
     checkoutDict["timeInStore"] = timeInStore
 
     return template('checkout', **checkoutDict)
+
+
+@app.route('/volunteer_visit', method=['GET', 'POST'])
+@app.route('/volunteer_visit/<volunteer_visit_id:int>', method=['GET', 'POST'])
+def volunteer_visit(db, volunteer_visit_id=None):
+    authorize()
+
+    bottle.BaseTemplate.defaults['page'] = ''
+
+    postData = bottle.request.POST
+    getData = bottle.request.GET
+    form = VisitForm(postData, getData)
+    family = None
+
+    if volunteer_visit_id is not None:
+        form.id.data = volunteer_visit_id
+
+    if bottle.request.method == 'POST':
+        visit = None
+        try:
+            if form.validate():
+                visit = VolunteerVisit()
+                visit.fromForm(form)
+                visit = db.merge(visit)
+
+                db.flush()
+                db.commit()
+
+                next_url = get_redirect_url('checkin')
+                return bottle.redirect(next_url)
+        except HTTPError as herr:
+            raise herr
+        except HTTPResponse as hres:
+            raise hres
+        except Exception as ex:
+            log.debug(ex)
+            db.rollback()
+    else:
+        thisCheckin = None
+        thisCheckout = None
+
+        if volunteer_visit_id is not None:
+            volunteerQuery = db.query(VolunteerVisit)
+            volunteerVisit = volunteerQuery.filter(VolunteerVisit.id ==
+                                                   volunteer_visit_id)[0]
+            family = volunteerVisit.family
+            form.family_id.data = family.id
+            thisCheckin = volunteerVisit.checkin
+            thisCheckout = volunteerVisit.checkout
+
+        if thisCheckin is None:
+            thisCheckin = datetime.now()
+        form.checkin.data = thisCheckin
+
+        if thisCheckout is None:
+            thisCheckout = datetime.now()
+        form.checkout.data = thisCheckout
+
+    if family is None:
+        customerQuery = db.query(CustomerFamily)
+        family = customerQuery.filter(CustomerFamily.id ==
+                                      form.family_id.data)[0]
+
+    volunteerDict = {}
+    volunteerDict['post_url'] = get_redirect_url('volunteer_visit')
+    volunteerDict['family'] = family
+    volunteerDict['form'] = form
+
+    return template('volunteer_visit', **volunteerDict)
 
 
 # Section: Login/logout pages
@@ -442,7 +562,9 @@ def components_static(folder, filename):
 
     """
 
-    return static_file(filename, root=os.path.join(MODULEPATH, 'views/components', folder))
+    return static_file(filename,
+                       root=os.path.join(MODULEPATH, 'views/components',
+                                         folder))
 
 
 @app.route('/sorry_page')
@@ -454,24 +576,6 @@ def sorry_page():
 
 
 # Section: Admin pages
-
-
-'''@app.get('/admin_old')
-@bottle.view('admin_old')
-def admin_old():
-    """Only admin users can see this"""
-    authorize(fail_redirect='sorry_page', role='admin')
-
-    bottle.BaseTemplate.defaults['page'] = '/admin'
-
-    adminDict = {}
-    adminDict["current_user"] = aaa.current_user
-    adminDict["users"] = aaa.list_users()
-    adminDict["roles"] = aaa.list_roles()
-
-    return adminDict'''
-
-
 @app.get('/admin')
 def admin(db):
     """Only admin users can see this"""
@@ -485,15 +589,19 @@ def admin(db):
     adminDict["roles"] = aaa.list_roles()
 
     categoryChoices = {s.id: {"id": s.id, "name": s.name,
-                       "dailyLimit": s.dailyLimit, "monthlyLimit": s.monthlyLimit,
-                       "familyWideLimit": s.familyWideLimit,
-                       "minAge": s.minAge, "maxAge": s.maxAge,
-                       "disabled": s.disabled, "order": s.order,
-                       "existing": True} for s
+                              "dailyLimit": s.dailyLimit,
+                              "monthlyLimit": s.monthlyLimit,
+                              "familyWideLimit": s.familyWideLimit,
+                              "minAge": s.minAge,
+                              "maxAge": s.maxAge,
+                              "disabled": s.disabled,
+                              "order": s.order,
+                              "existing": True} for s
                        in db.query(ShoppingCategory)
                        .order_by('"order"')}
-    
-    adminDict["categories"] = json.dumps(categoryChoices, default=json_util.default)
+
+    adminDict["categories"] = json.dumps(categoryChoices,
+                                         default=json_util.default)
 
     return template('admin', adminDict)
 
@@ -533,15 +641,15 @@ def edit_user(db):
         role = postd().role
         password = postd().password
         email = postd().email
-        
+
         if password == '':
             password = None
-        
+
         user = aaa.user(username)
         if user:
             user.update(role=role, pwd=password, email_addr=email)
             user = aaa.user(username)
-        
+
         edited_info = dict()
         edited_info["name"] = user.username
         edited_info["role"] = user.role
@@ -549,7 +657,7 @@ def edit_user(db):
         edited_info["description"] = user.description
         # You don't want to send the password back to the end user
         edited_info["password"] = ""
-            
+
         return dict(ok=True, msg='', user=edited_info)
     except Exception as e:
         log.debug(e)
@@ -575,7 +683,7 @@ def create_category(db):
     try:
         cat = ShoppingCategory()
         cat.fromForm(postd())
-        
+
         cat = db.merge(cat)
         db.flush()
 
@@ -590,9 +698,10 @@ def edit_category(db):
     authorize(fail_redirect='sorry_page', role='admin')
 
     try:
-        cat = db.query(ShoppingCategory).filter(ShoppingCategory.id == postd().id)[0]
+        cat = db.query(ShoppingCategory).\
+                filter(ShoppingCategory.id == postd().id)[0]
         cat.fromForm(postd())
-        
+
         cat = db.merge(cat)
         db.flush()
 
@@ -669,35 +778,12 @@ def report_landing():
     return {'report_options': availableReports}
 
 
-@app.get('/report/data/<report_num:int>')
-def report_data(db, report_num):
-    authorize(fail_redirect='sorry_page', role='admin')
-
-    sess = bottle.request.session
-
-    # Really simple date checking to avoid sql injection
-    startDate = get_get("startDate", "01/01/1901")
-    endDate = get_get("endDate", "01/01/2100")
-    startDate = datetime.strptime(startDate, "%m/%d/%Y")
-    endDate = datetime.strptime(endDate, "%m/%d/%Y")
-    startDate = startDate.strftime("%m/%d/%Y")
-    endDate = endDate.strftime("%m/%d/%Y")
-
-    myReport = determineAndCreateReport(report_num, startDate, endDate)
-    reportInfo = myReport.getData(db, sess)
-
-    bottle.response.content_type = 'application/json'
-    jsonInfo = json.dumps(reportInfo, default=json_util.default)
-
-    return jsonInfo
-
-
 @app.get('/report/info/<report_num:int>')
 def report_info(db, report_num):
     authorize(fail_redirect='sorry_page', role='admin')
 
     sess = bottle.request.session
-    
+
     # Really simple date checking to avoid sql injection
     startDate = get_get("startDate", "01/01/1901")
     endDate = get_get("endDate", "01/01/2100")
@@ -707,27 +793,9 @@ def report_info(db, report_num):
     endDate = endDate.strftime("%m/%d/%Y")
 
     myReport = determineAndCreateReport(report_num, startDate, endDate)
-    reportInfo = myReport.getTitleAndHtml(db, sess)
+    reportInfo = myReport.getDataAndHtml(db,sess)
 
     bottle.response.content_type = 'application/json'
     jsonInfo = json.dumps(reportInfo, default=json_util.default)
 
     return jsonInfo
-
-
-
-@app.get('/report/graphdata/<report_num:int>')
-def report_graph_data(db, report_num):
-    authorize(fail_redirect='sorry_page', role='admin')
-
-    # Really simple date checking to avoid sql injection
-    startDate = get_get("startDate", "01/01/1901")
-    endDate = get_get("endDate", "01/01/2100")
-    startDate = datetime.strptime(startDate, "%m/%d/%Y")
-    endDate = datetime.strptime(endDate, "%m/%d/%Y")
-    startDate = startDate.strftime("%m/%d/%Y")
-    endDate = endDate.strftime("%m/%d/%Y")
-
-    myReport = determineAndCreateReport(report_num, startDate, endDate)
-
-    return myReport.getGraph(bottle.request.session)

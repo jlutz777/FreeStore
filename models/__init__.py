@@ -4,8 +4,9 @@ This including wrappers around talking with the database.
 
 """
 
-from .customerfamily import CustomerFamily
-from .dependent import Dependent
-from .shopping_category import ShoppingCategory
-from .shopping_item import ShoppingItem
-from .visit import Visit
+from .customerfamily import CustomerFamily  # noqa
+from .dependent import Dependent  # noqa
+from .shopping_category import ShoppingCategory  # noqa
+from .shopping_item import ShoppingItem  # noqa
+from .visit import Visit  # noqa
+from .volunteervisit import VolunteerVisit  # noqa

@@ -5,37 +5,11 @@ Do all the work for reporting
 import abc
 import logging
 import os
-import pickle
 import reporting
-import tempfile
 
 logging.basicConfig(format='localhost - - [%(asctime)s] %(message)s',
                     level=logging.DEBUG)
 log = logging.getLogger(__name__)
-
-
-REPORT_SESSION_KEY = 'report_info'
-
-
-def storeCookieInfo(sess, data):
-    fd, temp_path = tempfile.mkstemp()
-    pickled = pickle.dumps(data, 2)
-    os.write(fd, pickled)
-    os.close(fd)
-    sess[REPORT_SESSION_KEY] = temp_path
-
-
-def retrieveCookieInfo(sess):
-    fileName = sess[REPORT_SESSION_KEY]
-    with open(fileName, 'rb') as f:
-        data = pickle.loads(f.read())
-    
-    if fileName.startswith('/tmp/'):
-        os.remove(fileName)
-    else:
-        log.debug("Couldn't delete: " + fileName)
-    
-    return data
 
 
 class Report:
@@ -46,12 +20,21 @@ class Report:
         self.sqlQuery = sqlQuery
 
     @abc.abstractmethod
-    def getTitleAndHtml(db, bottle_session):
+    def getTitleAndHtml(self, db, bottle_session):
         pass
-    
+
     @abc.abstractmethod
-    def getData(db, bottle_session):
+    def getData(self, db, bottle_session, reuse):
         pass
+
+    def getDataAndHtml(self, db, bottle_session):
+        data, reuse = self.getTitleAndHtml(db, bottle_session)
+        graph = None
+        info = { 'data': data }
+        if reuse is not None:
+            graph = self.getData(db, bottle_session, reuse)
+            info['graph'] = graph
+        return info
 
 
 class FamilyTotalOverTimeReport(Report):
@@ -59,15 +42,15 @@ class FamilyTotalOverTimeReport(Report):
     description = "Families over time"
 
     def __init__(self, start_date='', end_date=''):
-        
         # Convert start_date and end_date into dates!
         sqlQuery = "select customerfamily.datecreated::date, count(*)"
         sqlQuery += " from customerfamily inner join dependents on"
         sqlQuery += " customerfamily.id=dependents.family"
         sqlQuery += " where dependents.primary=True and"
         sqlQuery += " dependents.last_name not in ('User') and"
-        sqlQuery += " datecreated > '" + start_date + "' and "
-        sqlQuery += " datecreated < '" + end_date + "'"
+        sqlQuery += " datecreated > '" + start_date + "' and"
+        sqlQuery += " datecreated < '" + end_date + "' and"
+        sqlQuery += " customerfamily.is_customer=True"
         sqlQuery += " group by datecreated::date"
         sqlQuery += " order by datecreated::date"
 
@@ -76,8 +59,6 @@ class FamilyTotalOverTimeReport(Report):
     def getTitleAndHtml(self, db, bottle_session):
         reader = db.execute(self.sqlQuery)
         categoryTotals = reader.fetchall()
-        
-        storeCookieInfo(bottle_session, categoryTotals)
 
         totalFamilyCount = 0
         familyCountsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
@@ -92,11 +73,9 @@ class FamilyTotalOverTimeReport(Report):
         reportInfo = {}
         reportInfo['title'] = 'Family Count Over Time'
         reportInfo['html'] = familyCountsHtml
-        return reportInfo
+        return reportInfo, categoryTotals
 
-    def getData(self, db, bottle_session):
-        categoryTotals = retrieveCookieInfo(bottle_session)
-
+    def getData(self, db, bottle_session, categoryTotals):
         totalFamilyCount = 0
         arr = []
         for row in categoryTotals:
@@ -118,7 +97,8 @@ class DependentsTotalOverTimeReport(Report):
         sqlQuery += " customerfamily.id=dependents.family"
         sqlQuery += " where dependents.last_name not in ('User') and"
         sqlQuery += " datecreated > '" + start_date + "' and "
-        sqlQuery += " datecreated < '" + end_date + "'"
+        sqlQuery += " datecreated < '" + end_date + "' and"
+        sqlQuery += " customerfamily.is_customer=True"
         sqlQuery += " group by datecreated::date"
         sqlQuery += " order by datecreated::date"
 
@@ -127,8 +107,6 @@ class DependentsTotalOverTimeReport(Report):
     def getTitleAndHtml(self, db, bottle_session):
         reader = db.execute(self.sqlQuery)
         categoryTotals = reader.fetchall()
-
-        storeCookieInfo(bottle_session, categoryTotals)
 
         totalFamilyCount = 0
         familyCountsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
@@ -143,11 +121,9 @@ class DependentsTotalOverTimeReport(Report):
         reportInfo = {}
         reportInfo['title'] = 'Dependents Count Over Time'
         reportInfo['html'] = familyCountsHtml
-        return reportInfo
+        return reportInfo, categoryTotals
 
-    def getData(self, db, bottle_session):
-        categoryTotals = retrieveCookieInfo(bottle_session)
-
+    def getData(self, db, bottle_session, categoryTotals):
         prevVal = 0
         arr = []
 
@@ -189,8 +165,6 @@ class FamilyCheckoutsPerWeekReport(Report):
         reader = db.execute(self.sqlQuery)
         allCheckouts = reader.fetchall()
 
-        storeCookieInfo(bottle_session, allCheckouts)
-
         checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
         for row in allCheckouts:
             checkoutsHtml += "<tr><td class=\"date\">"
@@ -202,11 +176,9 @@ class FamilyCheckoutsPerWeekReport(Report):
         reportInfo = {}
         reportInfo['title'] = 'Families Checked Out Per Day'
         reportInfo['html'] = checkoutsHtml
-        return reportInfo
+        return reportInfo, allCheckouts
 
-    def getData(self, db, bottle_session):
-        allCheckouts = retrieveCookieInfo(bottle_session)
-
+    def getData(self, db, bottle_session, allCheckouts):
         arr = []
 
         for row in allCheckouts:
@@ -245,8 +217,6 @@ class DependentCheckoutsPerWeekReport(Report):
         reader = db.execute(self.sqlQuery)
         allCheckouts = reader.fetchall()
 
-        storeCookieInfo(bottle_session, allCheckouts)
-
         checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
         for row in allCheckouts:
             checkoutsHtml += "<tr><td class=\"date\">"
@@ -258,11 +228,9 @@ class DependentCheckoutsPerWeekReport(Report):
         reportInfo = {}
         reportInfo['title'] = 'Dependents Checked Out Per Day'
         reportInfo['html'] = checkoutsHtml
-        return reportInfo
+        return reportInfo, allCheckouts
 
-    def getData(self, db, bottle_session):
-        allCheckouts = retrieveCookieInfo(bottle_session)
-
+    def getData(self, db, bottle_session, allCheckouts):
         arr = []
 
         for row in allCheckouts:
@@ -335,8 +303,6 @@ class ItemsPerCategoryPerMonthReport(Report):
         for row in allCheckouts:
             results[row[1]][results['index'].index(row[0])] = row[2]
 
-        storeCookieInfo(bottle_session, results)
-
         checkoutsHtml = '<table style="width:800px;"><tr><th>Date</th>'
         for row in cats:
             checkoutsHtml += '<th>' + row + '</th>'
@@ -354,11 +320,9 @@ class ItemsPerCategoryPerMonthReport(Report):
         reportInfo = {}
         reportInfo['title'] = 'Items Per Category'
         reportInfo['html'] = checkoutsHtml
-        return reportInfo
-        
-    def getData(self, db, bottle_session):
-        itemsPerCat = retrieveCookieInfo(bottle_session)
-        
+        return reportInfo, results
+
+    def getData(self, db, bottle_session, itemsPerCat):
         arr = []
         dateLen = len(itemsPerCat['index'])
 
@@ -374,7 +338,7 @@ class ItemsPerCategoryPerMonthReport(Report):
             for row in cats:
                 keyVal[row] = itemsPerCat[row][i]
             arr.append(keyVal)
-        
+
         return arr
 
 
@@ -398,11 +362,12 @@ class IndividualsByAgeReport(Report):
         sqlQuery += " customerfamily.id=dependents.family"
         sqlQuery += " where last_name not in ('User') and"
         sqlQuery += " customerfamily.datecreated > '" + start_date + "' and "
-        sqlQuery += " customerfamily.datecreated < '" + end_date + "'"
+        sqlQuery += " customerfamily.datecreated < '" + end_date + "' and"
+        sqlQuery += " customerfamily.is_customer=True"
         sqlQuery += ") as deps"
         sqlQuery += " group by age"
         sqlQuery += " order by count desc"
-        
+
         super(IndividualsByAgeReport, self).__init__(sqlQuery)
 
     def getTitleAndHtml(self, db, bottle_session):
@@ -420,8 +385,7 @@ class IndividualsByAgeReport(Report):
         reportInfo = {}
         reportInfo['title'] = 'Individuals by Age'
         reportInfo['html'] = checkoutsHtml
-        reportInfo['nograph'] = 'true'
-        return reportInfo
+        return reportInfo, None
 
 
 class FamiliesPerZipReport(Report):
@@ -436,8 +400,10 @@ class FamiliesPerZipReport(Report):
         sqlQuery += " dependents on"
         sqlQuery += " customerfamily.id=dependents.family"
         sqlQuery += " where dependents.last_name not in ('User') and"
+        sqlQuery += " dependents.primary=True and"
         sqlQuery += " customerfamily.datecreated > '" + start_date + "' and "
-        sqlQuery += " customerfamily.datecreated < '" + end_date + "'"
+        sqlQuery += " customerfamily.datecreated < '" + end_date + "' and"
+        sqlQuery += " customerfamily.is_customer=True"
         sqlQuery += " group by zip"
         sqlQuery += " order by zip"
 
@@ -458,8 +424,7 @@ class FamiliesPerZipReport(Report):
         reportInfo = {}
         reportInfo['title'] = 'Familes by Zip Code'
         reportInfo['html'] = familiesHtml
-        reportInfo['nograph'] = 'true'
-        return reportInfo
+        return reportInfo, None
 
 
 class CheckoutFrequencyPerMonthReport(Report):
@@ -499,5 +464,41 @@ class CheckoutFrequencyPerMonthReport(Report):
         reportInfo = {}
         reportInfo['title'] = 'Visit Frequency Per Month'
         reportInfo['html'] = frequencyHtml
-        reportInfo['nograph'] = 'true'
-        return reportInfo
+        return reportInfo, None
+
+
+class VolunteersHoursWorkedReport(Report):
+    """Get the number of hours worked per volunteer total"""
+    description = "Number of Hours Worked Per Volunteer"
+
+    def __init__(self, start_date='', end_date=''):
+        sqlQuery = "select sum(checkout-checkin) as diff, "
+        sqlQuery += "dependents.first_name as fn, dependents.last_name as ln "
+        sqlQuery += "from volunteervisits inner join customerfamily "
+        sqlQuery += "on customerfamily.id=volunteervisits.family inner join "
+        sqlQuery += "dependents on customerfamily.id=dependents.family "
+        sqlQuery += "where dependents.primary=True and dependents.last_name "
+        sqlQuery += "not in ('User') and volunteervisits.checkout IS NOT NULL "
+        sqlQuery += "and volunteervisits.checkout >= '" + start_date
+        sqlQuery += "' and volunteervisits.checkout <= '" + end_date + "' "
+        sqlQuery += "and current_date+1 > volunteervisits.checkin "
+        sqlQuery += "group by customerfamily.id, ln, fn order by ln, fn"
+        
+        super(VolunteersHoursWorkedReport, self).__init__(sqlQuery)
+
+    def getTitleAndHtml(self, db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        allHours = reader.fetchall()
+
+        frequencyHtml = '<table><tr><th>Name</th><th>Hours</th></tr>'
+        for row in allHours:
+            frequencyHtml += "<tr><td class=\"category\">" + str(row[1])
+            frequencyHtml += " " + str(row[2])
+            frequencyHtml += "</td><td class=\"category\">" + str(row[0])
+            frequencyHtml += "</td></tr>"
+        frequencyHtml += "</table>"
+
+        reportInfo = {}
+        reportInfo['title'] = 'Volunteer Hours'
+        reportInfo['html'] = frequencyHtml
+        return reportInfo, None

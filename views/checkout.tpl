@@ -7,7 +7,11 @@
 
 % def calculateAge(born):
 %    today = date.today()
-%    return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+%    theAge = today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+%    if theAge < 0:
+%        theAge = 0
+%    end
+%    return theAge
 % end
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">

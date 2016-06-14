@@ -12,7 +12,6 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js" charset="utf-8"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3-geo-projection/0.2.9/d3.geo.projection.min.js" charset="utf-8"></script>
-    <script src="//wrobstory.github.io/vega/vega.v1.3.3.js"></script>
     <style type="text/css">
     td.date
     {
@@ -108,7 +107,7 @@ path {
     <div id="vis"></div>
   </body>
 <script type="text/javascript">
-function newParse(reportNum)
+function newParse(reportGraph)
 {
     // Set the dimensions of the canvas / graph
     var margin = {top: 30, right: 20, bottom: 30, left: 50},
@@ -276,26 +275,15 @@ function newParse(reportNum)
             .call(yAxis);
     }
     
-    $.ajax({
-        url: 'report/data/' + reportNum,
-        success: function(data)
-        {
-            var keys = d3.keys(data[0]);
-            if (keys.length == 2)
-            {
-                singleLineGraph(data);
-            }
-            else
-            {
-                multiLineGraph(data);
-            }
-        }
-    });
-}
-// parse a spec and create a visualization view
-function parse(spec)
-{
-    vg.parse.spec(spec, function(chart){ chart({el:"#vis"}).update(); });
+    var keys = d3.keys(reportGraph[0]);
+    if (keys.length == 2)
+    {
+        singleLineGraph(reportGraph);
+    }
+    else
+    {
+        multiLineGraph(reportGraph);
+    }
 }
 
 function runReport()
@@ -314,20 +302,14 @@ function runReport()
     }
     
     $.ajax({ url: reportUrl, success: function(reportInfo) {
-      $("#title").text(reportInfo.title);
-      $("#info").html(reportInfo.html);
+      reportData = reportInfo.data;
+      reportGraph = reportInfo.graph;
+      $("#title").text(reportData.title);
+      $("#info").html(reportData.html);
       $("#vis").text('');
-      if (!reportInfo.nograph)
+      if (reportGraph)
       {
-         /*if (selectedReportNum == 1 || selectedReportNum == 2
-             || selectedReportNum == 3 || selectedReportNum == 4)
-         {*/
-             newParse(selectedReportNum);
-         /*}
-         else
-         {
-             parse("/report/graphdata/"+selectedReportNum, "line");
-         }*/
+         newParse(reportGraph);
       }
     } });
 }

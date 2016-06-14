@@ -6,6 +6,7 @@ from .reports import FamilyTotalOverTimeReport, DependentsTotalOverTimeReport
 from .reports import FamilyCheckoutsPerWeekReport, DependentCheckoutsPerWeekReport
 from .reports import ItemsPerCategoryPerMonthReport, IndividualsByAgeReport
 from .reports import FamiliesPerZipReport, CheckoutFrequencyPerMonthReport
+from .reports import VolunteersHoursWorkedReport
 
 availableReports = {}
 availableReports[1] = FamilyTotalOverTimeReport
@@ -16,6 +17,7 @@ availableReports[5] = ItemsPerCategoryPerMonthReport
 availableReports[6] = IndividualsByAgeReport
 availableReports[7] = FamiliesPerZipReport
 availableReports[8] = CheckoutFrequencyPerMonthReport
+availableReports[9] = VolunteersHoursWorkedReport
 
 
 def determineAndCreateReport(report_num, startDate='', endDate=''):

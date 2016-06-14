@@ -13,6 +13,7 @@
 % get_menu()
 <script src="/js/jquery.mask.min.js"></script>
 <script type="text/javascript">
+    var isExisting = false;
     $(document).ready(function () {
         $('#add_another_button').click(function ()
         {
@@ -45,6 +46,12 @@
             }
             e.preventDefault();
         });
+        
+        $('#volunteer_checkin_button').click(function (e)
+        {
+            window.location.href = '/volunteer_visit?family_id={{customer_id}}';
+            e.preventDefault();
+        });
     
         // By default we want to check in the customer when changing them, but
         // this extra hidden input is checked on the server side when you don't want
@@ -58,6 +65,12 @@
         $('#phone').mask('(000) 000-0000', {clearIfNotMatch: true, placeholder: "(XXX) XXX-XXXX"});
         $('#zip').mask('00000', {clearIfNotMatch: true, placeholder: "XXXXX"});
         $('.dependent-birthdate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
+        
+        % if customer_id:
+        isExisting = true;
+        % end
+        
+        checkCustomerAndVisitorStatus();
     });
     
     // This function duplicates the current dependent structure and creates a new one
@@ -85,6 +98,42 @@
         });
         $(selector).parent().after(new_element);
     }
+    
+    function checkCustomerAndVisitorStatus()
+    {
+        if ($('#isCustomer').prop('checked'))
+        {
+            $('#visits').show();
+            $('.dependent').show();
+            $('#dependents_header').show();
+            $('#add_another_button').parent().parent().show();
+        }
+        else
+        {
+            $('#visits').hide();
+            $('.dependent').hide();
+            $('#dependents_header').hide();
+            $('#add_another_button').parent().parent().hide();
+        }
+        
+        if ($('#isVolunteer').prop('checked'))
+        {
+            $('#volunteering').show();
+            if (isExisting)
+            {
+                $('#volunteer_checkin').show();
+            }
+            else
+            {
+                $('#volunteer_checkin').hide();
+            }
+        }
+        else
+        {
+            $('#volunteering').hide();
+            $('#volunteer_checkin').hide();
+        }
+    }
 </script>
 <div class="container-fluid">
     % if form.errors:
@@ -99,12 +148,17 @@
         </div>
     </div>
     % end
+    <div class="row" id="volunteer_checkin" style="display:none; margin-top:10px;">
+        <div class="col-sm-12">
+            <button class="btn btn-info" id="volunteer_checkin_button">Volunteer Check In</button>
+        </div>
+    </div>
     <form id="thisForm" method="POST" action="{{post_url}}" role="form">
         <input id="state" name="state" type="hidden" value="Ohio">
         % if customer_id:
         <div class="row" style="margin-top:10px">
             <div class="col-sm-12">
-                <button type="submit" class="btn btn-default">Save Customer And Check In</button>
+                <button type="submit" class="btn btn-default">Save And Check In</button>
             </div>
         </div>
         % end
@@ -212,6 +266,26 @@
             % end
         </div>
     </div>
+    <div class="form-group ">
+        <label for="isCustomer" class="col-sm-2 control-label">Customer?</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="isCustomer" name="isCustomer" type="checkbox" value="isCustomer" onchange="checkCustomerAndVisitorStatus()"
+            % if form.isCustomer.data is None or form.isCustomer.data:
+            checked
+            % end
+            >
+        </div>
+    </div>
+    <div class="form-group ">
+        <label for="isVolunteer" class="col-sm-2 control-label">Volunteer?</label>
+        <div class="col-sm-10">
+            <input class="form-control" id="isVolunteer" name="isVolunteer" type="checkbox" value="isVolunteer" onchange="checkCustomerAndVisitorStatus()"
+            % if form.isVolunteer.data is not None and form.isVolunteer.data:
+            checked
+            % end
+            >
+        </div>
+    </div>
     % if aaa.current_user.role == 'admin':
     <div class="form-group ">
         <label for="adminComments" style="color:red" class="col-sm-2 control-label">Admin Comments</label>
@@ -246,7 +320,7 @@
         </div>
     % end
     </div>
-    <div class="page-header">
+    <div class="page-header" id="dependents_header">
         <h3>Household Members</h3>
     </div>
     % dependent_index = -1
@@ -255,7 +329,7 @@
     % if dependent.isPrimary.data:
     % continue
     % end
-    <div class="row">
+    <div class="row dependent">
     <div class="form-group fieldset" data-toggle="fieldset" id="dependent-fieldset">
         Household Member
     <div data-toggle="fieldset-entry">
@@ -319,7 +393,7 @@
     <div class="row" style="margin-top:10px">
         <div class="form-group"> 
             <div class="col-sm-10">
-                <button type="submit" class="btn btn-default">Save Customer And Check In</button>
+                <button type="submit" class="btn btn-default">Save And Check In</button>
             </div>
         </div>
     </div>
@@ -332,7 +406,7 @@
     </form>
 </div>
 % if customer_id:
-<div class="container-fluid">
+<div class="container-fluid" id ="visits">
     <div class="page-header">
         <h3>Visits</h3>
     </div>
@@ -356,6 +430,36 @@
             % else:
             <div class="col-sm-4">
                 {{visit.checkout.strftime("%m/%d/%Y %H:%M")}}
+            </div>
+            % end
+        </div>
+    % end
+</div>
+
+<div class="container-fluid" id ="volunteering">
+    <div class="page-header">
+        <h3>Volunteering</h3>
+    </div>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4"><strong>Checkin</strong></div>
+        <div class="col-sm-4"><strong>Checkout</strong></div>
+    </div>
+    % for volunteer in volunteers:
+        <div class="row">
+            <div class="col-sm-4">
+                <a href="{{volunteer_url_root}}/{{volunteer.id}}">Volunteer</a>
+            </div>
+            <div class="col-sm-4">
+                {{volunteer.checkin.strftime("%m/%d/%Y %H:%M")}}
+            </div>
+            % if volunteer.checkout is None:
+            <div class="col-sm-4">
+                -None-
+            </div>
+            % else:
+            <div class="col-sm-4">
+                {{volunteer.checkout.strftime("%m/%d/%Y %H:%M")}}
             </div>
             % end
         </div>
