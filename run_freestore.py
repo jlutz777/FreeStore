@@ -799,3 +799,50 @@ def report_info(db, report_num):
     jsonInfo = json.dumps(reportInfo, default=json_util.default)
 
     return jsonInfo
+
+# Section: Open pages (require no session)
+
+
+@app.route('/volunteer_registration', method=['GET', 'POST'])
+def volunteer_registration(db):
+    postData = bottle.request.POST
+    captcha_success = True
+    form = CustomerForm(postData)
+    form.isCustomer.data = False
+    form.isVolunteer.data = True
+    post_url = get_redirect_url('volunteer_registration')
+
+    if bottle.request.method == 'POST':
+        try:
+            import requests
+            captcha_url = "https://www.google.com/recaptcha/api/siteverify"
+            captcha_rs = postData.get('g-recaptcha-response')
+            params = {
+                'secret': os.environ.get("CAPTCHA_KEY", ""),
+                'response': captcha_rs
+            }
+            verify_rs = requests.get(captcha_url, params=params, verify=True)
+            verify_rs = verify_rs.json()
+            captcha_success = verify_rs.get("success", False)
+            if captcha_success and form.validate():
+                family = CustomerFamily()
+                family.fromForm(None, form)
+                family = db.merge(family)
+
+                db.flush()
+                db.commit()
+
+                return 'Thanks for registering!'
+        except HTTPError as herr:
+            raise herr
+        except HTTPResponse as hres:
+            raise hres
+        except Exception as ex:
+            log.debug(ex)
+            db.rollback()
+
+    volDict = {}
+    volDict['form'] = form
+    volDict['post_url'] = post_url
+    volDict['captcha_success'] = captcha_success
+    return template('volunteer_registration', volDict)

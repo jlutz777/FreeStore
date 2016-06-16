@@ -1,8 +1,12 @@
-% def get_menu():
+% def get_bootstrap():
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <link rel="stylesheet" href="/css/bootstrap.min.css">
 <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
 <script src="/js/bootstrap.min.js"></script>
+% end
+
+% def get_menu():
+% get_bootstrap()
 <style>
 .navbar-default .navbar-nav>.active>a
 {
@@ -71,7 +75,7 @@
 % def get_field_errors(field):
     % if field.errors:
         % for e in field.errors:
-            <span class="help-block">{{ e }}</p>
+            <span class="help-block">{{ e }}</span>
         % end
     % end
 % end

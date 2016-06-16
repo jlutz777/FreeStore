@@ -56,7 +56,11 @@ class CustomerFamily(base.Base):
 
     def __checkBirthDate__(self, formDependent, form):
         hasError = False
-        if formDependent['birthdate'].data is None:
+        
+        # Only customers need a birthdate
+        if not form.isCustomer.data:
+            pass
+        elif formDependent['birthdate'].data is None:
             formError = 'Birthday is required'
             formDependent['birthdate'].errors.append(formError)
             form.errors['dependent_birthdate'] = 'required'

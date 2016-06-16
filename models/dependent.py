@@ -23,7 +23,7 @@ class Dependent(base.Base):
     isPrimary = Column('primary', Boolean)
     firstName = Column('first_name', Unicode, nullable=False, default=defVal)
     lastName = Column('last_name', Unicode, nullable=False, default=defVal)
-    birthdate = Column('birthdate', DateTime, info=birthDateInfo)
+    birthdate = Column('birthdate', DateTime, nullable=True, info=birthDateInfo)
     family_id = Column('family', Integer, ForeignKey('customerfamily.id'))
 
     def getDict(self):
