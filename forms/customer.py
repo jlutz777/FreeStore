@@ -1,5 +1,6 @@
 from wtforms import validators, FormField
 from wtforms_alchemy import ModelForm, ModelFieldList
+from wtforms.fields import DateTimeField
 
 from models import CustomerFamily, Dependent
 
@@ -26,6 +27,9 @@ class DependentForm(ModelForm):
 
 
 class CustomerForm(ModelForm):
+    volunteer_date = DateTimeField(format='%m/%d/%Y %H:%M',
+                        validators=(validators.Optional(),))
+    
     class Meta:
         datetime_format = '%m/%d/%Y'
         model = CustomerFamily

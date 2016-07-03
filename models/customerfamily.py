@@ -73,6 +73,9 @@ class CustomerFamily(base.Base):
             hasError = True
         return hasError
 
+    def updatedFromRegistration(self, form):
+        pass
+
     def fromForm(self, id, form):
         if id is not None:
             self.id = id
@@ -116,3 +119,24 @@ class CustomerFamily(base.Base):
                 raise Exception('Dependent data needed')
 
             self.dependents.append(dependent)
+
+
+    def findMatch(self, form, db):
+        matchedFam = None
+        
+        # A match is when the first name, last name, zip, and city all match
+
+        for formDependent in form.dependents:
+            if not formDependent['isPrimary'].data:
+                continue
+            deps = db.query(Dependent).filter(Dependent.isPrimary)\
+                .filter(Dependent.firstName==formDependent.firstName.data)\
+                .filter(Dependent.lastName==formDependent.lastName.data)
+            for dep in deps:
+                fam = dep.family
+                if fam is not None and fam.zip == form.zip.data and fam.city == form.city.data:
+                    matchedFam = fam
+                    break
+
+        return matchedFam
+

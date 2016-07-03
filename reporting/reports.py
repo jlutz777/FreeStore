@@ -3,14 +3,6 @@ Do all the work for reporting
 """
 
 import abc
-import logging
-import os
-import reporting
-
-logging.basicConfig(format='localhost - - [%(asctime)s] %(message)s',
-                    level=logging.DEBUG)
-log = logging.getLogger(__name__)
-
 
 class Report:
     """Base class for reports"""

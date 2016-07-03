@@ -10,7 +10,6 @@ from reporting.utils import availableReports, determineAndCreateReport
 
 from sqlalchemy import select
 from sqlalchemy.sql import func
-from sqlalchemy.sql.expression import false
 
 from beaker.middleware import SessionMiddleware
 import bottle
@@ -793,7 +792,7 @@ def report_info(db, report_num):
     endDate = endDate.strftime("%m/%d/%Y")
 
     myReport = determineAndCreateReport(report_num, startDate, endDate)
-    reportInfo = myReport.getDataAndHtml(db,sess)
+    reportInfo = myReport.getDataAndHtml(db, sess)
 
     bottle.response.content_type = 'application/json'
     jsonInfo = json.dumps(reportInfo, default=json_util.default)
@@ -826,11 +825,29 @@ def volunteer_registration(db):
             captcha_success = verify_rs.get("success", False)
             if captcha_success and form.validate():
                 family = CustomerFamily()
-                family.fromForm(None, form)
+
+                matchedFam = family.findMatch(form, db)
+                if matchedFam is not None:
+                    # Note: we aren't taking the data from the form right now
+                    matchedFam.updatedFromRegistration(form)
+                    family = matchedFam
+                else:
+                    family.fromForm(None, form)
+
                 family = db.merge(family)
 
                 db.flush()
                 db.commit()
+
+                if form.volunteer_date.data is not None:
+                    visit = VolunteerVisit()
+                    visit.family_id = family.id
+                    visit.checkin = form.volunteer_date.data
+
+                    db.add(visit)
+
+                    db.flush()
+                    db.commit()
 
                 return 'Thanks for registering!'
         except HTTPError as herr:

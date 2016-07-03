@@ -17,6 +17,7 @@
         $('#phone').mask('(000) 000-0000', {clearIfNotMatch: true, placeholder: "(XXX) XXX-XXXX"});
         $('#zip').mask('00000', {clearIfNotMatch: true, placeholder: "XXXXX"});
         $('.dependent-birthdate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
+        $('#volunteer_date').mask("00/00/0000 00:00", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY hh:mm"});
     });
 </script>
 <div class="container-fluid">
@@ -111,6 +112,17 @@
         <label for="phone" class="col-sm-2 control-label">Phone</label>
         <div class="col-sm-10">
             <input class="form-control" id="phone" name="phone" type="text" value="{{form.phone.data}}">
+        </div>
+    </div>
+    <div class="form-group ">
+        <label for="volunteer_date" class="col-sm-2 control-label">Volunteer Date</label>
+        <div class="col-sm-10">
+            % if form.volunteer_date.data is not None and not form.volunteer_date.errors:
+            <input class="form-control" id="volunteer_date" name="volunteer_date" type="text" value="{{form.volunteer_date.data}}">
+            % else:
+            <input class="form-control" id="volunteer_date" name="volunteer_date" type="text" value="">
+            % end
+            % get_field_errors(form.volunteer_date)
         </div>
     </div>
     <script src='https://www.google.com/recaptcha/api.js'></script>
