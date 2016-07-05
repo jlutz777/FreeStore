@@ -21,8 +21,11 @@ from cork.backends import SqlAlchemyBackend
 
 from bson import json_util
 from datetime import datetime, date
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import json
 import logging
+import smtplib
 from operator import itemgetter
 import os
 
@@ -110,6 +113,26 @@ def get_first_of_next_month():
         nextYear += 1
 
     return date(nextYear, nextMonth, 1)
+
+
+def send_registered_user_email(registered_user):
+    smtp_host = 'smtp.gmail.com'
+    smtp_port = 587
+    server = smtplib.SMTP()
+    server.connect(smtp_host, smtp_port)
+    server._host = 'smtp.gmail.com'
+    server.starttls()
+    user = os.environ.get("EMAIL_SENDER", "")
+    passw = os.environ.get("EMAIL_PASSWORD", "")
+    server.login(user, passw)
+    tolist = [user, ]
+
+    msg = MIMEMultipart()
+    msg['From'] = user
+    msg['To'] = ', '.join(tolist)
+    msg['Subject'] = 'New volunteer'
+    msg.attach(MIMEText('Someone new registered: ' + registered_user))
+    server.sendmail(user, tolist, msg.as_string())
 
 
 def get_redirect_url(relative_path=None):
@@ -848,6 +871,10 @@ def volunteer_registration(db):
 
                     db.flush()
                     db.commit()
+
+                full_name = form.dependents[0].firstName.data
+                full_name += " " + form.dependents[0].lastName.data
+                send_registered_user_email(full_name)
 
                 return 'Thanks for registering!'
         except HTTPError as herr:
