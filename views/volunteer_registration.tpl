@@ -67,7 +67,7 @@
             <label for="dependents-0-birthdate" class="col-sm-2 control-label">Birthday</label>
             <div class="col-sm-10">
                 % if volunteer.birthdate.data is not None and not volunteer.birthdate.errors:
-                <input class="form-control dependent-birthdate" id="dependents-0-birthdate" name="dependents-0-birthdate" type="datetime" value="{{form.birthdate.data.strftime("%m/%d/%Y")}}">
+                <input class="form-control dependent-birthdate" id="dependents-0-birthdate" name="dependents-0-birthdate" type="datetime" value="{{volunteer.birthdate.data.strftime("%m/%d/%Y")}}">
                 % else:
                 <input class="form-control dependent-birthdate" id="dependents-0-birthdate" name="dependents-0-birthdate" type="datetime" value="">
                 % end
