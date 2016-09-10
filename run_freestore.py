@@ -487,8 +487,6 @@ def volunteer_visit(db, volunteer_visit_id=None):
             thisCheckin = datetime.now()
         form.checkin.data = thisCheckin
 
-        if thisCheckout is None:
-            thisCheckout = datetime.now()
         form.checkout.data = thisCheckout
 
     if family is None:
