@@ -1,3 +1,4 @@
+% from utils.utils import *
 % include renders
 % renders_namespace = _
 % get_field_errors = renders_namespace['get_field_errors']
@@ -333,7 +334,7 @@ window.onbeforeunload = warnBeforeNavigate;
         <label class="col-sm-4 control-label">Checkin Time</label>
         <div class="col-sm-8">
             <label>{{visit.checkin.strftime("%I:%M:%S %p")}} ({{timeInStore}} in store)</label>
-            <input type="hidden" id="checkin" name="checkin" type="text" value="{{visit.checkin.strftime("%m/%d/%Y %H:%M:%S")}}" />
+            <input type="hidden" id="checkin" name="checkin" type="text" value="{{formatted_str_date(visit.checkin)}}" />
             <input type="hidden" id="family_id" name="family_id" value="{{visit.family.id}}" />
         </div>
     </div>
