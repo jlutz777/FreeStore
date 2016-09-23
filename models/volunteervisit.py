@@ -6,6 +6,7 @@ This is the sqlalchemy class for communicating with the visits table
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 
 import models.base as base
+from utils.utils import *
 
 
 class VolunteerVisit(base.Base):
@@ -24,6 +25,6 @@ class VolunteerVisit(base.Base):
             self.id = form.id.data
         else:
             self.id = None
-        self.checkin = form.checkin.data
-        self.checkout = form.checkout.data
+        self.checkin = local_time_to_utc_time(form.checkin.data)
+        self.checkout = local_time_to_utc_time(form.checkout.data)
         self.family_id = form.family_id.data

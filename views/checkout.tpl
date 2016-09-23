@@ -333,7 +333,7 @@ window.onbeforeunload = warnBeforeNavigate;
     <div class="form-group ">
         <label class="col-sm-4 control-label">Checkin Time</label>
         <div class="col-sm-8">
-            <label>{{visit.checkin.strftime("%I:%M:%S %p")}} ({{timeInStore}} in store)</label>
+            <label>{{utc_time_to_local_time(visit.checkin)}} ({{timeInStore}} in store)</label>
             <input type="hidden" id="checkin" name="checkin" type="text" value="{{formatted_str_date(visit.checkin)}}" />
             <input type="hidden" id="family_id" name="family_id" value="{{visit.family.id}}" />
         </div>

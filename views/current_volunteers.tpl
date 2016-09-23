@@ -24,7 +24,7 @@
       <a class="customer" href="/customer/[[familyId]]">[[lastName]], [[firstName]]</a>: Checked in at [[checkin]]
     </p>
     <p style="margin-bottom:15px">
-      <a href="/volunteer_visit/[[visitId]]" role="button" class="btn btn-default">Checkout Volunteer [[lastName]]</a>
+      <a href="/volunteer_visit/[[visitId]]?checkout=true" role="button" class="btn btn-default">Checkout Volunteer [[lastName]]</a>
     </p>
     [[/visits]]
 </script>

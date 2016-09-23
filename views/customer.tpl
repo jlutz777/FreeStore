@@ -1,4 +1,5 @@
 % include renders
+% from utils.utils import *
 % renders_namespace = _ 
 % get_field_errors = renders_namespace['get_field_errors']
 % get_menu = renders_namespace['get_menu']
@@ -421,7 +422,7 @@
                 <a href="{{visit_url_root}}/{{visit.id}}">Visit</a>
             </div>
             <div class="col-sm-4">
-                {{visit.checkin.strftime("%m/%d/%Y %H:%M")}}
+                {{utc_time_to_local_time(visit.checkin)}}
             </div>
             % if visit.checkout is None:
             <div class="col-sm-4">
@@ -429,7 +430,7 @@
             </div>
             % else:
             <div class="col-sm-4">
-                {{visit.checkout.strftime("%m/%d/%Y %H:%M")}}
+                {{utc_time_to_local_time(visit.checkout)}}
             </div>
             % end
         </div>
@@ -451,7 +452,7 @@
                 <a href="{{volunteer_url_root}}/{{volunteer.id}}">Volunteer</a>
             </div>
             <div class="col-sm-4">
-                {{volunteer.checkin.strftime("%m/%d/%Y %H:%M")}}
+                {{utc_time_to_local_time(volunteer.checkin)}}
             </div>
             % if volunteer.checkout is None:
             <div class="col-sm-4">
@@ -459,7 +460,7 @@
             </div>
             % else:
             <div class="col-sm-4">
-                {{volunteer.checkout.strftime("%m/%d/%Y %H:%M")}}
+                {{utc_time_to_local_time(volunteer.checkout)}}
             </div>
             % end
         </div>

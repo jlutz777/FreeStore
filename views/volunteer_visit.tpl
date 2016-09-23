@@ -53,7 +53,7 @@ $(document).ready(function () {
             <label for="checkin" class="col-sm-2 control-label">Checkin</label>
             <div class="col-sm-10">
                 % if form.checkin.data is not None:
-                <input autofocus class="form-control" id="checkin" name="checkin" type="text" value="{{form.checkin.data.strftime("%m/%d/%Y %H:%M")}}">
+                <input autofocus class="form-control" id="checkin" name="checkin" type="text" value="{{form.checkin.data}}">
                 % else:
                 <input autofocus class="form-control" id="checkin" name="checkin" type="text" value="">
                 % end
@@ -68,7 +68,7 @@ $(document).ready(function () {
             <label for="checkout" class="col-sm-2 control-label">Checkout</label>
             <div class="col-sm-10">
                 % if form.checkout.data is not None:
-                <input class="form-control" id="checkout" name="checkout" type="text" value="{{form.checkout.data.strftime("%m/%d/%Y %H:%M")}}">
+                <input class="form-control" id="checkout" name="checkout" type="text" value="{{form.checkout.data}}">
                 % else:
                 <input class="form-control" id="checkout" name="checkout" type="text" value="">
                 % end

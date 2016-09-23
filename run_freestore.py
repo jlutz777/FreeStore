@@ -7,6 +7,7 @@ import models.base
 from models import CustomerFamily, Dependent, Visit, VolunteerVisit
 from models import ShoppingCategory, ShoppingItem
 from reporting.utils import availableReports, determineAndCreateReport
+from utils.utils import *
 
 from sqlalchemy import select
 from sqlalchemy.sql import func
@@ -225,7 +226,7 @@ def current_volunteers_data(db):
                     thisVisit["visitId"] = visit.id
                     thisVisit["lastName"] = dependent.lastName
                     thisVisit["firstName"] = dependent.firstName
-                    checkinStr = visit.checkin.strftime("%m/%d/%Y %H:%M")
+                    checkinStr = utc_time_to_local_time(visit.checkin)
                     thisVisit["checkin"] = checkinStr
                     currentVisitsArray.append(thisVisit)
                     break
@@ -485,9 +486,11 @@ def volunteer_visit(db, volunteer_visit_id=None):
 
         if thisCheckin is None:
             thisCheckin = datetime.now()
-        form.checkin.data = thisCheckin
+        form.checkin.data = utc_time_to_local_time(thisCheckin)
 
-        form.checkout.data = thisCheckout
+        if thisCheckout is None and getData.get('checkout', 'false') == 'true':
+            thisCheckout = datetime.now()
+        form.checkout.data = utc_time_to_local_time(thisCheckout)
 
     if family is None:
         customerQuery = db.query(CustomerFamily)
@@ -863,7 +866,7 @@ def volunteer_registration(db):
                 if form.volunteer_date.data is not None:
                     visit = VolunteerVisit()
                     visit.family_id = family.id
-                    visit.checkin = form.volunteer_date.data
+                    visit.checkin = local_time_to_utc_time(form.volunteer_date.data)
 
                     db.add(visit)
 
