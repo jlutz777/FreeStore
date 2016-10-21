@@ -16,6 +16,7 @@ class ShoppingCategory(base.Base):
     name = Column('name', Unicode)
     dailyLimit = Column('daily_limit', Integer)
     monthlyLimit = Column('monthly_limit', Integer)
+    yearlyLimit = Column('yearly_limit', Integer)
     familyWideLimit = Column('family_wide', Boolean)
     order = Column('order', Integer)
     minAge = Column('min_age', Integer, nullable=True)
@@ -27,6 +28,7 @@ class ShoppingCategory(base.Base):
         self.name = posted.name
         self.dailyLimit = posted.dailyLimit
         self.monthlyLimit = posted.monthlyLimit
+        self.yearlyLimit = posted.yearlyLimit
         self.familyWideLimit = posted.familyWideLimit != ""
         self.order = posted.order
         minAge = posted.minAge
@@ -45,6 +47,7 @@ class ShoppingCategory(base.Base):
             'name': self.name,
             'dailyLimit': self.dailyLimit,
             'monthlyLimit': self.monthlyLimit,
+            'yearlyLimit' : self.yearlyLimit,
             'familyWideLimit': self.familyWideLimit,
             'order': self.order,
             'minAge': self.minAge,

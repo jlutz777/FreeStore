@@ -1,3 +1,4 @@
+% from utils.utils import *
 % include renders
 % renders_namespace = _ 
 % get_field_errors = renders_namespace['get_field_errors']
@@ -67,7 +68,7 @@
             <label for="dependents-0-birthdate" class="col-sm-2 control-label">Birthday</label>
             <div class="col-sm-10">
                 % if volunteer.birthdate.data is not None and not volunteer.birthdate.errors:
-                <input class="form-control dependent-birthdate" id="dependents-0-birthdate" name="dependents-0-birthdate" type="datetime" value="{{volunteer.birthdate.data.strftime("%m/%d/%Y")}}">
+                <input class="form-control dependent-birthdate" id="dependents-0-birthdate" name="dependents-0-birthdate" type="datetime" value="{{formatted_str_date(volunteer.birthdate.data)}}">
                 % else:
                 <input class="form-control dependent-birthdate" id="dependents-0-birthdate" name="dependents-0-birthdate" type="datetime" value="">
                 % end

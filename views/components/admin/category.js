@@ -25,6 +25,7 @@ $(document).ready(function ()
                 name: "",
                 dailyLimit: "1",
                 monthlyLimit: "5",
+                yearlyLimit: "60",
                 familyWideLimit: false,
                 minAge: "",
                 maxAge: "",

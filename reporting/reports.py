@@ -3,6 +3,7 @@ Do all the work for reporting
 """
 
 import abc
+from utils.utils import *
 
 class Report:
     """Base class for reports"""
@@ -57,7 +58,7 @@ class FamilyTotalOverTimeReport(Report):
         for row in categoryTotals:
             totalFamilyCount += row[1]
             familyCountsHtml += "<tr><td class=\"date\">"
-            familyCountsHtml += row[0].strftime("%m/%d/%Y") + "</td>"
+            familyCountsHtml += formatted_str_date(row[0]) + "</td>"
             familyCountsHtml += "<td class=\"count\">" + str(totalFamilyCount)
             familyCountsHtml += "</td></tr>"
         familyCountsHtml += "</table>"
@@ -73,7 +74,7 @@ class FamilyTotalOverTimeReport(Report):
         for row in categoryTotals:
             totalFamilyCount += row[1]
             keyVal = {}
-            keyVal["date"] = row[0].strftime("%m/%d/%Y")
+            keyVal["date"] = formatted_str_date(row[0])
             keyVal["count"] = str(totalFamilyCount)
             arr.append(keyVal)
         return arr
@@ -105,7 +106,7 @@ class DependentsTotalOverTimeReport(Report):
         for row in categoryTotals:
             totalFamilyCount += row[1]
             familyCountsHtml += "<tr><td class=\"date\">"
-            familyCountsHtml += row[0].strftime("%m/%d/%Y") + "</td>"
+            familyCountsHtml += formatted_str_date(row[0]) + "</td>"
             familyCountsHtml += "<td class=\"count\">" + str(totalFamilyCount)
             familyCountsHtml += "</td></tr>"
         familyCountsHtml += "</table>"
@@ -122,7 +123,7 @@ class DependentsTotalOverTimeReport(Report):
         for row in categoryTotals:
             prevVal = prevVal + row[1]
             keyVal = {}
-            keyVal["date"] = row[0].strftime("%m/%d/%Y")
+            keyVal["date"] = formatted_str_date(row[0])
             keyVal["count"] = prevVal
             arr.append(keyVal)
 
@@ -160,7 +161,7 @@ class FamilyCheckoutsPerWeekReport(Report):
         checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
         for row in allCheckouts:
             checkoutsHtml += "<tr><td class=\"date\">"
-            checkoutsHtml += row[0].strftime("%m/%d/%Y") + "</td>"
+            checkoutsHtml += formatted_str_date(row[0]) + "</td>"
             checkoutsHtml += "<td class=\"count\">" + str(row[1])
             checkoutsHtml += "</td></tr>"
         checkoutsHtml += "</table>"
@@ -175,7 +176,7 @@ class FamilyCheckoutsPerWeekReport(Report):
 
         for row in allCheckouts:
             keyVal = {}
-            keyVal["date"] = row[0].strftime("%m/%d/%Y")
+            keyVal["date"] = formatted_str_date(row[0])
             keyVal["count"] = row[1]
             arr.append(keyVal)
 
@@ -212,7 +213,7 @@ class DependentCheckoutsPerWeekReport(Report):
         checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
         for row in allCheckouts:
             checkoutsHtml += "<tr><td class=\"date\">"
-            checkoutsHtml += row[0].strftime("%m/%d/%Y") + "</td>"
+            checkoutsHtml += formatted_str_date(row[0]) + "</td>"
             checkoutsHtml += "<td class=\"count\">" + str(row[1])
             checkoutsHtml += "</td></tr>"
         checkoutsHtml += "</table>"
@@ -227,7 +228,7 @@ class DependentCheckoutsPerWeekReport(Report):
 
         for row in allCheckouts:
             keyVal = {}
-            keyVal["date"] = row[0].strftime("%m/%d/%Y")
+            keyVal["date"] = formatted_str_date(row[0])
             keyVal["count"] = row[1]
             arr.append(keyVal)
 
@@ -302,7 +303,7 @@ class ItemsPerCategoryPerMonthReport(Report):
 
         for i in range(0, dateLen):
             checkoutsHtml += '<tr><td>'
-            checkoutsHtml += results['index'][i].strftime("%m/%d/%Y")
+            checkoutsHtml += formatted_str_date(results['index'][i])
             checkoutsHtml += '</td>'
             for row in cats:
                 checkoutsHtml += '<td>' + str(results[row][i]) + '</td>'
@@ -326,7 +327,7 @@ class ItemsPerCategoryPerMonthReport(Report):
 
         for i in range(0, dateLen):
             keyVal = {}
-            keyVal["date"] = itemsPerCat['index'][i].strftime("%m/%d/%Y")
+            keyVal["date"] = formatted_str_date(itemsPerCat['index'][i])
             for row in cats:
                 keyVal[row] = itemsPerCat[row][i]
             arr.append(keyVal)
@@ -447,7 +448,7 @@ class CheckoutFrequencyPerMonthReport(Report):
         frequencyHtml = '<table><tr><th>Date</th><th>Frequency</th><th>Family Count</th></tr>'
         for row in allFrequencies:
             frequencyHtml += "<tr><td class=\"date\">"
-            frequencyHtml += row[0].strftime("%m/%d/%Y") + "</td>"
+            frequencyHtml += formatted_str_date(row[0]) + "</td>"
             frequencyHtml += "<td class=\"category\">" + str(row[1])
             frequencyHtml += "</td><td class=\"category\">" + str(row[2])
             frequencyHtml += "</td></tr>"

@@ -44,18 +44,35 @@ var categories = {};
 // in the time allotted (currently since the beginning of the month)
 // previousTotals is a hash of a hash in the form of:
 // previousTotals[category id][family member's id] = total previously purchased
-var previousTotals = {};
+var previousMonthlyTotals = {};
+var previousYearlyTotals = {};
 
 % # Loop through all the categories and get the data, also set up an empty object for
 % # the previous totals
 % for cat in categoryChoices:
-categories[{{cat[0]}}] = { id: '{{cat[0]}}', name: '{{cat[1]}}', dailyLimit: {{cat[2]}}, monthlyLimit: {{cat[3]}}, isFamilyWide: {{str(cat[4]).lower()}}};
-previousTotals[{{cat[0]}}] = {};
+categories[{{cat["id"]}}] = {
+    id: '{{cat["id"]}}',
+    name: '{{cat["name"]}}',
+    dailyLimit: {{cat["dailyLimit"]}},
+    monthlyLimit: {{cat["monthlyLimit"]}},
+    % if cat["yearlyLimit"] is not None:
+    yearlyLimit: {{cat["yearlyLimit"]}},
+    % else:
+    yearlyLimit: 10000,
+    % end
+    isFamilyWide: {{str(cat["familyWideLimit"]).lower()}}};
+previousMonthlyTotals[{{cat["id"]}}] = {};
+previousYearlyTotals[{{cat["id"]}}] = {};
 % end
 
 % # Loop through and set up the previous categories
-% for cat in categoryTotals:
-previousTotals[{{cat[0]}}][{{cat[1]}}] = {{cat[2]}};
+% for cat in monthlyCategoryTotals:
+previousMonthlyTotals[{{cat[0]}}][{{cat[1]}}] = {{cat[2]}};
+% end
+
+% # Loop through and set up the previous categories
+% for cat in yearlyCategoryTotals:
+previousYearlyTotals[{{cat[0]}}][{{cat[1]}}] = {{cat[2]}};
 % end
 
 function alertLimitReached()
@@ -139,18 +156,25 @@ function calculateLimits(e)
 
         var curr_cat = categories[cat_id];
         var isFamilyWide = curr_cat.isFamilyWide;
-        var latestTotal = 0;
+        var latestMonthlyTotal = 0;
+        var latestYearlyTotal = 0;
 
         // If a category is not family-wide (so it is per individual), then
         // calculate the new total for this time period by adding the current value
         // to the previous totals from the db
         if (!isFamilyWide)
         {
-            latestTotal = item_val;
+            latestMonthlyTotal = item_val;
+            latestYearlyTotal = item_val;
 
-            if (dep_id in previousTotals[cat_id])
+            if (dep_id in previousMonthlyTotals[cat_id])
             {
-                latestTotal += previousTotals[cat_id][dep_id];
+                latestMonthlyTotal += previousMonthlyTotals[cat_id][dep_id];
+            }
+            
+            if (dep_id in previousYearlyTotals[cat_id])
+            {
+                latestYearlyTotal += previousYearlyTotals[cat_id][dep_id];
             }
         }
         // If it is family-wide, then you need to add up the values in the inputs and
@@ -167,13 +191,22 @@ function calculateLimits(e)
                 }
             });
 
-            latestTotal = item_val;
+            latestMonthlyTotal = item_val;
+            latestYearlyTotal = item_val;
 
-            for (var this_dep_id in previousTotals[cat_id])
+            for (var this_dep_id in previousMonthlyTotals[cat_id])
             {
-                if(previousTotals[cat_id].hasOwnProperty(this_dep_id))
+                if(previousMonthlyTotals[cat_id].hasOwnProperty(this_dep_id))
                 {
-                    latestTotal += previousTotals[cat_id][this_dep_id];
+                    latestMonthlyTotal += previousMonthlyTotals[cat_id][this_dep_id];
+                }
+            }
+            
+            for (var this_dep_id in previousYearlyTotals[cat_id])
+            {
+                if(previousYearlyTotals[cat_id].hasOwnProperty(this_dep_id))
+                {
+                    latestYearlyTotal += previousYearlyTotals[cat_id][this_dep_id];
                 }
             }
         }
@@ -183,17 +216,20 @@ function calculateLimits(e)
 
         // If you are over the limit, clear out the current input so you cannot submit
         // this value
-        if (latestTotal > curr_cat.monthlyLimit || item_val > curr_cat.dailyLimit)
+        if (latestMonthlyTotal > curr_cat.monthlyLimit || item_val > curr_cat.dailyLimit ||
+            latestYearlyTotal > curr_cat.yearlyLimit)
         {
             $(this).val('');
             changedItem = $(this);
             $(this).addClass("item_over_limit");
         }
-        else if (latestTotal == curr_cat.monthlyLimit || item_val == curr_cat.dailyLimit)
+        else if (latestMonthlyTotal == curr_cat.monthlyLimit || item_val == curr_cat.dailyLimit ||
+                 latestYearlyTotal == curr_cat.yearlyLimit)
         {
             $(this).addClass("item_limit_reached");
         }
-        else if (latestTotal+1 == curr_cat.monthlyLimit || item_val+1 == curr_cat.dailyLimit)
+        else if (latestMonthlyTotal+1 == curr_cat.monthlyLimit || item_val+1 == curr_cat.dailyLimit ||
+                 latestYearlyTotal+1 == curr_cat.yearlyLimit)
         {
             $(this).addClass("item_warning");            
         }
@@ -215,30 +251,56 @@ function calculateLimits(e)
 function showPrevTotals()
 {
     var prevText = '';
-    var deps = {};
+    var monthlyDeps = {};
+    var yearlyDeps = {};
 
-    for (var cat_id in previousTotals)
+    for (var cat_id in previousMonthlyTotals)
     {
-        for (var dep_id in previousTotals[cat_id])
+        for (var dep_id in previousMonthlyTotals[cat_id])
         {
-            if (dep_id in deps)
+            if (dep_id in monthlyDeps)
             {
-                deps[dep_id] += ", " + previousTotals[cat_id][dep_id];
+                monthlyDeps[dep_id] += ", " + previousMonthlyTotals[cat_id][dep_id];
             }
             else
             {
-                deps[dep_id] = previousTotals[cat_id][dep_id];
+                monthlyDeps[dep_id] = previousMonthlyTotals[cat_id][dep_id];
             }            
-            deps[dep_id] += " " + categories[cat_id].name;
+            monthlyDeps[dep_id] += " " + categories[cat_id].name;
         }
     }
     
-    for (var dep_id in deps)
+    for (var cat_id in previousYearlyTotals)
+    {
+        for (var dep_id in previousYearlyTotals[cat_id])
+        {
+            if (dep_id in yearlyDeps)
+            {
+                yearlyDeps[dep_id] += ", " + previousYearlyTotals[cat_id][dep_id];
+            }
+            else
+            {
+                yearlyDeps[dep_id] = previousYearlyTotals[cat_id][dep_id];
+            }            
+            yearlyDeps[dep_id] += " " + categories[cat_id].name;
+        }
+    }
+    
+    prevText += "Month:<br />";
+    for (var dep_id in monthlyDeps)
     {
         var dep_name = $(".dep-" + dep_id + "-name").text();
-        prevText += deps[dep_id] + " for " + dep_name + "<br />";
+        prevText += monthlyDeps[dep_id] + " for " + dep_name + "<br />";
     }
-    $("#month_prev_totals").html(prevText);
+    
+    prevText += "Year:<br />";
+    for (var dep_id in yearlyDeps)
+    {
+        var dep_name = $(".dep-" + dep_id + "-name").text();
+        prevText += yearlyDeps[dep_id] + " for " + dep_name + "<br />";
+    }
+    
+    $("#prev_totals").html(prevText);
 }
 
 function warnBeforeNavigate()
@@ -334,15 +396,15 @@ window.onbeforeunload = warnBeforeNavigate;
         <label class="col-sm-4 control-label">Checkin Time</label>
         <div class="col-sm-8">
             <label>{{utc_time_to_local_time(visit.checkin)}} ({{timeInStore}} in store)</label>
-            <input type="hidden" id="checkin" name="checkin" type="text" value="{{formatted_str_date(visit.checkin)}}" />
+            <input type="hidden" id="checkin" name="checkin" type="text" value="{{formatted_str_date_time(visit.checkin)}}" />
             <input type="hidden" id="family_id" name="family_id" value="{{visit.family.id}}" />
         </div>
     </div>
     </div>
     <div class="row">
     <div class="form-group ">
-        <label class="col-sm-4 control-label">This Month Previous Totals:</label>
-        <div class="col-sm-8" id="month_prev_totals">
+        <label class="col-sm-4 control-label">Previous Totals:</label>
+        <div class="col-sm-8" id="prev_totals">
             (None)
         </div>
     </div>
@@ -358,8 +420,8 @@ window.onbeforeunload = warnBeforeNavigate;
                 % end
                 <th style="text-align:center;">&nbsp;&nbsp;Age&nbsp;&nbsp;</th>
                 % for option in categoryChoices:
-                % if not option[7]:
-                <th style="text-align:center;">{{option[1]}}</th>
+                % if not option["disabled"]:
+                <th style="text-align:center;">{{option["name"]}}</th>
                 % end
                 % end
             </tr>
@@ -371,21 +433,21 @@ window.onbeforeunload = warnBeforeNavigate;
                 <td class="dep-{{dependent.id}}-name">{{dependent.firstName}}</td>
                 <td style="text-align: center;">{{dependentAge}}</td>
                 % for option in categoryChoices:
-                % if not option[7]:
+                % if not option["disabled"]:
                 <td style="text-align: center;">
                 % # This is a convention used elsewhere to more easily figure out
                 % # which dependent and category this input is for 
-                % inputName = "row_" + str(dependent.id) + "_col_" + str(option[0])
+                % inputName = "row_" + str(dependent.id) + "_col_" + str(option["id"])
                 % thisVal = previousShoppingItems.get(inputName, '')
                 <!-- Set the value to 0 for the household if empty
                      to trigger the colors -->
-                % if option[4] and thisVal == '' and depIndex == 0:
+                % if option["familyWideLimit"] and thisVal == '' and depIndex == 0:
                 % thisVal = 0
                 % end
                 % # Some categories are limited to a specific age range, so check it
-                % if (option[5] is None or dependentAge >= option[5]) and (option[6] is None or dependentAge <= option[6]):
-                % if not option[4] or depIndex == 0:
-                <input type="text" name="{{inputName}}" onchange="calculateLimits()" maxlength="2" style="width:30px;" class="shopping_item category_{{option[0]}}" value="{{thisVal}}"></input>
+                % if (option["minAge"] is None or dependentAge >= option["minAge"]) and (option["maxAge"] is None or dependentAge <= option["maxAge"]):
+                % if not option["familyWideLimit"] or depIndex == 0:
+                <input type="text" name="{{inputName}}" onchange="calculateLimits()" maxlength="2" style="width:30px;" class="shopping_item category_{{option["id"]}}" value="{{thisVal}}"></input>
                 % end
                 % else:
                 {{thisVal}}

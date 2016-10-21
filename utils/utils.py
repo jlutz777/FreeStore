@@ -1,11 +1,19 @@
 import pytz, datetime
 
 datetime_fmt = "%m/%d/%Y %H:%M"
+date_fmt = "%m/%d/%Y"
 utc_tz = pytz.utc
 local_tz = pytz.timezone('US/Eastern')
 
 
 def formatted_str_date(my_date):
+    if my_date is None:
+        return None
+
+    str_date = my_date.strftime(date_fmt)
+    return str_date
+
+def formatted_str_date_time(my_date):
     if my_date is None:
         return None
 

@@ -369,6 +369,21 @@ def visit(db):
     return bottle.redirect(checkout_url)
 
 
+def getCategoryTotals(db, visit, date_start, date_end):
+    categoryTotals = select([ShoppingCategory.id, Dependent.id,
+                             func.sum(ShoppingItem.quantity)])\
+        .select_from(ShoppingItem.__table__
+                     .join(ShoppingCategory).join(Dependent)
+                     .join(Visit))\
+        .where(Dependent.family_id == visit.family_id)\
+        .where(Visit.checkout >= date_start)\
+        .where(Visit.checkout < date_end)\
+        .where(Visit.id != visit.id)\
+        .group_by(ShoppingCategory.id, Dependent.id)
+    reader = db.execute(categoryTotals)
+    return reader.fetchall()
+
+
 @app.route('/checkout/<visit_id:int>', method=['GET', 'POST'])
 def checkout(db, visit_id):
     authorize()
@@ -376,10 +391,8 @@ def checkout(db, visit_id):
     bottle.BaseTemplate.defaults['page'] = ''
     previousShoppingItems = {}
 
-    categoryChoices = [(s.id, s.name, s.dailyLimit, s.monthlyLimit,
-                       s.familyWideLimit, s.minAge, s.maxAge, s.disabled) for s
-                       in db.query(ShoppingCategory)
-                       .order_by('"order"')]
+    categoryChoices = [cat.__dict__ for cat in db.query(ShoppingCategory)
+                       .order_by('"order"').all()]
     post_url = get_redirect_url()
 
     visits = db.query(Visit).filter(Visit.id == visit_id)
@@ -396,18 +409,11 @@ def checkout(db, visit_id):
     firstOfMonth = date(now.year, now.month, 1)
     firstOfNextMonth = get_first_of_next_month()
 
-    categoryTotals = select([ShoppingCategory.id, Dependent.id,
-                             func.sum(ShoppingItem.quantity)])\
-        .select_from(ShoppingItem.__table__
-                     .join(ShoppingCategory).join(Dependent)
-                     .join(Visit))\
-        .where(Dependent.family_id == visit.family_id)\
-        .where(Visit.checkout >= firstOfMonth)\
-        .where(Visit.checkout < firstOfNextMonth)\
-        .where(Visit.id != visit.id)\
-        .group_by(ShoppingCategory.id, Dependent.id)
-    reader = db.execute(categoryTotals)
-    categoryTotals = reader.fetchall()
+    firstOfYear = date(now.year, 1, 1)
+    firstOfNextYear = date(now.year+1, 1, 1)
+
+    monthlyCategoryTotals = getCategoryTotals(db, visit, firstOfMonth, firstOfNextMonth)
+    yearlyCategoryTotals = getCategoryTotals(db, visit, firstOfYear, firstOfNextYear)
 
     if bottle.request.method == 'POST':
         visit.fromPost(visit_id, bottle.request.POST, categoryChoices, db)
@@ -428,7 +434,8 @@ def checkout(db, visit_id):
     checkoutDict["visit"] = visit
     checkoutDict["post_url"] = post_url
     checkoutDict["categoryChoices"] = categoryChoices
-    checkoutDict["categoryTotals"] = categoryTotals
+    checkoutDict["monthlyCategoryTotals"] = monthlyCategoryTotals
+    checkoutDict["yearlyCategoryTotals"] = yearlyCategoryTotals
     checkoutDict["previousShoppingItems"] = previousShoppingItems
     timeInStore = td_format(datetime.now()-visit.checkin)
     checkoutDict["timeInStore"] = timeInStore
@@ -614,6 +621,7 @@ def admin(db):
     categoryChoices = {s.id: {"id": s.id, "name": s.name,
                               "dailyLimit": s.dailyLimit,
                               "monthlyLimit": s.monthlyLimit,
+                              "yearlyLimit": s.yearlyLimit,
                               "familyWideLimit": s.familyWideLimit,
                               "minAge": s.minAge,
                               "maxAge": s.maxAge,
@@ -812,8 +820,8 @@ def report_info(db, report_num):
     endDate = get_get("endDate", "01/01/2100")
     startDate = datetime.strptime(startDate, "%m/%d/%Y")
     endDate = datetime.strptime(endDate, "%m/%d/%Y")
-    startDate = startDate.strftime("%m/%d/%Y")
-    endDate = endDate.strftime("%m/%d/%Y")
+    startDate = formatted_str_date(startDate)
+    endDate = formatted_str_date(endDate)
 
     myReport = determineAndCreateReport(report_num, startDate, endDate)
     reportInfo = myReport.getDataAndHtml(db, sess)

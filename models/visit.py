@@ -48,11 +48,11 @@ class Visit(base.Base):
         for dependent in fam.dependents:
             for category in categories:
                 itemKey = "row_" + str(dependent.id)
-                itemKey += "_col_" + str(category[0])
+                itemKey += "_col_" + str(category["id"])
                 thisShoppingItem = posted.get(itemKey, "")
                 if thisShoppingItem != "" and thisShoppingItem != "0":
                     item = ShoppingItem()
-                    item.category_id = category[0]
+                    item.category_id = category["id"]
                     item.dependent_id = dependent.id
                     item.quantity = thisShoppingItem
                     self.items.append(item)

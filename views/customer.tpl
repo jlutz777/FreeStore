@@ -1,5 +1,5 @@
-% include renders
 % from utils.utils import *
+% include renders
 % renders_namespace = _ 
 % get_field_errors = renders_namespace['get_field_errors']
 % get_menu = renders_namespace['get_menu']
@@ -204,7 +204,7 @@
             <label for="dependents-{{dependent_index}}-birthdate" class="col-sm-2 control-label">Birthday</label>
             <div class="col-sm-10">
                 % if dependent.birthdate.data is not None and not dependent.birthdate.errors:
-                <input class="form-control dependent-birthdate" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="{{dependent.birthdate.data.strftime("%m/%d/%Y")}}">
+                <input class="form-control dependent-birthdate" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="{{formatted_str_date(dependent.birthdate.data)}}">
                 % else:
                 <input class="form-control dependent-birthdate" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="">
                 % end
@@ -315,7 +315,7 @@
         <div class="form-group ">
             <label for="datecreated" class="col-sm-2 control-label">Date Created</label>
             <div class="col-sm-10">
-                <input class="form-control" readonly id="datecreated" name="datecreated" type="text" value="{{form.datecreated.data.strftime("%m/%d/%Y")}}">
+                <input class="form-control" readonly id="datecreated" name="datecreated" type="text" value="{{formatted_str_date(form.datecreated.data)}}">
                 % get_field_errors(form.datecreated)
             </div>
         </div>
@@ -365,7 +365,7 @@
             <label for="dependents-{{dependent_index}}-birthdate" class="col-sm-2 control-label">Birthday</label>
             <div class="col-sm-10">
                 % if dependent.birthdate.data is not None and not dependent.birthdate.errors:
-                    <input class="form-control dependent-birthdate" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="{{dependent.birthdate.data.strftime("%m/%d/%Y")}}">
+                    <input class="form-control dependent-birthdate" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="{{formatted_str_date(dependent.birthdate.data)}}">
                 % else:
                     <input class="form-control dependent-birthdate" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="">
                 % end
