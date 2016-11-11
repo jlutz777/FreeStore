@@ -28,7 +28,10 @@ class ShoppingCategory(base.Base):
         self.name = posted.name
         self.dailyLimit = posted.dailyLimit
         self.monthlyLimit = posted.monthlyLimit
-        self.yearlyLimit = posted.yearlyLimit
+        yearlyLimit = posted.yearlyLimit
+        if yearlyLimit == "":
+            yearlyLimit = None
+        self.yearlyLimit = yearlyLimit
         self.familyWideLimit = posted.familyWideLimit != ""
         self.order = posted.order
         minAge = posted.minAge
