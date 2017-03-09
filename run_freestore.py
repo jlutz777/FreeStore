@@ -614,7 +614,7 @@ def admin(db):
     bottle.BaseTemplate.defaults['page'] = '/admin'
 
     adminDict = {}
-    adminDict["current_user"] = aaa.current_user
+    adminDict["current_user"] = aaa.current_user.replace("\'", "\\'")
     adminDict["users"] = aaa.list_users()
     adminDict["roles"] = aaa.list_roles()
 
@@ -632,7 +632,7 @@ def admin(db):
                        .order_by('"order"')}
 
     adminDict["categories"] = json.dumps(categoryChoices,
-                                         default=json_util.default)
+                                         default=json_util.default).replace("\'", "\\'")
 
     return template('admin', adminDict)
 
