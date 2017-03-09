@@ -614,7 +614,7 @@ def admin(db):
     bottle.BaseTemplate.defaults['page'] = '/admin'
 
     adminDict = {}
-    adminDict["current_user"] = aaa.current_user.replace("\'", "\\'")
+    adminDict["current_user"] = aaa.current_user
     adminDict["users"] = aaa.list_users()
     adminDict["roles"] = aaa.list_roles()
 
