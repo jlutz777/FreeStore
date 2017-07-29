@@ -39,28 +39,9 @@ log = logging.getLogger(__name__)
 
 postgresConn = os.environ.get("POSTGRES_CONN", "")
 sessionEncryptKey = os.environ.get("SESSION_KEY", "asdfghjkl")
+devMode = os.environ.get("DEV_MODE", "disabled")
 corkBackend = SqlAlchemyBackend(postgresConn, initialize=False)
 aaa = Cork(backend=corkBackend, email_sender='', smtp_url='')
-
-app = bottle.default_app()
-#app.catchall = False
-dbPlugin = sqlalchemy.Plugin(models.base.engine, keyword='db')
-app.install(dbPlugin)
-
-session_opts = {
-    'session.cookie_expires': True,
-    'session.encrypt_key': sessionEncryptKey,
-    'session.httponly': True,
-    'session.timeout': 3600 * 24,  # 1 day
-    'session.type': 'cookie',
-    'session.validate_key': True,
-    'session.auto': True
-}
-sessionApp = SessionMiddleware(app, session_opts)
-
-# Put the cork object on the base template
-bottle.BaseTemplate.defaults['aaa'] = aaa
-bottle.BaseTemplate.defaults['page'] = ''
 
 
 # Section: Utilities
@@ -141,7 +122,10 @@ def get_redirect_url(relative_path=None):
 
     if relative_path is None:
         relative_path = '/'.join(splitted[3:])
-    https_url = 'https://' + splitted[2] + '/' + relative_path
+    if not isDevMode():
+        https_url = 'https://' + splitted[2] + '/' + relative_path
+    else:
+        https_url = 'http://' + splitted[2] + '/' + relative_path
 
     return https_url
 
@@ -149,6 +133,33 @@ def get_redirect_url(relative_path=None):
 def authorize(fail_redirect='login', role='user'):
     full_fail_redirect = get_redirect_url(fail_redirect)
     aaa.require(fail_redirect=full_fail_redirect, role=role)
+
+def isDevMode():
+    return devMode == "enabled"
+
+# Section: Main app
+
+
+app = bottle.default_app()
+if isDevMode():
+     app.catchall = False
+dbPlugin = sqlalchemy.Plugin(models.base.engine, keyword='db')
+app.install(dbPlugin)
+
+session_opts = {
+    'session.cookie_expires': True,
+    'session.encrypt_key': sessionEncryptKey,
+    'session.httponly': True,
+    'session.timeout': 3600 * 24,  # 1 day
+    'session.type': 'cookie',
+    'session.validate_key': True,
+    'session.auto': True
+}
+sessionApp = SessionMiddleware(app, session_opts)
+
+# Put the cork object on the base template
+bottle.BaseTemplate.defaults['aaa'] = aaa
+bottle.BaseTemplate.defaults['page'] = ''
 
 
 @hook('before_request')
