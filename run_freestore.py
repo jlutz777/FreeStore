@@ -492,11 +492,21 @@ def volunteer_visit(db, volunteer_visit_id=None):
     else:
         thisCheckin = None
         thisCheckout = None
+        volunteerVisit = None
 
         if volunteer_visit_id is not None:
             volunteerQuery = db.query(VolunteerVisit)
             volunteerVisit = volunteerQuery.filter(VolunteerVisit.id ==
                                                    volunteer_visit_id)[0]
+        else:
+            volunteerQuery = db.query(VolunteerVisit)
+            volunteerVisitsForFamily = volunteerQuery.filter(VolunteerVisit.family_id ==
+                                                   form.family_id.data).filter(VolunteerVisit.checkout.is_(None))
+            if volunteerVisitsForFamily.count() > 0:
+                volunteerVisit = volunteerVisitsForFamily[0]
+                form.id.data = volunteerVisit.id
+
+        if volunteerVisit is not None:
             family = volunteerVisit.family
             form.family_id.data = family.id
             thisCheckin = volunteerVisit.checkin
