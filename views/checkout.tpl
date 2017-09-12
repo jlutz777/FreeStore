@@ -410,7 +410,7 @@ window.onbeforeunload = warnBeforeNavigate;
     </div>
     </div>
     <div class="row" style="margin-top:20px;">
-        <table class="col-sm-12">
+        <table class="col-sm-12" style="table-layout: fixed;">
             <tr>
                 % for dependent in visit.family.dependents:
                     % if dependent.isPrimary:
@@ -421,7 +421,7 @@ window.onbeforeunload = warnBeforeNavigate;
                 <th style="text-align:center;">&nbsp;&nbsp;Age&nbsp;&nbsp;</th>
                 % for option in categoryChoices:
                 % if not option["disabled"]:
-                <th style="text-align:center;">{{option["name"]}}</th>
+                <th style="text-align:center; maximum-width: 100px;">{{option["name"]}}</th>
                 % end
                 % end
             </tr>
