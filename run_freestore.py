@@ -340,6 +340,32 @@ def customer(db, customer_id=None):
     return template('customer', **customerDict)
 
 
+@app.route('/customercheck', method=['GET'])
+def customercheck(db):
+    authorize()
+    
+    searchName = get_get('firstName') + ' ' + get_get('lastName')
+    this_customer_id = get_get('this_customer_id')
+    
+    log.debug(this_customer_id)
+    
+    deps = db.query(Dependent).filter(Dependent.isPrimary)
+
+    depDict = []
+    for dep in deps:
+        if dep.family_id is not None and \
+            str(dep.family_id) != this_customer_id and \
+            is_fuzzy_match(dep.firstName + ' ' + dep.lastName, searchName):
+            depDict.append(dep.getDict())
+
+    bottle.response.content_type = 'application/json'
+    jsonInfo = json.dumps(depDict, default=json_util.default)
+    
+    log.debug(jsonInfo)
+
+    return jsonInfo
+
+
 @app.route('/customersearch', method=['POST'])
 def customersearch(db):
     authorize()
