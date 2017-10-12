@@ -50,8 +50,9 @@
         
         $('#volunteer_checkin_button').click(function (e)
         {
-            window.location.href = '/volunteer_visit?family_id={{customer_id}}';
-            e.preventDefault();
+            $('#checkinCust').val('false');
+            $('#checkinVolunteer').val('true');
+            $('#thisForm').submit();
         });
     
         // By default we want to check in the customer when changing them, but
@@ -404,6 +405,7 @@
         </div>
     </div>
     <input type="hidden" id="checkinCust" name="checkinCust" value="true" />
+    <input type="hidden" id="checkinVolunteer" name="checkinVolunteer" value="false" />
     </form>
 </div>
 % if customer_id:

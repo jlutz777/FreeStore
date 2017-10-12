@@ -279,6 +279,7 @@ def customer(db, customer_id=None):
                 activeVisits = family.visits.filter(Visit.checkout == None)  # noqa
                 hasNoActiveVisit = len(activeVisits.all()) == 0
                 shouldCreateVisit = postData["checkinCust"] == "true"
+                shouldCheckinVolunteer = postData["checkinVolunteer"] == "true"
                 isCustomer = "isCustomer" in postData
                 isVolunteer = "isVolunteer" in postData
 
@@ -290,7 +291,9 @@ def customer(db, customer_id=None):
 
                 db.commit()
 
-                if isVolunteer:
+                if shouldCheckinVolunteer:
+                    next_url = get_redirect_url('volunteer_visit?family_id='+str(family.id))
+                elif isVolunteer:
                     next_url = get_redirect_url('customer/'+str(family.id))
                 return bottle.redirect(next_url)
             else:
