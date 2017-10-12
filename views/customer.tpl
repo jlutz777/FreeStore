@@ -50,8 +50,9 @@
         
         $('#volunteer_checkin_button').click(function (e)
         {
-            window.location.href = '/volunteer_visit?family_id={{customer_id}}';
-            e.preventDefault();
+            $('#checkinCust').val('false');
+            $('#checkinVolunteer').val('true');
+            $('#thisForm').submit();
         });
     
         // By default we want to check in the customer when changing them, but
@@ -73,6 +74,40 @@
         
         checkCustomerAndVisitorStatus();
     });
+    
+    function checkPrimaryName(dependent_id) {
+        var first_name = $(`#dependents-${dependent_id}-firstName`).val();
+        var last_name = $(`#dependents-${dependent_id}-lastName`).val();
+        
+        $.ajax({url: '/customercheck',
+            type: 'GET',
+            data: {
+              'firstName': first_name,
+              'lastName': last_name,
+              'this_customer_id': {{customer_id or -1}}
+            },
+            success: function(result)
+            {
+                if (result.length > 0)
+                {
+                    var matchString = '';
+                    for (i=0; i<result.length; i++)
+                    {
+                        var individualMatch = result[i];
+                        matchString += individualMatch.fullName + '\n';
+                    }
+                    var matchChild = $('#matchingCustomer').show().children(":nth-child(2)");
+                    matchChild.text(matchString);
+                    matchChild.html(matchChild.html().replace(/\n/g,'<br/>'));
+                    matchChild.parentsUntil(".form-group").addClass('has-error');
+                }
+                else
+                {
+                    $('#matchingCustomer').hide().parentsUntil(".form-group").removeClass('has-error');
+                }
+            }
+           });
+    }
     
     // This function duplicates the current dependent structure and creates a new one
     // This keeps the customer simple unless we need extra dependents
@@ -181,7 +216,7 @@
         ">
             <label for="dependents-{{dependent_index}}-firstName" class="col-sm-2 control-label">First Name</label>
             <div class="col-sm-10">
-                <input autofocus class="form-control" id="dependents-{{dependent_index}}-firstName" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
+                <input autofocus class="form-control" id="dependents-{{dependent_index}}-firstName" onblur="checkPrimaryName({{dependent_index}})" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
                 % get_field_errors(dependent.firstName)
             </div>
         </div>
@@ -190,10 +225,15 @@
         has-error
         % end
         ">
+            
             <label for="dependents-{{dependent_index}}-lastName" class="col-sm-2 control-label">Last Name</label>
             <div class="col-sm-10">
-                <input class="form-control" id="dependents-{{dependent_index}}-lastName" name="dependents-{{dependent_index}}-lastName" type="text" value="{{dependent.lastName.data}}">
+                <input class="form-control" id="dependents-{{dependent_index}}-lastName" onblur="checkPrimaryName({{dependent_index}})" name="dependents-{{dependent_index}}-lastName" type="text" value="{{dependent.lastName.data}}">
                 % get_field_errors(dependent.lastName)
+                <div id="matchingCustomer" class="page_header" style="display:none;">
+                    <p class="help-block">Possible matching customer!</p>
+                    <p class="help-block"></p>
+                </div>
             </div>
         </div>
         <div class="form-group 
@@ -404,6 +444,7 @@
         </div>
     </div>
     <input type="hidden" id="checkinCust" name="checkinCust" value="true" />
+    <input type="hidden" id="checkinVolunteer" name="checkinVolunteer" value="false" />
     </form>
 </div>
 % if customer_id:

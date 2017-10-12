@@ -17,6 +17,7 @@ bottle-sqlalchemy==0.4.1
 colorama==0.3.2
 configobj==5.0.2
 decorator==3.4.0
+-e git+https://github.com/seatgeek/fuzzywuzzy.git@0.15.1#egg=fuzzywuzzy
 gevent==1.1b1
 greenlet==0.4.5
 gunicorn==18.0

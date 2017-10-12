@@ -1,4 +1,5 @@
 import pytz, datetime
+from fuzzywuzzy import fuzz
 
 datetime_fmt = "%m/%d/%Y %H:%M"
 date_fmt = "%m/%d/%Y"
@@ -39,3 +40,7 @@ def utc_time_to_local_time(utc_time):
         dt = datetime.datetime.strptime(dt, datetime_fmt)
     utc_dt = utc_tz.localize(dt)
     return utc_dt.astimezone(local_tz).strftime(datetime_fmt)
+
+def is_fuzzy_match(data1, data2, accuracy=80):
+    matchVal = fuzz.ratio(data1, data2)
+    return matchVal > accuracy

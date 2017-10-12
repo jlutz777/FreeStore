@@ -279,6 +279,7 @@ def customer(db, customer_id=None):
                 activeVisits = family.visits.filter(Visit.checkout == None)  # noqa
                 hasNoActiveVisit = len(activeVisits.all()) == 0
                 shouldCreateVisit = postData["checkinCust"] == "true"
+                shouldCheckinVolunteer = postData["checkinVolunteer"] == "true"
                 isCustomer = "isCustomer" in postData
                 isVolunteer = "isVolunteer" in postData
 
@@ -290,7 +291,9 @@ def customer(db, customer_id=None):
 
                 db.commit()
 
-                if isVolunteer:
+                if shouldCheckinVolunteer:
+                    next_url = get_redirect_url('volunteer_visit?family_id='+str(family.id))
+                elif isVolunteer:
                     next_url = get_redirect_url('customer/'+str(family.id))
                 return bottle.redirect(next_url)
             else:
@@ -335,6 +338,32 @@ def customer(db, customer_id=None):
     customerDict['volunteer_url_root'] = volunteer_url_root
 
     return template('customer', **customerDict)
+
+
+@app.route('/customercheck', method=['GET'])
+def customercheck(db):
+    authorize()
+    
+    searchName = get_get('firstName') + ' ' + get_get('lastName')
+    this_customer_id = get_get('this_customer_id')
+    
+    log.debug(this_customer_id)
+    
+    deps = db.query(Dependent).filter(Dependent.isPrimary)
+
+    depDict = []
+    for dep in deps:
+        if dep.family_id is not None and \
+            str(dep.family_id) != this_customer_id and \
+            is_fuzzy_match(dep.firstName + ' ' + dep.lastName, searchName):
+            depDict.append(dep.getDict())
+
+    bottle.response.content_type = 'application/json'
+    jsonInfo = json.dumps(depDict, default=json_util.default)
+    
+    log.debug(jsonInfo)
+
+    return jsonInfo
 
 
 @app.route('/customersearch', method=['POST'])
@@ -492,11 +521,21 @@ def volunteer_visit(db, volunteer_visit_id=None):
     else:
         thisCheckin = None
         thisCheckout = None
+        volunteerVisit = None
 
         if volunteer_visit_id is not None:
             volunteerQuery = db.query(VolunteerVisit)
             volunteerVisit = volunteerQuery.filter(VolunteerVisit.id ==
                                                    volunteer_visit_id)[0]
+        else:
+            volunteerQuery = db.query(VolunteerVisit)
+            volunteerVisitsForFamily = volunteerQuery.filter(VolunteerVisit.family_id ==
+                                                   form.family_id.data).filter(VolunteerVisit.checkout.is_(None))
+            if volunteerVisitsForFamily.count() > 0:
+                volunteerVisit = volunteerVisitsForFamily[0]
+                form.id.data = volunteerVisit.id
+
+        if volunteerVisit is not None:
             family = volunteerVisit.family
             form.family_id.data = family.id
             thisCheckin = volunteerVisit.checkin
