@@ -144,6 +144,8 @@ class FamilyCheckoutsPerWeekReport(Report):
         sqlQuery += " customerfamily.id=visits.family"
         sqlQuery += " inner join dependents on"
         sqlQuery += " customerfamily.id=dependents.family"
+        sqlQuery += " inner join shopping_item on"
+        sqlQuery += " visits.id=shopping_item.visit"
         sqlQuery += " where dependents.primary=True"
         sqlQuery += " and dependents.last_name not in ('User')"
         sqlQuery += " and visits.checkout IS NOT NULL and"
@@ -153,6 +155,62 @@ class FamilyCheckoutsPerWeekReport(Report):
         sqlQuery += " order by checkout2"
 
         super(FamilyCheckoutsPerWeekReport, self).__init__(sqlQuery)
+
+    def getTitleAndHtml(self, db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        allCheckouts = reader.fetchall()
+
+        checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
+        for row in allCheckouts:
+            checkoutsHtml += "<tr><td class=\"date\">"
+            checkoutsHtml += formatted_str_date(row[0]) + "</td>"
+            checkoutsHtml += "<td class=\"count\">" + str(row[1])
+            checkoutsHtml += "</td></tr>"
+        checkoutsHtml += "</table>"
+
+        reportInfo = {}
+        reportInfo['title'] = 'Families Checked Out Per Day'
+        reportInfo['html'] = checkoutsHtml
+        return reportInfo, allCheckouts
+
+    def getData(self, db, bottle_session, allCheckouts):
+        arr = []
+
+        for row in allCheckouts:
+            keyVal = {}
+            keyVal["date"] = formatted_str_date(row[0])
+            keyVal["count"] = row[1]
+            arr.append(keyVal)
+
+        return arr
+
+
+class EmptyFamilyCheckoutsPerWeekReport(Report):
+    """Get the empty checkouts per week"""
+    description = "Empty Family Checkouts each week"
+
+    def __init__(self, start_date='', end_date=''):
+        # This groups the checkout dates by week, subtracting two to make
+        # the date be on Saturday instead of Monday
+        sqlQuery = "select date_trunc('week', visits.checkout::date+"
+        sqlQuery += "interval '2 days')"
+        sqlQuery += "-interval '2 days' as checkout2, count(*) as count"
+        sqlQuery += " from visits inner join customerfamily on"
+        sqlQuery += " customerfamily.id=visits.family"
+        sqlQuery += " inner join dependents on"
+        sqlQuery += " customerfamily.id=dependents.family"
+        sqlQuery += " left join shopping_item on"
+        sqlQuery += " visits.id=shopping_item.visit"
+        sqlQuery += " where dependents.primary=True"
+        sqlQuery += " and shopping_item.id IS NULL"
+        sqlQuery += " and dependents.last_name not in ('User')"
+        sqlQuery += " and visits.checkout IS NOT NULL and"
+        sqlQuery += " visits.checkout > '" + start_date + "' and "
+        sqlQuery += " visits.checkout < '" + end_date + "'"
+        sqlQuery += " group by checkout2"
+        sqlQuery += " order by checkout2"
+
+        super(EmptyFamilyCheckoutsPerWeekReport, self).__init__(sqlQuery)
 
     def getTitleAndHtml(self, db, bottle_session):
         reader = db.execute(self.sqlQuery)
@@ -197,6 +255,8 @@ class DependentCheckoutsPerWeekReport(Report):
         sqlQuery += " customerfamily.id=visits.family"
         sqlQuery += " inner join dependents on"
         sqlQuery += " customerfamily.id=dependents.family"
+        sqlQuery += " inner join shopping_item"
+        sqlQuery += " on visits.id=shopping_item.visit"
         sqlQuery += " where dependents.last_name not in ('User')"
         sqlQuery += " and visits.checkout IS NOT NULL and"
         sqlQuery += " visits.checkout > '" + start_date + "' and "
