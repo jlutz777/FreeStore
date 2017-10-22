@@ -45,7 +45,7 @@ class FamilyTotalOverTimeReport(Report):
         sqlQuery += " datecreated < '" + end_date + "' and"
         sqlQuery += " customerfamily.is_customer=True"
         sqlQuery += " group by datecreated::date"
-        sqlQuery += " order by datecreated::date"
+        sqlQuery += " order by datecreated::date DESC"
 
         super(FamilyTotalOverTimeReport, self).__init__(sqlQuery)
 
@@ -93,7 +93,7 @@ class DependentsTotalOverTimeReport(Report):
         sqlQuery += " datecreated < '" + end_date + "' and"
         sqlQuery += " customerfamily.is_customer=True"
         sqlQuery += " group by datecreated::date"
-        sqlQuery += " order by datecreated::date"
+        sqlQuery += " order by datecreated::date DESC"
 
         super(DependentsTotalOverTimeReport, self).__init__(sqlQuery)
 
@@ -152,7 +152,7 @@ class FamilyCheckoutsPerWeekReport(Report):
         sqlQuery += " visits.checkout > '" + start_date + "' and "
         sqlQuery += " visits.checkout < '" + end_date + "'"
         sqlQuery += " group by checkout2"
-        sqlQuery += " order by checkout2"
+        sqlQuery += " order by checkout2 DESC"
 
         super(FamilyCheckoutsPerWeekReport, self).__init__(sqlQuery)
 
@@ -208,7 +208,7 @@ class EmptyFamilyCheckoutsPerWeekReport(Report):
         sqlQuery += " visits.checkout > '" + start_date + "' and "
         sqlQuery += " visits.checkout < '" + end_date + "'"
         sqlQuery += " group by checkout2"
-        sqlQuery += " order by checkout2"
+        sqlQuery += " order by checkout2 DESC"
 
         super(EmptyFamilyCheckoutsPerWeekReport, self).__init__(sqlQuery)
 
@@ -225,7 +225,63 @@ class EmptyFamilyCheckoutsPerWeekReport(Report):
         checkoutsHtml += "</table>"
 
         reportInfo = {}
-        reportInfo['title'] = 'Families Checked Out Per Day'
+        reportInfo['title'] = 'Empty Families Checked Out Per Day'
+        reportInfo['html'] = checkoutsHtml
+        return reportInfo, allCheckouts
+
+    def getData(self, db, bottle_session, allCheckouts):
+        arr = []
+
+        for row in allCheckouts:
+            keyVal = {}
+            keyVal["date"] = formatted_str_date(row[0])
+            keyVal["count"] = row[1]
+            arr.append(keyVal)
+
+        return arr
+
+
+class FamilyCheckInsPerWeekReport(Report):
+    """Get the checkins per week"""
+    description = "Family Checkins each week"
+
+    def __init__(self, start_date='', end_date=''):
+        # This groups the checkout dates by week, subtracting two to make
+        # the date be on Saturday instead of Monday
+        sqlQuery = "select date_trunc('week', visits.checkin::date+"
+        sqlQuery += "interval '2 days')"
+        sqlQuery += "-interval '2 days' as checkin2, count(*) as count"
+        sqlQuery += " from visits inner join customerfamily on"
+        sqlQuery += " customerfamily.id=visits.family"
+        sqlQuery += " inner join dependents on"
+        sqlQuery += " customerfamily.id=dependents.family"
+        sqlQuery += " left join (select visit from shopping_item"
+        sqlQuery += " group by visit) as b on visits.id=b.visit"
+        sqlQuery += " where dependents.primary=True"
+        sqlQuery += " and dependents.last_name not in ('User')"
+        sqlQuery += " and visits.checkin > '" + start_date + "' and"
+        sqlQuery += " visits.checkin < '" + end_date + "' and"
+        sqlQuery += " ((b.visit IS NOT NULL and visits.checkout IS NOT NULL) or"
+        sqlQuery += " visits.checkout IS NULL)"
+        sqlQuery += " group by checkin2"
+        sqlQuery += " order by checkin2 DESC"
+
+        super(FamilyCheckInsPerWeekReport, self).__init__(sqlQuery)
+
+    def getTitleAndHtml(self, db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        allCheckouts = reader.fetchall()
+
+        checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
+        for row in allCheckouts:
+            checkoutsHtml += "<tr><td class=\"date\">"
+            checkoutsHtml += formatted_str_date(row[0]) + "</td>"
+            checkoutsHtml += "<td class=\"count\">" + str(row[1])
+            checkoutsHtml += "</td></tr>"
+        checkoutsHtml += "</table>"
+
+        reportInfo = {}
+        reportInfo['title'] = 'Families Checked In Per Day'
         reportInfo['html'] = checkoutsHtml
         return reportInfo, allCheckouts
 
@@ -262,7 +318,7 @@ class DependentCheckoutsPerWeekReport(Report):
         sqlQuery += " visits.checkout > '" + start_date + "' and "
         sqlQuery += " visits.checkout < '" + end_date + "'"
         sqlQuery += " group by checkout2"
-        sqlQuery += " order by checkout2"
+        sqlQuery += " order by checkout2 DESC"
 
         super(DependentCheckoutsPerWeekReport, self).__init__(sqlQuery)
 
@@ -318,7 +374,7 @@ class ItemsPerCategoryPerMonthReport(Report):
         sqlQuery += " visits.checkout > '" + start_date + "' and "
         sqlQuery += " visits.checkout < '" + end_date + "'"
         sqlQuery += " group by checkout2, name"
-        sqlQuery += " order by checkout2"
+        sqlQuery += " order by checkout2 DESC"
 
         super(ItemsPerCategoryPerMonthReport, self).__init__(sqlQuery)
 
@@ -497,7 +553,7 @@ class CheckoutFrequencyPerMonthReport(Report):
         sqlQuery += " visits.checkout >= '" + start_date + "' and visits.checkout <= '" + end_date + "'"
         sqlQuery += " group by checkout2, customerfamily.id,visits.id order by checkout2"
         sqlQuery += ") as foo group by checkout2, id) as foo2"
-        sqlQuery += " group by checkout2, count order by checkout2, count"
+        sqlQuery += " group by checkout2, count order by checkout2 DESC, count"
 
         super(CheckoutFrequencyPerMonthReport, self).__init__(sqlQuery)
 
