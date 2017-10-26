@@ -45,7 +45,7 @@ class FamilyTotalOverTimeReport(Report):
         sqlQuery += " datecreated < '" + end_date + "' and"
         sqlQuery += " customerfamily.is_customer=True"
         sqlQuery += " group by datecreated::date"
-        sqlQuery += " order by datecreated::date DESC"
+        sqlQuery += " order by datecreated::date"
 
         super(FamilyTotalOverTimeReport, self).__init__(sqlQuery)
 
@@ -93,7 +93,7 @@ class DependentsTotalOverTimeReport(Report):
         sqlQuery += " datecreated < '" + end_date + "' and"
         sqlQuery += " customerfamily.is_customer=True"
         sqlQuery += " group by datecreated::date"
-        sqlQuery += " order by datecreated::date DESC"
+        sqlQuery += " order by datecreated::date"
 
         super(DependentsTotalOverTimeReport, self).__init__(sqlQuery)
 
