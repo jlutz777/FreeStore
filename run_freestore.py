@@ -9,7 +9,7 @@ from models import ShoppingCategory, ShoppingItem
 from reporting.utils import availableReports, determineAndCreateReport
 from utils.utils import *
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.sql import func
 
 from beaker.middleware import SessionMiddleware
@@ -347,8 +347,6 @@ def customercheck(db):
     searchName = get_get('firstName') + ' ' + get_get('lastName')
     this_customer_id = get_get('this_customer_id')
     
-    log.debug(this_customer_id)
-    
     deps = db.query(Dependent).filter(Dependent.isPrimary)
 
     depDict = []
@@ -360,8 +358,6 @@ def customercheck(db):
 
     bottle.response.content_type = 'application/json'
     jsonInfo = json.dumps(depDict, default=json_util.default)
-    
-    log.debug(jsonInfo)
 
     return jsonInfo
 
@@ -432,7 +428,7 @@ def checkout(db, visit_id):
     previousShoppingItems = {}
 
     categoryChoices = [cat.__dict__ for cat in db.query(ShoppingCategory)
-                       .order_by('"order"').all()]
+                       .order_by(text('"order"')).all()]
     post_url = get_redirect_url()
 
     visits = db.query(Visit).filter(Visit.id == visit_id)
@@ -679,7 +675,7 @@ def admin(db):
                               "order": s.order,
                               "existing": True} for s
                        in db.query(ShoppingCategory)
-                       .order_by('"order"')}
+                       .order_by(text('"order"'))}
 
     adminDict["categories"] = json.dumps(categoryChoices,
                                          default=json_util.default).replace("\'", "\\'")
