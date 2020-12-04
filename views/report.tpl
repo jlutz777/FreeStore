@@ -103,7 +103,7 @@ path {
     <div class="form-group ">
         <label for="startdate" class="col-sm-2 control-label">Start Date:</label>
         <div class="col-sm-8">
-            <input class="form-control" id="startdate" name="startdate">
+            <input class="form-control" id="startdate" onkeydown="inputKeyDown()" name="startdate">
         </div>
     </div>
     </div>
@@ -111,7 +111,7 @@ path {
     <div class="form-group ">
         <label for="enddate" class="col-sm-2 control-label">End Date:</label>
         <div class="col-sm-8">
-            <input class="form-control" id="enddate" name="enddate">
+            <input class="form-control" id="enddate" onkeydown="inputKeyDown()" name="enddate">
         </div>
     </div>
     </div>
@@ -331,6 +331,13 @@ function runReport()
          newParse(reportGraph);
       }
     } });
+}
+
+function inputKeyDown()
+{
+    if (event.keyCode == 13) {
+        runReport();
+    }
 }
 
 $(document).ready(function () {
