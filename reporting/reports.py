@@ -5,6 +5,9 @@ Do all the work for reporting
 import abc
 from utils.utils import *
 
+import logging
+log = logging.getLogger(__name__)
+
 class Report:
     """Base class for reports"""
     __metaclass__ = abc.ABCMeta
@@ -54,14 +57,14 @@ class FamilyTotalOverTimeReport(Report):
         categoryTotals = reader.fetchall()
 
         totalFamilyCount = 0
-        familyCountsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
+        familyCountsHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Date</th><th>Total</th></tr></thead><tbody>'
         for row in categoryTotals:
             totalFamilyCount += row[1]
             familyCountsHtml += "<tr><td class=\"date\">"
             familyCountsHtml += formatted_str_date(row[0]) + "</td>"
             familyCountsHtml += "<td class=\"count\">" + str(totalFamilyCount)
             familyCountsHtml += "</td></tr>"
-        familyCountsHtml += "</table>"
+        familyCountsHtml += "</tbody></table>"
 
         reportInfo = {}
         reportInfo['title'] = 'Family Count Over Time'
@@ -102,14 +105,14 @@ class DependentsTotalOverTimeReport(Report):
         categoryTotals = reader.fetchall()
 
         totalFamilyCount = 0
-        familyCountsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
+        familyCountsHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Date</th><th>Total</th></tr></thead><tbody>'
         for row in categoryTotals:
             totalFamilyCount += row[1]
             familyCountsHtml += "<tr><td class=\"date\">"
             familyCountsHtml += formatted_str_date(row[0]) + "</td>"
             familyCountsHtml += "<td class=\"count\">" + str(totalFamilyCount)
             familyCountsHtml += "</td></tr>"
-        familyCountsHtml += "</table>"
+        familyCountsHtml += "</tbody></table>"
 
         reportInfo = {}
         reportInfo['title'] = 'Dependents Count Over Time'
@@ -160,13 +163,13 @@ class FamilyCheckoutsPerWeekReport(Report):
         reader = db.execute(self.sqlQuery)
         allCheckouts = reader.fetchall()
 
-        checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
+        checkoutsHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Date</th><th>Total</th></tr></thead><tbody>'
         for row in allCheckouts:
             checkoutsHtml += "<tr><td class=\"date\">"
             checkoutsHtml += formatted_str_date(row[0]) + "</td>"
             checkoutsHtml += "<td class=\"count\">" + str(row[1])
             checkoutsHtml += "</td></tr>"
-        checkoutsHtml += "</table>"
+        checkoutsHtml += "</tbody></table>"
 
         reportInfo = {}
         reportInfo['title'] = 'Families Checked Out Per Day'
@@ -216,13 +219,13 @@ class EmptyFamilyCheckoutsPerWeekReport(Report):
         reader = db.execute(self.sqlQuery)
         allCheckouts = reader.fetchall()
 
-        checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
+        checkoutsHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Date</th><th>Total</th></tr></thead><tbody>'
         for row in allCheckouts:
             checkoutsHtml += "<tr><td class=\"date\">"
             checkoutsHtml += formatted_str_date(row[0]) + "</td>"
             checkoutsHtml += "<td class=\"count\">" + str(row[1])
             checkoutsHtml += "</td></tr>"
-        checkoutsHtml += "</table>"
+        checkoutsHtml += "</tbody></table>"
 
         reportInfo = {}
         reportInfo['title'] = 'Empty Families Checked Out Per Day'
@@ -272,13 +275,13 @@ class FamilyCheckInsPerWeekReport(Report):
         reader = db.execute(self.sqlQuery)
         allCheckouts = reader.fetchall()
 
-        checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
+        checkoutsHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Date</th><th>Total</th></tr></thead><tbody>'
         for row in allCheckouts:
             checkoutsHtml += "<tr><td class=\"date\">"
             checkoutsHtml += formatted_str_date(row[0]) + "</td>"
             checkoutsHtml += "<td class=\"count\">" + str(row[1])
             checkoutsHtml += "</td></tr>"
-        checkoutsHtml += "</table>"
+        checkoutsHtml += "</tbody></table>"
 
         reportInfo = {}
         reportInfo['title'] = 'Families Checked In Per Day'
@@ -326,13 +329,13 @@ class DependentCheckoutsPerWeekReport(Report):
         reader = db.execute(self.sqlQuery)
         allCheckouts = reader.fetchall()
 
-        checkoutsHtml = '<table><tr><th>Date</th><th>Total</th></tr>'
+        checkoutsHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Date</th><th>Total</th></tr></thead><tbody>'
         for row in allCheckouts:
             checkoutsHtml += "<tr><td class=\"date\">"
             checkoutsHtml += formatted_str_date(row[0]) + "</td>"
             checkoutsHtml += "<td class=\"count\">" + str(row[1])
             checkoutsHtml += "</td></tr>"
-        checkoutsHtml += "</table>"
+        checkoutsHtml += "</tbody></table>"
 
         reportInfo = {}
         reportInfo['title'] = 'Dependents Checked Out Per Day'
@@ -412,10 +415,11 @@ class ItemsPerCategoryPerMonthReport(Report):
         for row in allCheckouts:
             results[row[1]][results['index'].index(row[0])] = row[2]
 
-        checkoutsHtml = '<table style="width:800px;"><tr><th>Date</th>'
+        checkoutsHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Date</th>'
+        #  style="width:800px;
         for row in cats:
             checkoutsHtml += '<th>' + row + '</th>'
-        checkoutsHtml += '</tr>'
+        checkoutsHtml += '</tr></thead><tbody>'
 
         for i in range(0, dateLen):
             checkoutsHtml += '<tr><td>'
@@ -424,7 +428,7 @@ class ItemsPerCategoryPerMonthReport(Report):
             for row in cats:
                 checkoutsHtml += '<td>' + str(results[row][i]) + '</td>'
             checkoutsHtml += '</tr>'
-        checkoutsHtml += '</table>'
+        checkoutsHtml += '</tbody></table>'
 
         reportInfo = {}
         reportInfo['title'] = 'Items Per Category'
@@ -456,15 +460,17 @@ class IndividualsByAgeReport(Report):
     description = "Individuals By Age"
 
     def __init__(self, start_date='', end_date=''):
-        sqlQuery = "select count(*) as count, CASE"
-        sqlQuery += " when birth_year between 0 AND 2 THEN '0-2'"
+        sqlQuery = "select * from ("
+        sqlQuery += "select count(*) as count, CASE"
+        sqlQuery += " WHEN birth_year between -1 AND 2 THEN '0-2'"
         sqlQuery += " WHEN birth_year BETWEEN 3 AND 5 THEN '3-5'"
         sqlQuery += " WHEN birth_year BETWEEN 6 AND 12 THEN '6-12'"
         sqlQuery += " WHEN birth_year BETWEEN 13 AND 18  THEN '13-18'"
         sqlQuery += " WHEN birth_year BETWEEN 19 AND 29  THEN '19-29'"
         sqlQuery += " WHEN birth_year BETWEEN 30 AND 39  THEN '30-39'"
         sqlQuery += " WHEN birth_year BETWEEN 40 AND 59  THEN '40-59'"
-        sqlQuery += " WHEN birth_year BETWEEN 60 AND 150  THEN '60+' END"
+        sqlQuery += " WHEN birth_year BETWEEN 60 AND 150  THEN '60+'"
+        sqlQuery += " ELSE 'INVALID' END"
         sqlQuery += " as age from (select extract(year from"
         sqlQuery += " age(birthdate::date)) as birth_year from dependents"
         sqlQuery += " inner join customerfamily on"
@@ -474,8 +480,17 @@ class IndividualsByAgeReport(Report):
         sqlQuery += " customerfamily.datecreated < '" + end_date + "' and"
         sqlQuery += " customerfamily.is_customer=True"
         sqlQuery += ") as deps"
-        sqlQuery += " group by age"
-        sqlQuery += " order by count desc"
+        sqlQuery += " group by age) s"
+        sqlQuery += " order by case when age ='0-2' then 1"
+        sqlQuery += " WHEN age = '3-5' then 2"
+        sqlQuery += " WHEN age = '6-12' then 3"
+        sqlQuery += " WHEN age = '13-18' then 4"
+        sqlQuery += " WHEN age = '19-29' then 5"
+        sqlQuery += " WHEN age = '30-39' then 6"
+        sqlQuery += " WHEN age = '40-59' then 7"
+        sqlQuery += " WHEN age = '60-150' then 8"
+        sqlQuery += " ELSE 9"
+        sqlQuery += " END ASC"
 
         super(IndividualsByAgeReport, self).__init__(sqlQuery)
 
@@ -483,13 +498,13 @@ class IndividualsByAgeReport(Report):
         reader = db.execute(self.sqlQuery)
         allAgeRanges = reader.fetchall()
 
-        checkoutsHtml = '<table><tr><th>Age Range</th><th>Total</th></tr>'
+        checkoutsHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Age Range</th><th>Total</th></tr></thead><tbody>'
         for row in allAgeRanges:
             checkoutsHtml += "<tr><td class=\"date\">"
             checkoutsHtml += str(row[1]) + "</td>"
             checkoutsHtml += "<td class=\"count\">" + str(row[0])
             checkoutsHtml += "</td></tr>"
-        checkoutsHtml += "</table>"
+        checkoutsHtml += "</tbody></table>"
 
         reportInfo = {}
         reportInfo['title'] = 'Individuals by Age'
@@ -522,13 +537,13 @@ class FamiliesPerZipReport(Report):
         reader = db.execute(self.sqlQuery)
         allFamilies = reader.fetchall()
 
-        familiesHtml = '<table><tr><th>Zip</th><th>Total</th></tr>'
+        familiesHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Zip</th><th>Total</th></tr></thead><tbody>'
         for row in allFamilies:
             familiesHtml += "<tr><td class=\"category\">"
             familiesHtml += str(row[0]) + "</td>"
             familiesHtml += "<td class=\"count\">" + str(row[1])
             familiesHtml += "</td></tr>"
-        familiesHtml += "</table>"
+        familiesHtml += "</tbody></table>"
 
         reportInfo = {}
         reportInfo['title'] = 'Familes by Zip Code'
@@ -561,14 +576,19 @@ class CheckoutFrequencyPerMonthReport(Report):
         reader = db.execute(self.sqlQuery)
         allFrequencies = reader.fetchall()
 
-        frequencyHtml = '<table><tr><th>Date</th><th>Frequency</th><th>Family Count</th></tr>'
+        frequencyHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Date</th><th>Frequency</th><th>Family Count</th></tr></thead><tbody>'
+        prevDate = ''
         for row in allFrequencies:
-            frequencyHtml += "<tr><td class=\"date\">"
+            rowClass = ""
+            if prevDate != row[0]:
+                rowClass = "row-big"
+            prevDate = row[0]
+            frequencyHtml += "<tr class=\"" + rowClass + "\"><td class=\"date\">"
             frequencyHtml += formatted_str_date(row[0]) + "</td>"
             frequencyHtml += "<td class=\"category\">" + str(row[1])
             frequencyHtml += "</td><td class=\"category\">" + str(row[2])
             frequencyHtml += "</td></tr>"
-        frequencyHtml += "</table>"
+        frequencyHtml += "</tbody></table>"
 
         reportInfo = {}
         reportInfo['title'] = 'Visit Frequency Per Month'
@@ -599,13 +619,13 @@ class VolunteersHoursWorkedReport(Report):
         reader = db.execute(self.sqlQuery)
         allHours = reader.fetchall()
 
-        frequencyHtml = '<table><tr><th>Name</th><th>Hours</th></tr>'
+        frequencyHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Name</th><th>Hours</th></tr></thead><tbody>'
         for row in allHours:
             frequencyHtml += "<tr><td class=\"category\">" + str(row[1])
             frequencyHtml += " " + str(row[2])
             frequencyHtml += "</td><td class=\"category\">" + str(row[0])
             frequencyHtml += "</td></tr>"
-        frequencyHtml += "</table>"
+        frequencyHtml += "</tbody></table>"
 
         reportInfo = {}
         reportInfo['title'] = 'Volunteer Hours'

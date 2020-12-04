@@ -13,19 +13,31 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3-geo-projection/0.2.9/d3.geo.projection.min.js" charset="utf-8"></script>
     <style type="text/css">
-    td.date
+    .date
     {
+      vertical-align: bottom;
       width: 125px;
     }
 
-    td.category
+    .category
     {
+      vertical-align: bottom;
       width: 150px;
     }
 
-    td.count
+    .count
     {
       width: 50px;
+    }
+    
+    table>tbody>tr.row-big>td
+    {
+      vertical-align: bottom;
+    }
+    
+    tr.row-big
+    {
+      height: 50px;
     }
 
     #report_filter
@@ -35,6 +47,7 @@
     
     #title
     {
+      margin-top: 30px;
       margin-bottom: 10px;
     }
 
@@ -102,9 +115,15 @@ path {
         </div>
     </div>
     </div>
-    <div id="title"></div>
-    <div id="info"></div>
-    <div id="vis"></div>
+    <h3 id="title"></h3>
+    <div class="container-fluid">
+        <div class="col-md-12">
+            <div id="info"></div>
+        </div>
+        <div class="col-md-12">
+            <div id="vis"></div>
+        </div>
+    </div>
   </body>
 <script type="text/javascript">
 function newParse(reportGraph)
