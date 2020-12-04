@@ -5,9 +5,6 @@ Do all the work for reporting
 import abc
 from utils.utils import *
 
-import logging
-log = logging.getLogger(__name__)
-
 class Report:
     """Base class for reports"""
     __metaclass__ = abc.ABCMeta
@@ -416,7 +413,6 @@ class ItemsPerCategoryPerMonthReport(Report):
             results[row[1]][results['index'].index(row[0])] = row[2]
 
         checkoutsHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Date</th>'
-        #  style="width:800px;
         for row in cats:
             checkoutsHtml += '<th>' + row + '</th>'
         checkoutsHtml += '</tr></thead><tbody>'
