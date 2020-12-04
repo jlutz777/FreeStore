@@ -75,6 +75,22 @@
         checkCustomerAndVisitorStatus();
     });
     
+    function capitalizeAndCheckName(dependent_id) {
+        capitalizeFirstAndLastNames(dependent_id);
+        checkPrimaryName(dependent_id);
+    }
+    
+    function capitalizeFirstAndLastNames(dependent_id) {
+        var firstNameField = $(`#dependents-${dependent_id}-firstName`);
+        var lastNameField = $(`#dependents-${dependent_id}-lastName`);
+        
+        var first_name = firstNameField.val();
+        var last_name = lastNameField.val();
+        
+        firstNameField.val(first_name.charAt(0).toUpperCase() + first_name.slice(1));
+        lastNameField.val(last_name.charAt(0).toUpperCase() + last_name.slice(1));
+    }
+    
     function checkPrimaryName(dependent_id) {
         var first_name = $(`#dependents-${dependent_id}-firstName`).val();
         var last_name = $(`#dependents-${dependent_id}-lastName`).val();
@@ -216,7 +232,7 @@
         ">
             <label for="dependents-{{dependent_index}}-firstName" class="col-sm-2 control-label">First Name</label>
             <div class="col-sm-10">
-                <input autofocus class="form-control" id="dependents-{{dependent_index}}-firstName" onblur="checkPrimaryName({{dependent_index}})" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
+                <input autofocus class="form-control" id="dependents-{{dependent_index}}-firstName" onblur="capitalizeAndCheckName({{dependent_index}})" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
                 % get_field_errors(dependent.firstName)
             </div>
         </div>
@@ -228,7 +244,7 @@
             
             <label for="dependents-{{dependent_index}}-lastName" class="col-sm-2 control-label">Last Name</label>
             <div class="col-sm-10">
-                <input class="form-control" id="dependents-{{dependent_index}}-lastName" onblur="checkPrimaryName({{dependent_index}})" name="dependents-{{dependent_index}}-lastName" type="text" value="{{dependent.lastName.data}}">
+                <input class="form-control" id="dependents-{{dependent_index}}-lastName" onblur="capitalizeAndCheckName({{dependent_index}})" name="dependents-{{dependent_index}}-lastName" type="text" value="{{dependent.lastName.data}}">
                 % get_field_errors(dependent.lastName)
                 <div id="matchingCustomer" class="page_header" style="display:none;">
                     <p class="help-block">Possible matching customer!</p>
@@ -382,7 +398,7 @@
         ">
             <label for="dependents-{{dependent_index}}-firstName" class="col-sm-2 control-label">First Name</label>
             <div class="col-sm-10">
-                <input class="form-control" id="dependents-{{dependent_index}}-firstName" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
+                <input class="form-control" id="dependents-{{dependent_index}}-firstName" onblur="capitalizeFirstAndLastNames({{dependent_index}})" name="dependents-{{dependent_index}}-firstName" type="text" value="{{dependent.firstName.data}}">
                 % get_field_errors(dependent.firstName)
             </div>
         </div>
@@ -393,7 +409,7 @@
         ">
             <label for="dependents-{{dependent_index}}-lastName" class="col-sm-2 control-label">Last Name</label>
             <div class="col-sm-10">
-                <input class="form-control" id="dependents-{{dependent_index}}-lastName" name="dependents-{{dependent_index}}-lastName" type="text" value="{{dependent.lastName.data}}">
+                <input class="form-control" id="dependents-{{dependent_index}}-lastName" onblur="capitalizeFirstAndLastNames({{dependent_index}})" name="dependents-{{dependent_index}}-lastName" type="text" value="{{dependent.lastName.data}}">
                 % get_field_errors(dependent.lastName)
             </div>
         </div>
