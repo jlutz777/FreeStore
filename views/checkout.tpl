@@ -32,6 +32,12 @@
     background-color: red;
     font-weight: normal;
 }
+
+#prev_totals
+{
+    height: 100px;
+    overflow: auto;
+}
 </style>
 </head>
 <body>
@@ -461,7 +467,7 @@ window.onbeforeunload = warnBeforeNavigate;
         </table>
     </div>
     <div class="row">
-    <div class="form-group" style="margin-top: 20px;"> 
+    <div class="form-group" style="margin-top: 20px; margin-bottom: 50px;"> 
         <div class="col-sm-12">
             <button type="submit" class="btn btn-default">Checkout</button>
         </div>
