@@ -24,12 +24,14 @@
 }
 
 .tt-dropdown-menu {
-  width: 422px;
-  margin-top: 0px;
-  padding: 8px 0;
   background-color: #fff;
   border: 1px solid #ccc;
   border: 1px solid rgba(0, 0, 0, 0.2);
+  margin-top: 0px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 8px 0;
+  width: 422px;
   -webkit-border-radius: 8px;
      -moz-border-radius: 8px;
           border-radius: 8px;
@@ -39,7 +41,7 @@
 }
 
 .tt-suggestion {
-  padding: 3px 20px;
+  padding: 6px 20px;
   font-size: 18px;
   line-height: 24px;
 }
@@ -72,7 +74,8 @@ $(window).load(function()
   $('#customername').typeahead({
     hint: true,
     highlight: true,
-    minLength: 1
+    minLength: 2,
+    order: 'asc'
   },
   {
     name: 'customers',
@@ -93,7 +96,7 @@ $(window).load(function()
 <div id="hbox">
   <div class="box">
       <form action="customersearch" method="post" name="customersearch">
-        <label>Type part of name to search</label>
+        <label>Type part of name to search:</label>
         <div id="the-basics">
           <input autofocus class="typeahead" type="text" id="customername" name="customername" />
         </div>
