@@ -374,11 +374,13 @@ def customersearch(db):
     if len(splitted) == 1:
         deps = db.query(Dependent).filter(Dependent.isPrimary)\
             .filter(func.concat(Dependent.firstName, ' ', Dependent.lastName)
-                    .ilike("%" + splitted[0] + "%"))
+                    .ilike("%" + splitted[0] + "%"))\
+                .order_by(Dependent.lastName, Dependent.firstName)
     else:
         deps = db.query(Dependent).filter(Dependent.isPrimary)\
             .filter(and_(Dependent.firstName.ilike("%" + splitted[0] + "%"), \
-                         Dependent.lastName.ilike("%" + splitted[1] + "%")))
+                         Dependent.lastName.ilike("%" + splitted[1] + "%")))\
+                .order_by(Dependent.lastName, Dependent.firstName)
 
     depDict = []
     for dep in deps:
