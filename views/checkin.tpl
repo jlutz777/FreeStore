@@ -28,8 +28,6 @@
   border: 1px solid #ccc;
   border: 1px solid rgba(0, 0, 0, 0.2);
   margin-top: 0px;
-  max-height: 200px;
-  overflow-y: auto;
   padding: 8px 0;
   width: 422px;
   -webkit-border-radius: 8px;
@@ -74,8 +72,7 @@ $(window).load(function()
   $('#customername').typeahead({
     hint: true,
     highlight: true,
-    minLength: 2,
-    order: 'asc'
+    minLength: 2
   },
   {
     name: 'customers',

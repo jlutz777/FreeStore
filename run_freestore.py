@@ -9,7 +9,7 @@ from models import ShoppingCategory, ShoppingItem
 from reporting.utils import availableReports, determineAndCreateReport
 from utils.utils import *
 
-from sqlalchemy import select, text
+from sqlalchemy import select, text, and_
 from sqlalchemy.sql import func
 
 from beaker.middleware import SessionMiddleware
@@ -365,11 +365,22 @@ def customercheck(db):
 @app.route('/customersearch', method=['POST'])
 def customersearch(db):
     authorize()
-
-    searchTerm = "%" + post_get('searchTerm') + "%"
-    deps = db.query(Dependent).filter(Dependent.isPrimary)\
-        .filter(func.concat(Dependent.firstName, ' ', Dependent.lastName)
-                .ilike(searchTerm))
+    
+    # Split search term and then if two terms, check first name
+    # and last name separately
+    # If one term, check first or last name
+    splitted = post_get('searchTerm').split(' ')
+    deps = None
+    if len(splitted) == 1:
+        deps = db.query(Dependent).filter(Dependent.isPrimary)\
+            .filter(func.concat(Dependent.firstName, ' ', Dependent.lastName)
+                    .ilike("%" + splitted[0] + "%"))\
+                .order_by(Dependent.lastName, Dependent.firstName)
+    else:
+        deps = db.query(Dependent).filter(Dependent.isPrimary)\
+            .filter(and_(Dependent.firstName.ilike("%" + splitted[0] + "%"), \
+                         Dependent.lastName.ilike("%" + splitted[1] + "%")))\
+                .order_by(Dependent.lastName, Dependent.firstName)
 
     depDict = []
     for dep in deps:
