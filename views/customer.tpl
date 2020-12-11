@@ -229,6 +229,30 @@
     % if not dependent.isPrimary.data:
     % continue
     % end
+        % if aaa.current_user.role == 'admin':
+        <div class="form-group ">
+            <label for="adminComments" style="color:red" class="col-sm-2 control-label">Admin Comments</label>
+            <div class="col-sm-10">
+                % if form.adminComments.data is not None and not form.adminComments.errors:
+                    <input class="form-control" style="color:red" id="adminComments" name="adminComments" type="text" value="{{form.adminComments.data}}">
+                % else:
+                    <input class="form-control" style="color:red" id="adminComments" name="adminComments" type="text" value="">
+                % end
+            </div>
+        </div>
+        % else:
+            % # Non-admins see a readonly field
+            % if form.adminComments.data is None or form.adminComments.data == '':
+                <input id="adminComments" name="adminComments" type="hidden" value="">
+            % else:
+            <div class="form-group ">
+                <label for="adminComments" style="color:red" class="col-sm-2 control-label">Admin Comments</label>
+                <div class="col-sm-10">
+                <input class="form-control" style="color:red" readonly id="adminComments" name="adminComments" type="text" value="{{form.adminComments.data}}">
+                </div>
+            </div>
+            % end
+        % end
         <input class="form-control" id="dependents-{{dependent_index}}-isPrimary" name="dependents-{{dependent_index}}-isPrimary" type="hidden" value="True">
         <div class="form-group 
         % if dependent.firstName.errors:
@@ -348,30 +372,6 @@
             >
         </div>
     </div>
-    % if aaa.current_user.role == 'admin':
-    <div class="form-group ">
-        <label for="adminComments" style="color:red" class="col-sm-2 control-label">Admin Comments</label>
-        <div class="col-sm-10">
-            % if form.adminComments.data is not None and not form.adminComments.errors:
-                <input class="form-control" style="color:red" id="adminComments" name="adminComments" type="text" value="{{form.adminComments.data}}">
-            % else:
-                <input class="form-control" style="color:red" id="adminComments" name="adminComments" type="text" value="">
-            % end
-        </div>
-    </div>
-    % else:
-        % # Non-admins see a readonly field
-        % if form.adminComments.data is None or form.adminComments.data == '':
-            <input id="adminComments" name="adminComments" type="hidden" value="">
-        % else:
-        <div class="form-group ">
-            <label for="adminComments" style="color:red" class="col-sm-2 control-label">Admin Comments</label>
-            <div class="col-sm-10">
-            <input class="form-control" style="color:red" readonly id="adminComments" name="adminComments" type="text" value="{{form.adminComments.data}}">
-            </div>
-        </div>
-        % end
-    % end
     % if form.datecreated.data is not None:
         <div class="form-group ">
             <label for="datecreated" class="col-sm-2 control-label">Date Created</label>
