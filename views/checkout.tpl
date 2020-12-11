@@ -21,23 +21,27 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta content="text/html; charset=utf-8" http-equiv="content-type">
 <style>
-.item_warning
-{
-    background-color: orange;
-    font-weight: normal;
-}
+    body {
+        padding-bottom: 75px;
+    }
+    
+    .item_warning
+    {
+        background-color: orange;
+        font-weight: normal;
+    }
 
-.item_limit_reached
-{
-    background-color: red;
-    font-weight: normal;
-}
-
-#prev_totals
-{
-    height: 100px;
-    overflow: auto;
-}
+    .item_limit_reached
+    {
+        background-color: red;
+        font-weight: normal;
+    }
+    
+    #prev_totals
+    {
+        height: 100px;
+        overflow: auto;
+    }
 </style>
 </head>
 <body>
