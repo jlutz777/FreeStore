@@ -39,8 +39,8 @@
     
     #prev_totals
     {
-        height: 100px;
-        overflow: auto;
+        height: 150px;
+        overflow-y: scroll;
     }
 </style>
 </head>
