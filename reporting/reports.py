@@ -573,13 +573,8 @@ class CheckoutFrequencyPerMonthReport(Report):
         allFrequencies = reader.fetchall()
 
         frequencyHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Date</th><th>Frequency</th><th>Family Count</th></tr></thead><tbody>'
-        prevDate = ''
         for row in allFrequencies:
-            rowClass = ""
-            if prevDate != row[0]:
-                rowClass = "row-big"
-            prevDate = row[0]
-            frequencyHtml += "<tr class=\"" + rowClass + "\"><td class=\"date\">"
+            frequencyHtml += "<tr><td class=\"date\">"
             frequencyHtml += formatted_str_date(row[0]) + "</td>"
             frequencyHtml += "<td class=\"category\">" + str(row[1])
             frequencyHtml += "</td><td class=\"category\">" + str(row[2])
