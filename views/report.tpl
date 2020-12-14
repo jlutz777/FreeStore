@@ -30,16 +30,6 @@
       width: 50px;
     }
     
-    table>tbody>tr.row-big>td
-    {
-      vertical-align: bottom;
-    }
-    
-    tr.row-big
-    {
-      height: 50px;
-    }
-
     #report_filter
     {
        height: 100px;

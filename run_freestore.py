@@ -305,8 +305,10 @@ def customer(db, customer_id=None):
         except Exception as ex:
             log.debug(ex)
             db.rollback()
-            visits = family.visits
-            volunteerVisits = family.volunteerVisits
+            visits = family.visits\
+                .order_by(models.Visit.checkin)
+            volunteerVisits = family.volunteerVisits\
+                .order_by(models.VolunteerVisit.checkin)
 
     if customer_id is not None and \
        (failedValidation or bottle.request.method == 'GET'):
@@ -321,8 +323,10 @@ def customer(db, customer_id=None):
 
         if not failedValidation:
             form = CustomerForm(obj=fams[0])
-        visits = fams[0].visits
-        volunteerVisits = fams[0].volunteerVisits
+        visits = fams[0].visits\
+            .order_by(models.Visit.checkin)
+        volunteerVisits = fams[0].volunteerVisits\
+            .order_by(models.VolunteerVisit.checkin)
     elif bottle.request.method == 'GET':
         # Mark one of the two dependents as primary
         form.dependents[0].isPrimary.data = True

@@ -573,13 +573,8 @@ class CheckoutFrequencyPerMonthReport(Report):
         allFrequencies = reader.fetchall()
 
         frequencyHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Date</th><th>Frequency</th><th>Family Count</th></tr></thead><tbody>'
-        prevDate = ''
         for row in allFrequencies:
-            rowClass = ""
-            if prevDate != row[0]:
-                rowClass = "row-big"
-            prevDate = row[0]
-            frequencyHtml += "<tr class=\"" + rowClass + "\"><td class=\"date\">"
+            frequencyHtml += "<tr><td class=\"date\">"
             frequencyHtml += formatted_str_date(row[0]) + "</td>"
             frequencyHtml += "<td class=\"category\">" + str(row[1])
             frequencyHtml += "</td><td class=\"category\">" + str(row[2])
@@ -627,3 +622,54 @@ class VolunteersHoursWorkedReport(Report):
         reportInfo['title'] = 'Volunteer Hours'
         reportInfo['html'] = frequencyHtml
         return reportInfo, None
+
+class VolunteersPerDayReport(Report):
+    """Get the number of volunteers checked in per day"""
+    description = "Number of Volunteers Per Day"
+
+    def __init__(self, start_date='', end_date=''):
+        # This groups the checkout dates by week, subtracting two to make
+        # the date be on Saturday instead of Monday
+        sqlQuery = "select date_trunc('week', volunteervisits.checkin::date+"
+        sqlQuery += "interval '2 days')"
+        sqlQuery += "-interval '2 days' as checkin2, count(*) as count"
+        sqlQuery += " from volunteervisits inner join customerfamily on"
+        sqlQuery += " customerfamily.id=volunteervisits.family"
+        sqlQuery += " inner join dependents on"
+        sqlQuery += " customerfamily.id=dependents.family"
+        sqlQuery += " where dependents.primary=True"
+        sqlQuery += " and dependents.last_name not in ('User') and"
+        sqlQuery += " volunteervisits.checkin > '" + start_date + "' and "
+        sqlQuery += " volunteervisits.checkin < '" + end_date + "'"
+        sqlQuery += " group by checkin2"
+        sqlQuery += " order by checkin2 DESC"
+        
+        super(VolunteersPerDayReport, self).__init__(sqlQuery)
+
+    def getTitleAndHtml(self, db, bottle_session):
+        reader = db.execute(self.sqlQuery)
+        allCheckins = reader.fetchall()
+
+        checkInsHtml = '<table class="table table-striped table-bordered table-hover table-responsive"><thead><tr><th>Date</th><th>Total</th></tr></thead><tbody>'
+        for row in allCheckins:
+            checkInsHtml += "<tr><td class=\"date\">"
+            checkInsHtml += formatted_str_date(row[0]) + "</td>"
+            checkInsHtml += "<td class=\"count\">" + str(row[1])
+            checkInsHtml += "</td></tr>"
+        checkInsHtml += "</tbody></table>"
+
+        reportInfo = {}
+        reportInfo['title'] = 'Volunteers Per Day'
+        reportInfo['html'] = checkInsHtml
+        return reportInfo, allCheckins
+
+    def getData(self, db, bottle_session, allCheckins):
+        arr = []
+
+        for row in allCheckins:
+            keyVal = {}
+            keyVal["date"] = formatted_str_date(row[0])
+            keyVal["count"] = row[1]
+            arr.append(keyVal)
+
+        return arr
