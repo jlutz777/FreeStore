@@ -10,9 +10,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta content="text/html; charset=utf-8" http-equiv="content-type">
     <style type="text/css">
-    body {
-        padding-bottom: 75px;
-    }
+        body {
+            padding-bottom: 75px;
+        }
     </style>
 </head>
 <body>
@@ -20,31 +20,37 @@
 <script src="/js/jquery.mask.min.js"></script>
 <script type="text/javascript">
     var isExisting = false;
+    
+    function calculateAge(birthdayStr) {
+        if (!birthdayStr) {
+            return null;
+        }
+
+        var birthday = new Date(birthdayStr);
+        var ageDifMs = Date.now() - birthday.getTime();
+        var ageDate = new Date(ageDifMs);
+        return Math.abs(ageDate.getUTCFullYear() - 1970);
+    }
+            
     $(document).ready(function () {
-        $('#add_another_button').click(function ()
-        {
+        $('#add_another_button').click(function () {
             clone_field_list('.fieldset:last');
         });
         
-        $('.remove_button').click(function (e)
-        {
-            if ($('.remove_button').length > 1)
-            {
+        $('.remove_button').click(function (e) {
+            if ($('.remove_button').length > 1) {
                 var dependentGrandParent = $(e.target).parents("#dependent-fieldset");
                 dependentGrandParent.remove();
             }
         });
     
-        $('#delete_button').click(function (e)
-        {
+        $('#delete_button').click(function (e) {
             var continueSubmit = confirm("Are you sure you want to delete this customer?");
             
-            if (continueSubmit)
-            {
+            if (continueSubmit) {
                 $.ajax({url: '{{post_url}}',
                     type: 'DELETE',
-                    success: function(result)
-                    {
+                    success: function(result) {
                         // TODO: delete with errors
                         window.location.href = '{{checkin_url}}';
                     }
@@ -53,8 +59,7 @@
             e.preventDefault();
         });
         
-        $('#volunteer_checkin_button').click(function (e)
-        {
+        $('#volunteer_checkin_button').click(function (e) {
             $('#checkinCust').val('false');
             $('#checkinVolunteer').val('true');
             $('#thisForm').submit();
@@ -63,8 +68,7 @@
         // By default we want to check in the customer when changing them, but
         // this extra hidden input is checked on the server side when you don't want
         // the customer checked in
-        $('#noCheckin').click(function()
-        {
+        $('#noCheckin').click(function() {
             $('#checkinCust').val('false');
             $('#thisForm').submit();
         });
@@ -72,6 +76,21 @@
         $('#phone').mask('(000) 000-0000', {clearIfNotMatch: true, placeholder: "(XXX) XXX-XXXX"});
         $('#zip').mask('00000', {clearIfNotMatch: true, placeholder: "XXXXX"});
         $('.dependent-birthdate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
+        
+        // On every change, re-calculate the birthday
+        $('.dependent-birthdate').change(function(e) {
+            var birthdateField = $(e.target);
+            var ageField = birthdateField.parents(".form-group").children('.age');
+            var age = calculateAge(birthdateField.val());
+            if (age) {
+                ageField.text('Age: ' + age);
+            }
+            else {
+                ageField.text('Age: ---');
+            }
+        });
+        // Calculate on load too
+        $('.dependent-birthdate').change();
         
         % if customer_id:
         isExisting = true;
@@ -107,13 +126,10 @@
               'lastName': last_name,
               'this_customer_id': {{customer_id or -1}}
             },
-            success: function(result)
-            {
-                if (result.length > 0)
-                {
+            success: function(result) {
+                if (result.length > 0) {
                     var matchString = '';
-                    for (i=0; i<result.length; i++)
-                    {
+                    for (i=0; i<result.length; i++) {
                         var individualMatch = result[i];
                         matchString += individualMatch.fullName + '\n';
                     }
@@ -122,12 +138,11 @@
                     matchChild.html(matchChild.html().replace(/\n/g,'<br/>'));
                     matchChild.parentsUntil(".form-group").addClass('has-error');
                 }
-                else
-                {
+                else {
                     $('#matchingCustomer').hide().parentsUntil(".form-group").removeClass('has-error');
                 }
             }
-           });
+        });
     }
     
     // This function duplicates the current dependent structure and creates a new one
@@ -142,8 +157,7 @@
             var id = $(this).attr('id').replace('-' + (elem_num - 1) + '-', '-' + elem_num + '-');
             $(this).attr({'name': id, 'id': id}).val('').removeAttr('checked');
             // Remove the old datepicker and re-add so it doesn't share with the cloned one
-            if (id.indexOf('-birthdate') != -1)
-            {
+            if (id.indexOf('-birthdate') != -1) {
                 var elemWithoutMask = $(this).clone(false);
                 $(this).replaceWith(elemWithoutMask);
                 elemWithoutMask.mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
@@ -156,37 +170,30 @@
         $(selector).parent().after(new_element);
     }
     
-    function checkCustomerAndVisitorStatus()
-    {
-        if ($('#isCustomer').prop('checked'))
-        {
+    function checkCustomerAndVisitorStatus() {
+        if ($('#isCustomer').prop('checked')) {
             $('#visits').show();
             $('.dependent').show();
             $('#dependents_header').show();
             $('#add_another_button').parent().parent().show();
         }
-        else
-        {
+        else {
             $('#visits').hide();
             $('.dependent').hide();
             $('#dependents_header').hide();
             $('#add_another_button').parent().parent().hide();
         }
         
-        if ($('#isVolunteer').prop('checked'))
-        {
+        if ($('#isVolunteer').prop('checked')) {
             $('#volunteering').show();
-            if (isExisting)
-            {
+            if (isExisting) {
                 $('#volunteer_checkin').show();
             }
-            else
-            {
+            else {
                 $('#volunteer_checkin').hide();
             }
         }
-        else
-        {
+        else {
             $('#volunteering').hide();
             $('#volunteer_checkin').hide();
         }
@@ -287,7 +294,7 @@
         % end
         ">
             <label for="dependents-{{dependent_index}}-birthdate" class="col-sm-2 control-label">Birthday</label>
-            <div class="col-sm-10">
+            <div class="col-sm-6">
                 % if dependent.birthdate.data is not None and not dependent.birthdate.errors:
                 <input class="form-control dependent-birthdate" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="{{formatted_str_date(dependent.birthdate.data)}}">
                 % else:
@@ -295,6 +302,7 @@
                 % end
                 % get_field_errors(dependent.birthdate)
             </div>
+            <strong class="age col-sm-4 control-label"></strong>
         </div>
             % if dependent["id"].data is not None:
                 <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="{{dependent["id"].data}}">
@@ -424,7 +432,7 @@
         % end
         ">
             <label for="dependents-{{dependent_index}}-birthdate" class="col-sm-2 control-label">Birthday</label>
-            <div class="col-sm-10">
+            <div class="col-sm-6">
                 % if dependent.birthdate.data is not None and not dependent.birthdate.errors:
                     <input class="form-control dependent-birthdate" id="dependents-{{dependent_index}}-birthdate" name="dependents-{{dependent_index}}-birthdate" type="datetime" value="{{formatted_str_date(dependent.birthdate.data)}}">
                 % else:
@@ -432,6 +440,7 @@
                 % end
                 % get_field_errors(dependent.birthdate)
             </div>
+            <strong class="age col-sm-4 control-label"></strong>
         </div>
         % if dependent["id"].data is not None:
             <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="{{dependent["id"].data}}">
