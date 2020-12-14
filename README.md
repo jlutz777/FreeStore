@@ -1,4 +1,5 @@
-FreeStore
+# FreeStore
+
 =========
 
 This is a web application for Rocky River United Methodist's Twice Blessed Free Store in Cleveland, Ohio.  The code is meant to
@@ -18,3 +19,12 @@ Admins additionally can:
 - Create and edit users in the system, including admin versus user rights.
 - Run reports for customers, dependents, visits, and more.
 - Add shopping categories with item limits per user or per family and per week, month, or year.
+
+
+## Upgrading the Database
+SQLAlchemy is used throughout the server-side python code, and the database is created and updated through [alembic](https://alembic.sqlalchemy.org/).
+Running the alembic commands on a database should give you all the tables and fields you need.
+
+The basics are:
+- `alembic upgrade head` to upgrade using the current scripts available
+- `alembic revisions -m "whatever you are doing"`, followed by editing the py file generated to meet your needs
