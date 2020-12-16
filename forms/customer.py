@@ -1,11 +1,27 @@
-from wtforms import validators, FormField
+from wtforms import validators, FormField, SelectField
 from wtforms_alchemy import ModelForm, ModelFieldList
 from wtforms.fields import DateTimeField
 
-from models import CustomerFamily, Dependent
+from models import CustomerFamily, Dependent, Relationship
+
+
+class RelationshipForm(ModelForm):
+    class Meta:
+        datetime_format = '%m/%d/%Y'
+        model = Relationship
+        include = ['id']
+        field_args = {
+            'id': {
+                'validators': [validators.Optional()]
+            },
+            'name': {
+                'validators': [validators.Optional()]
+            }
+        }
 
 
 class DependentForm(ModelForm):
+
     class Meta:
         datetime_format = '%m/%d/%Y'
         model = Dependent
@@ -24,6 +40,13 @@ class DependentForm(ModelForm):
                 'validators': [validators.Optional()]
             }
         }
+
+    # This should be queried from the db
+    relationship = SelectField(u'Relationship', coerce=int, \
+                    validators=[validators.Optional()], \
+                    choices=[(1, 'Spouse/significant other'),(2, 'Child'),
+                             (3, 'Grandparent'), (4, 'Grandchild'),
+                             (5, 'Other')])
 
 
 class CustomerForm(ModelForm):
