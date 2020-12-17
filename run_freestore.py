@@ -308,10 +308,9 @@ def customer(db, customer_id=None):
         except Exception as ex:
             log.debug(ex)
             db.rollback()
-            visits = family.visits\
-                .order_by(models.Visit.checkin)
-            volunteerVisits = family.volunteerVisits\
-                .order_by(models.VolunteerVisit.checkin)
+            if family is not None:
+                visits = family.visits
+                volunteerVisits = family.volunteerVisits
 
     if customer_id is not None and \
        (failedValidation or bottle.request.method == 'GET'):
