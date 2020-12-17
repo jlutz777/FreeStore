@@ -25,6 +25,7 @@ class Dependent(base.Base):
     lastName = Column('last_name', Unicode, nullable=False, default=defVal)
     birthdate = Column('birthdate', DateTime, nullable=True, info=birthDateInfo)
     family_id = Column('family', Integer, ForeignKey('customerfamily.id'))
+    relationship = Column('relationship', Integer, ForeignKey('relationships.id'), nullable=True)
 
     def getDict(self):
         return {

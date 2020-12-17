@@ -10,3 +10,4 @@ from .shopping_category import ShoppingCategory  # noqa
 from .shopping_item import ShoppingItem  # noqa
 from .visit import Visit  # noqa
 from .volunteervisit import VolunteerVisit  # noqa
+from .relationship import Relationship  # noqa

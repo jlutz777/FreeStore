@@ -31,6 +31,24 @@
         var ageDate = new Date(ageDifMs);
         return Math.abs(ageDate.getUTCFullYear() - 1970);
     }
+    
+    function fillAge(e) {
+        var birthdateField = $(e.target);
+        var ageField = birthdateField.parents(".form-group").find('.age');
+        var age = calculateAge(birthdateField.val());
+        if (age) {
+            ageField.text('Age: ' + age);
+        }
+        else {
+            ageField.text('Age: ---');
+        }
+    }
+    
+    function initBirthDateFields(birthdayFieldElem) {
+        birthdayFieldElem.mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
+        birthdayFieldElem.change(fillAge); // On every change, re-calculate the birthday
+        birthdayFieldElem.change(); // Calculate on load too
+    }
             
     $(document).ready(function () {
         $('#add_another_button').click(function () {
@@ -75,26 +93,12 @@
     
         $('#phone').mask('(000) 000-0000', {clearIfNotMatch: true, placeholder: "(XXX) XXX-XXXX"});
         $('#zip').mask('00000', {clearIfNotMatch: true, placeholder: "XXXXX"});
-        $('.dependent-birthdate').mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
         
-        // On every change, re-calculate the birthday
-        $('.dependent-birthdate').change(function(e) {
-            var birthdateField = $(e.target);
-            var ageField = birthdateField.parents(".form-group").children('.age');
-            var age = calculateAge(birthdateField.val());
-            if (age) {
-                ageField.text('Age: ' + age);
-            }
-            else {
-                ageField.text('Age: ---');
-            }
-        });
-        // Calculate on load too
-        $('.dependent-birthdate').change();
+        initBirthDateFields($('.dependent-birthdate'));
         
-        % if customer_id:
+    % if customer_id:
         isExisting = true;
-        % end
+    % end
         
         checkCustomerAndVisitorStatus();
     });
@@ -160,7 +164,7 @@
             if (id.indexOf('-birthdate') != -1) {
                 var elemWithoutMask = $(this).clone(false);
                 $(this).replaceWith(elemWithoutMask);
-                elemWithoutMask.mask("00/00/0000", {clearIfNotMatch: true, placeholder: "MM/DD/YYYY"});
+                initBirthDateFields(elemWithoutMask);
             }
         });
         new_element.find('label').each(function() {
@@ -260,6 +264,7 @@
             </div>
             % end
         % end
+        <input class="form-control" id="dependents-{{dependent_index}}-relationship" name="dependents-{{dependent_index}}-relationship" type="hidden" value="5">
         <input class="form-control" id="dependents-{{dependent_index}}-isPrimary" name="dependents-{{dependent_index}}-isPrimary" type="hidden" value="True">
         <div class="form-group 
         % if dependent.firstName.errors:
@@ -302,7 +307,9 @@
                 % end
                 % get_field_errors(dependent.birthdate)
             </div>
-            <strong class="age col-sm-4 control-label"></strong>
+            <div class="col-sm-4">
+                <strong class="age control-label"></strong>
+            </div>
         </div>
             % if dependent["id"].data is not None:
                 <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="{{dependent["id"].data}}">
@@ -399,12 +406,14 @@
     % if dependent.isPrimary.data:
     % continue
     % end
-    <div class="row dependent">
-    <div class="form-group fieldset" data-toggle="fieldset" id="dependent-fieldset">
-        Household Member
+    <div class="dependent form-horizontal">
+    <div class="fieldset" data-toggle="fieldset" id="dependent-fieldset">
     <div data-toggle="fieldset-entry">
+        <div class="form-group row">
+            <label class="col-sm-2 control-label">Household Member</label>
+        </div>
         <input type="hidden" id="dependents-{{dependent_index}}-isPrimary" name="dependents-{{dependent_index}}-isPrimary" value="">
-        <div class="form-group 
+        <div class="form-group row 
         % if dependent.firstName.errors:
         has-error
         % end
@@ -415,7 +424,7 @@
                 % get_field_errors(dependent.firstName)
             </div>
         </div>
-        <div class="form-group 
+        <div class="form-group row 
         % if dependent.lastName.errors:
         has-error
         % end
@@ -426,7 +435,7 @@
                 % get_field_errors(dependent.lastName)
             </div>
         </div>
-        <div class="form-group 
+        <div class="form-group row  
         % if dependent.birthdate.errors:
         has-error
         % end
@@ -440,15 +449,38 @@
                 % end
                 % get_field_errors(dependent.birthdate)
             </div>
-            <strong class="age col-sm-4 control-label"></strong>
+            <div class="col-sm-4">
+                <strong class="age control-label"></strong>
+            </div>
+        </div>
+        <div class="form-group row 
+        % if dependent.relationship.errors:
+        has-error
+        % end
+        ">
+            <label for="dependents-{{dependent_index}}-relationship" class="col-sm-2 control-label">Relationship</label>
+            <div class="col-sm-10">
+                <select class="form-control dependent-relationship" id="dependents-{{dependent_index}}-relationship" name="dependents-{{dependent_index}}-relationship">
+                    % for relationship in relationshipOpts:
+                    <option value="{{relationship['id']}}"
+                        % if dependent.relationship.data == relationship['id']:
+                            selected
+                        % elif dependent.relationship.data is None:
+                            selected
+                        % end
+                    >{{relationship['name']}}</option>
+                    % end
+                </select>
+                % get_field_errors(dependent.relationship)
+            </div>
         </div>
         % if dependent["id"].data is not None:
             <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="{{dependent["id"].data}}">
         % else:
             <input class="form-control" id="dependents-{{dependent_index}}-id" name="dependents-{{dependent_index}}-id" type="hidden" value="">
         % end
-        </div>
-    <div class="form-group"> 
+    </div>
+    <div class="form-group row"> 
         <div class="col-sm-offset-2 col-sm-10">
             <button type="button" class="remove_button btn btn-danger" data-toggle="fieldset-remove-row">Remove</button>
         </div>

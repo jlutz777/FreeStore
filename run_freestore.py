@@ -5,7 +5,7 @@ from forms.customer import CustomerForm
 from forms.volunteervisit import VisitForm
 import models.base
 from models import CustomerFamily, Dependent, Visit, VolunteerVisit
-from models import ShoppingCategory, ShoppingItem
+from models import ShoppingCategory, ShoppingItem, Relationship
 from reporting.utils import availableReports, determineAndCreateReport
 from utils.utils import *
 
@@ -255,6 +255,9 @@ def customer(db, customer_id=None):
     authorize()
 
     bottle.BaseTemplate.defaults['page'] = '/customer'
+    
+    relationshipOpts = [relationship.__dict__ for relationship in db.query(Relationship)
+                        .order_by(Relationship.id).all()]
 
     postData = bottle.request.POST
     form = CustomerForm(postData)
@@ -305,10 +308,9 @@ def customer(db, customer_id=None):
         except Exception as ex:
             log.debug(ex)
             db.rollback()
-            visits = family.visits\
-                .order_by(models.Visit.checkin)
-            volunteerVisits = family.volunteerVisits\
-                .order_by(models.VolunteerVisit.checkin)
+            if family is not None:
+                visits = family.visits
+                volunteerVisits = family.volunteerVisits
 
     if customer_id is not None and \
        (failedValidation or bottle.request.method == 'GET'):
@@ -336,6 +338,7 @@ def customer(db, customer_id=None):
     customerDict['customer_id'] = customer_id
     customerDict['visits'] = visits
     customerDict['volunteers'] = volunteerVisits
+    customerDict['relationshipOpts'] = relationshipOpts
     customerDict['post_url'] = post_url
     customerDict['checkin_url'] = checkin_url
     customerDict['visit_url_root'] = visit_url_root

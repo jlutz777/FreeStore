@@ -72,6 +72,20 @@ class CustomerFamily(base.Base):
             formDependent['birthdate'].data = None
             hasError = True
         return hasError
+    
+    def __checkRelationship__(self, formDependent, form):
+        hasError = False
+        
+        # Is optional
+        if not formDependent['relationship'].data:
+            pass
+        elif formDependent['relationship'].data < 1 or \
+             formDependent['relationship'].data > 5:
+            formError = 'Relationship is invalid'
+            formDependent['relationship'].errors.append(formError)
+            form.errors['dependent_relationship'] = 'required'
+            hasError = True
+        return hasError
 
     def updatedFromRegistration(self, form):
         pass
@@ -114,6 +128,10 @@ class CustomerFamily(base.Base):
             if self.__checkBirthDate__(formDependent, form):
                 hasError = True
             dependent.birthdate = formDependent['birthdate'].data
+            
+            if self.__checkRelationship__(formDependent, form):
+                hasError = True
+            dependent.relationship = formDependent['relationship'].data
 
             if hasError:
                 raise Exception('Dependent data needed')
