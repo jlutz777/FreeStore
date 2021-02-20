@@ -410,7 +410,7 @@
     <div class="fieldset" data-toggle="fieldset" id="dependent-fieldset">
     <div data-toggle="fieldset-entry">
         <div class="form-group row">
-            <label class="col-sm-2 control-label">Household Member</label>
+            <label for="dependents-{{dependent_index}}-nothing" class="col-sm-2 control-label">Household Member</label>
         </div>
         <input type="hidden" id="dependents-{{dependent_index}}-isPrimary" name="dependents-{{dependent_index}}-isPrimary" value="">
         <div class="form-group row 
