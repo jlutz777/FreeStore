@@ -9,7 +9,7 @@ WTForms-Alchemy==0.16.9
 WTForms-Components==0.9.6
 alembic==0.6.7
 argparse==1.2.1
-bottle==0.12.8
+bottle==0.12.19
 bottle-cork==0.12.0
 bottle-pgsql==0.2
 bottle-sqlalchemy==0.4.3
